@@ -1,0 +1,12 @@
+[Match]
+Name=eth1
+
+[Link]
+RequiredForOnline=no
+
+[Network]
+ConfigureWithoutCarrier=yes
+IPv6AcceptRA=no
+LinkLocalAddressing=ipv6
+Address={{ router_ip_address }}/{{ lan_network_prefix_length }}
+VLAN=lan_vpn

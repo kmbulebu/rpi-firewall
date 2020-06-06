@@ -1,0 +1,12 @@
+[Match]
+Name=lan_vpn
+
+[Link]
+RequiredForOnline=no
+
+[Network]
+VRF=vrf0
+ConfigureWithoutCarrier=yes
+IPv6AcceptRA=no
+LinkLocalAddressing=no
+Address={{ lan_vpn_router_ip_address }}/{{ lan_vpn_network_prefix_length }}

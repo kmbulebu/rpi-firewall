@@ -1,0 +1,6 @@
+[NetDev]
+Name=vrf0
+Kind=vrf
+
+[VRF]
+Table=200

@@ -1,0 +1,13 @@
+[Match]
+Name=wg0
+
+[Link]
+RequiredForOnline=no
+
+[Network]
+VRF=vrf0
+DefaultRouteOnDevice=yes
+ConfigureWithoutCarrier=no
+IPv6AcceptRA=no
+LinkLocalAddressing=no
+Address={{ lan_vpn_wg_address }}

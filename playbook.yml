@@ -1,0 +1,8 @@
+---
+- hosts: '*:localhost'
+  become: yes
+  roles:
+    - base
+    - firewall
+    - ddi
+    - vpn

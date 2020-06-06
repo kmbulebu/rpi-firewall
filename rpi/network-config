@@ -1,0 +1,8 @@
+---
+version: 2
+renderer: networkd
+ethernets:
+  eth0:
+    optional: false
+    critical: true
+    dhcp4: true

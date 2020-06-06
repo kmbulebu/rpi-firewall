@@ -1,0 +1,6 @@
+[NetDev]
+Name=lan_vpn
+Kind=vlan
+
+[VLAN]
+Id={{ lan_vpn_vlan_id }}

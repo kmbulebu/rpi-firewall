@@ -1,0 +1,8 @@
+[Match]
+Name=vrf0
+
+[Link]
+RequiredForOnline=no
+
+[Network]
+ConfigureWithoutCarrier=yes

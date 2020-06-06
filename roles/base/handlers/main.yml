@@ -1,0 +1,7 @@
+- name: netplan apply
+  command: netplan apply
+  become: yes
+- name: restart systemd-networkd
+  service:
+    name: systemd-networkd
+    state: restarted

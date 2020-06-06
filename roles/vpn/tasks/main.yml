@@ -1,0 +1,21 @@
+---
+- name: Install Wireguard
+  apt:
+    name: wireguard
+    state: latest
+- name: Create wg0 wireguard network
+  template:
+    src: 30-wg0.netdev
+    dest: /etc/systemd/network/30-wg0.netdev
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure wg0 network
+  template:
+    src: 30-wg0.network
+    dest: /etc/systemd/network/30-wg0.network
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd

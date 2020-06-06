@@ -1,0 +1,7 @@
+#cloud-config
+
+packages:
+  - ansible
+
+runcmd:
+  - "ansible-pull --inventory /boot/firmware/inventory.yml --checkout master --url https://github.com/kmbulebu/rpi-firewall.git -o playbook.yml"

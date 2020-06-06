@@ -1,0 +1,3 @@
+{% for dhcp_reservation in dhcp_reservations %}
+{{ dhcp_reservation.mac_address }} {{ dhcp_reservation.ip_address }}
+{% endfor %}
