@@ -7,6 +7,29 @@
 - name: Apt Cache
   apt:
     update_cache: yes
+- name: Setup ansible-pull config
+  copy:
+    src: ansible-pull
+    dest: /etc/default/ansible-pull
+    owner: root
+    group: root
+    mode: '0640'
+- name: Setup ansible-pull service
+  copy:
+    src: ansible-pull.service
+    dest: /etc/systemd/system/ansible-pull.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: systemctl daemon-reload
+- name: Setup ansible-pull timer
+  copy:
+    src: ansible-pull.timer
+    dest: /etc/systemd/system/ansible-pull.timer
+    owner: root
+    group: root
+    mode: '0644'
+  notify: systemctl daemon-reload
 - name: Disable cloud-init network configuration
   copy:
     content: "network: {config: disabled}"

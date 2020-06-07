@@ -5,3 +5,6 @@
   service:
     name: systemd-networkd
     state: restarted
+- name: systemctl daemon-reload
+  systemd:
+    daemon_reload: yes
