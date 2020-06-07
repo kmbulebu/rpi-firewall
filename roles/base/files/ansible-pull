@@ -1,4 +1,3 @@
-INVENTORY_FILE=/boot/firmware/inventory.yml
 PLAYBOOK_GIT_URL=https://github.com/kmbulebu/rpi-firewall.git
 PLAYBOOK_GIT_REF=master
 PLAYBOOK=playbook.yml

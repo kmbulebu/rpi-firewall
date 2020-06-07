@@ -4,6 +4,7 @@
 - Automate DNSSEC trust anchors
 - Automated security updates and reboots.
 - Syslog output
+- Fully idempotent ansible
 - Enable IPv6
   - Enable IPv6 route advertisements
   - Block IPv6 inbound connections by default
