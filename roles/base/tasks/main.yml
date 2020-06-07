@@ -30,6 +30,23 @@
     group: root
     mode: '0644'
   notify: systemctl daemon-reload
+- name: systemctl daemon-reload
+  systemd:
+    daemon_reload: yes
+- name: Enable ansible-pull.service
+  ignore_errors: true
+  systemd:
+    name: ansible-pull.service
+    enabled: yes
+    state: stopped
+    masked: no
+- name: Enable ansible-pull.timer
+  ignore_errors: true
+  systemd:
+    name: ansible-pull.timer
+    enabled: yes
+    state: started
+    masked: no
 - name: Disable cloud-init network configuration
   copy:
     content: "network: {config: disabled}"

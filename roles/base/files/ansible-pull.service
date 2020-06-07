@@ -5,7 +5,7 @@ After=network.target auditd.service
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/default/ansible-pull
-ExecStart=/usr/bin/ansible-pull --inventory "$INVENTORY_FILE" --checkout master --url "$PLAYBOOK_GIT_URL" -o "$PLAYBOOK"
+ExecStart=/usr/bin/ansible-pull --inventory "$INVENTORY_FILE" --checkout "$PLAYBOOK_GIT_REF" --url "$PLAYBOOK_GIT_URL" -o "$PLAYBOOK"
 RemainAfterExit=false
 
 [Install]
