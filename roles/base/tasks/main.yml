@@ -46,7 +46,6 @@
   systemd:
     name: ansible-pull.service
     enabled: yes
-    state: stopped
     masked: no
 - name: Enable ansible-pull.timer
   systemd:
