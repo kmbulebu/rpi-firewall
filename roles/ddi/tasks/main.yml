@@ -14,10 +14,6 @@
   apt:
     name: dnsmasq
     state: latest
-- name: Install IPv6 Route Advertisement Server
-  apt:
-    name: radvd
-    state: latest
 - name: Template a file to /etc/dnsmasq.conf
   template:
     src: dnsmasq.conf
@@ -42,14 +38,6 @@
     group: root
     mode: '0644'
   notify: restart dnsmasq
-- name: radvd configuration
-  template:
-    src: radvd.conf
-    dest: /etc/radvd.conf
-    owner: root
-    group: root
-    mode: '0644'
-  notify: restart radvd
 - name: Disable systemd-resolved
   ignore_errors: true
   systemd:

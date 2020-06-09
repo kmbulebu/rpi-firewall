@@ -6,9 +6,13 @@ RequiredForOnline=yes
 
 [Network]
 LinkLocalAddressing=ipv6
-DHCP=yes
+DHCP=ipv6
+DHCP=ipv4
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
+IPv6PrivacyExtensions=yes
+
+[DHCPv6]
 
 [DHCP]
 UseMTU=true

@@ -10,3 +10,12 @@ IPv6AcceptRA=no
 LinkLocalAddressing=ipv6
 Address={{ router_ip_address }}/{{ lan_network_prefix_length }}
 VLAN=lan_vpn
+IPv6PrefixDelegation=yes
+
+[IPv6PrefixDelegation]
+RouterLifetimeSec=3600
+DNSLifetimeSec=3600
+EmitDNS=true
+DNS=_link_local
+EmitDomains=true
+Domains={{ domain }}
