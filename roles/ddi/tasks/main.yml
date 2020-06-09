@@ -14,6 +14,7 @@
   apt:
     name: dnsmasq
     state: latest
+    install_recommends: false
 - name: Template a file to /etc/dnsmasq.conf
   template:
     src: dnsmasq.conf

@@ -4,7 +4,6 @@
 - Automate DNSSEC trust anchors
 - Automated security updates and reboots.
 - Syslog output
-- Fully idempotent ansible
 - Enable IPv6
   - Whitelist IPv6 inbound connections
   - NAT 6to4 inbound IPv6 connections for devices without IPv6
