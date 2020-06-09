@@ -18,5 +18,5 @@
   <icmp-block name="neighbour-advertisement"/>
   <icmp-block name="neighbour-solicitation"/>
   <protocol value="ipv6-icmp" />
-  <protocol value="dhcpv6-client" />
+  <service name="dhcpv6-client" />
 </zone>
