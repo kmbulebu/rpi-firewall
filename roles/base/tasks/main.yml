@@ -12,6 +12,11 @@
   apt:
     update_cache: yes
     cache_valid_time: 86400 # 1 day
+- name: Install unattended-upgrades
+  apt:
+    name: unattended-upgrades
+    state: latest
+    install_recommends: false
 - name: Apt Unused Packages
   apt:
     name:
@@ -21,13 +26,6 @@
       - byobu
       - packagekit
     state: absent
-- name: Install unattended-upgrades
-  apt:
-    name: unattended-upgrades
-    state: latest
-    install_recommends: false
-- name: Remove packages
-  apt:
     autoclean: yes
     autoremove: yes
 - name: Setup ansible-pull config
