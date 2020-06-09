@@ -6,8 +6,6 @@
 - Syslog output
 - Fully idempotent ansible
 - Enable IPv6
-  - Enable IPv6 route advertisements
-  - Block IPv6 inbound connections by default
   - Whitelist IPv6 inbound connections
   - NAT 6to4 inbound IPv6 connections for devices without IPv6
 
@@ -16,6 +14,7 @@ Hardening:
 
 Feature Ideas:
 - SNMP or Prometheus telemetry
+- Configurable ntp
 - DMZ VLAN
 - Guest VLAN
   - Routes to internet, not to other LAN vlans

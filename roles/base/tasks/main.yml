@@ -3,7 +3,11 @@
   timezone:
     name: UTC
 - name: Enable NTP
-  command: timedatectl set-ntp on
+  systemd:
+    name: systemd-timesyncd.service
+    enabled: yes
+    state: started
+    masked: no
 - name: Apt Cache
   apt:
     update_cache: yes
