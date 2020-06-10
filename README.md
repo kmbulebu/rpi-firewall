@@ -168,7 +168,7 @@ lan_vpn_vlan_id: 2
 The IP address and prefix to assign to the VPN LAN side of the router. This address and prefix will determine the IP address range for the plocal area network attached to the VPN. For example, a setting of `192.168.254.1/24` will assign the router an IP address of `192.168.254.1`, and the network will have an IP address range of `192.168.254.1` to `192.168.254.255` with `192.168.254.255` as the broadcast address.
 
 ```
-lan_vpn_router_ip_address: 192.168.1.1/24
+lan_vpn_router_ip_address: 192.168.254.1/24
 ```
 
 #### DHCP Address Allocation Range
@@ -184,7 +184,7 @@ lan_vpn_dhcp_ip_address_range_stop: 192.168.254.254
 
 #### Wireguard Private Key
 
-Set to the Wireguard private key. In a Wireguard configuration file, this found under the `[Interface]` section, named `PrivateKey`.
+Set to the Wireguard private key. In a Wireguard configuration file, this is found under the `[Interface]` section, named `PrivateKey`.
 
 ```
 lan_vpn_wg_private_key:
@@ -192,7 +192,7 @@ lan_vpn_wg_private_key:
 
 #### Wireguard Listen Port
 
-Set to the Wireguard listening port. In a Wireguard configuration file, this found under the `[Interface]` seciton, named `ListenPort`.
+Set to the Wireguard listening port. In a Wireguard configuration file, this is found under the `[Interface]` section, named `ListenPort`.
 
 ```
 lan_vpn_wg_listen_port: 51820
@@ -200,7 +200,7 @@ lan_vpn_wg_listen_port: 51820
 
 #### Wireguard Address
 
-Set to the Wireguard IP address and prefix. In a Wireguard configuration file, this found under the `[Interface]` section, named `Address`.
+Set to the Wireguard IP address and prefix. In a Wireguard configuration file, this is found under the `[Interface]` section, named `Address`.
 
 ```
 lan_vpn_wg_address:
@@ -208,7 +208,7 @@ lan_vpn_wg_address:
 
 #### Wireguard Peer Public Key
 
-Set to the Wireguard peer public key. In a Wireguard configuration file, this found under the `[Peer]` section, named `PublicKey`. Typically, this is the public key of a VPN service provider.
+Set to the Wireguard peer public key. In a Wireguard configuration file, this is found under the `[Peer]` section, named `PublicKey`. Typically, this is the public key of a VPN service provider.
 
 ```
 lan_vpn_wg_peer_public_key:
