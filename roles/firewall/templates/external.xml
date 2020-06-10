@@ -4,18 +4,16 @@
   <description>For use on external networks. You do not trust the other computers on networks to not harm your computer. Only selected incoming connections are accepted.</description>
   <interface name="{{ wan_iface }}"/>
   <masquerade/>
-  {% for port_forward in port_forwards %}
-  <!-- {{ port_forward.description }} -->
-  <rule family="ipv4">
-    <source address="{{ port_forward.address_from }}"/>
-    <forward-port port="{{ port_forward.ports_from }}" protocol="{{ port_forward.proto }}" to-port="{{ port_forward.ports_to }}" to-addr="{{ port_forward.address_to }}"/>
-    <accept/>
-  </rule>
-  {% endfor %}
-
   <icmp-block-inversion/>
   <icmp-block name="neighbour-advertisement"/>
   <icmp-block name="neighbour-solicitation"/>
   <protocol value="ipv6-icmp" />
   <service name="dhcpv6-client" />
+  {% for port_forward in port_forwards %}
+  <!-- {{ port_forward.description }} -->
+  <rule family="ipv4">
+    <source address="{{ port_forward.address_from }}"/>
+    <forward-port port="{{ port_forward.ports_from }}" protocol="{{ port_forward.proto }}" to-port="{{ port_forward.ports_to }}" to-addr="{{ port_forward.address_to }}"/>
+  </rule>
+  {% endfor %}
 </zone>
