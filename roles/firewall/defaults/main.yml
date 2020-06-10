@@ -1,0 +1,3 @@
+---
+wan_iface: eth0
+lan_iface: eth1

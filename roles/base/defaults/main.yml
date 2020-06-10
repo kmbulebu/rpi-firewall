@@ -1,0 +1,6 @@
+---
+lan_vpn_vlan_id: 2
+router_ip_address: 192.168.1.1/24
+router_hostname: router
+domain: my.home
+lan_vpn_router_ip_address: 192.168.254.1/24

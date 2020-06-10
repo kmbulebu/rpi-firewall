@@ -8,7 +8,7 @@ RequiredForOnline=no
 ConfigureWithoutCarrier=yes
 IPv6AcceptRA=no
 LinkLocalAddressing=ipv6
-Address={{ router_ip_address }}/{{ lan_network_prefix_length }}
+Address={{ router_ip_address }}
 VLAN=lan_vpn
 IPv6PrefixDelegation=yes
 

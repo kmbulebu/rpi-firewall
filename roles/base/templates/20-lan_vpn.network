@@ -9,4 +9,4 @@ VRF=vrf0
 ConfigureWithoutCarrier=yes
 IPv6AcceptRA=no
 LinkLocalAddressing=no
-Address={{ lan_vpn_router_ip_address }}/{{ lan_vpn_network_prefix_length }}
+Address={{ lan_vpn_router_ip_address }}
