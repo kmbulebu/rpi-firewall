@@ -8,10 +8,9 @@
   <!-- {{ port_forward.description }} -->
   <rule family="ipv4">
     <source address="{{ port_forward.address_from }}"/>
-    <port port="{{ port_forward.ports_from }}" protocol="{{ port_forward.proto }}"/>
+    <forward-port port="{{ port_forward.ports_from }}" protocol="{{ port_forward.proto }}" to-port="{{ port_forward.ports_to }}" to-addr="{{ port_forward.address_to }}"/>
     <accept/>
   </rule>
-  <forward-port port="{{ port_forward.ports_from }}" protocol="{{ port_forward.proto }}" to-port="{{ port_forward.ports_to }}" to-addr="{{ port_forward.address_to }}"/>
   {% endfor %}
 
   <icmp-block-inversion/>
