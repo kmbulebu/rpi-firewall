@@ -43,6 +43,14 @@
     group: root
     mode: '0644'
   notify: systemctl daemon-reload
+- name: Setup ansible-pull-reconfigure service
+  copy:
+    src: ansible-pull-reconfigure.service
+    dest: /etc/systemd/system/ansible-pull-reconfigure.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: systemctl daemon-reload
 - name: Setup ansible-pull timer
   copy:
     src: ansible-pull.timer
@@ -51,10 +59,10 @@
     group: root
     mode: '0644'
   notify: systemctl daemon-reload
-- name: Setup ansible-pull path watch
+- name: Setup ansible-pull-reconfigure path watch
   copy:
-    src: ansible-pull.path
-    dest: /etc/systemd/system/ansible-pull.path
+    src: ansible-pull-reconfigure.path
+    dest: /etc/systemd/system/ansible-pull-reconfigure.path
     owner: root
     group: root
     mode: '0644'
@@ -73,9 +81,14 @@
     enabled: yes
     state: started
     masked: no
-- name: Enable ansible-pull.path
+- name: Enable ansible-pull-reconfigure.service
   systemd:
-    name: ansible-pull.path
+    name: ansible-pull.service
+    enabled: yes
+    masked: no
+- name: Enable ansible-pull-reconfigure.path
+  systemd:
+    name: ansible-pull-reconfigure.path
     enabled: yes
     state: started
     masked: no

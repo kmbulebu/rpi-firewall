@@ -1,11 +1,11 @@
 [Unit]
-Description=Run ansible-pull
+Description=Run ansible-pull to check for updates.
 After=network.target auditd.service
 
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/default/ansible-pull
-ExecStart=/usr/bin/ansible-pull --inventory "/boot/firmware/inventory.yml" --checkout "$PLAYBOOK_GIT_REF" --url "$PLAYBOOK_GIT_URL" "$PLAYBOOK"
+ExecStart=/usr/bin/ansible-pull --only-if-changed --inventory "/boot/firmware/inventory.yml" --checkout "$PLAYBOOK_GIT_REF" --url "$PLAYBOOK_GIT_URL" "$PLAYBOOK"
 RemainAfterExit=false
 
 [Install]
