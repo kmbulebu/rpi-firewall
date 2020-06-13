@@ -11,8 +11,25 @@ DHCP=ipv4
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=yes
+DNSOverTLS=opportunistic
+DNSSEC=allow-downgrade
+DNSDefaultRoute=true
+{% for name_server in name_servers %}
+DNS={{ name_server }}
+{% endfor %}
 
 [DHCPv6]
+UseDNS=false
+ForceDHCPv6PDOtherInformation=true
+PrefixDelegationHint=56
+
+[IPv6AcceptRA]
+UseDNS=false
+UseDomains=false
 
 [DHCP]
+SendHostname=false
+UseHostname=false
 UseMTU=true
+UseDNS=false
+UseDomains=false

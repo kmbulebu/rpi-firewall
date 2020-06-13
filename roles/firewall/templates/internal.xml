@@ -10,4 +10,7 @@
   <service name="dhcpv6"/>
   <service name="dhcp"/>
   <service name="dns"/>
+  <!-- Hijack all DNS to ensure it goes through DNS over TLS -->
+  <forward-port port="53" protocol="tcp" to-port="53" to-addr="{{ lan_address }}"/>
+  <forward-port port="53" protocol="udp" to-port="53" to-addr="{{ lan_address }}"/>
 </zone>

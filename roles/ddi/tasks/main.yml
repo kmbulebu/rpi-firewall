@@ -3,13 +3,13 @@
   apt:
     update_cache: yes
     cache_valid_time: 86400 # 1 day
-- name: Setup system DNS
-  template:
-    src: resolv.conf
-    dest: /etc/resolv.conf
-    owner: root
-    group: root
-    mode: '0644'
+# - name: Setup system DNS
+#   template:
+#     src: resolv.conf
+#     dest: /etc/resolv.conf
+#     owner: root
+#     group: root
+#     mode: '0644'
 - name: Install DHCP server
   apt:
     name: dnsmasq
@@ -43,9 +43,9 @@
   ignore_errors: true
   systemd:
     name: systemd-resolved
-    enabled: no
-    state: stopped
-    masked: yes
+    enabled: yes
+    state: started
+    masked: no
 - name: Enable dnsmasq
   systemd:
     name: dnsmasq

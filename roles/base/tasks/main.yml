@@ -83,7 +83,7 @@
     masked: no
 - name: Enable ansible-pull-reconfigure.service
   systemd:
-    name: ansible-pull.service
+    name: ansible-pull-reconfigure.service
     enabled: yes
     masked: no
 - name: Enable ansible-pull-reconfigure.path
@@ -163,3 +163,15 @@
     group: root
     mode: '0644'
   notify: restart systemd-networkd
+- name: systemd-resolved
+  template:
+    src: resolved.conf
+    dest: /etc/systemd/resolved.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-resolved
+- name: Delete /etc/resolv.conf
+  file:
+    path: /etc/resolv.conf
+    state: absent
