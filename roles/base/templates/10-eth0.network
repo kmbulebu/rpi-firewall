@@ -5,14 +5,14 @@ Name=eth0
 RequiredForOnline=yes
 
 [Network]
-LinkLocalAddressing=ipv6
-DHCP=ipv6
+#LinkLocalAddressing=ipv6
+#DHCP=ipv6
 DHCP=ipv4
-IPv6AcceptRA=yes
+#IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
-IPv6PrivacyExtensions=yes
+#IPv6PrivacyExtensions=yes
 
-[DHCPv6]
+#[DHCPv6]
 
 [DHCP]
 UseMTU=true
