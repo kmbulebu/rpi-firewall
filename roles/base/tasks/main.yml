@@ -8,6 +8,15 @@
     enabled: yes
     state: started
     masked: no
+- hostname:
+    name: "{{ router_hostname }}"
+- name: Setup /etc/hosts
+  template:
+    src: hosts
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: '0644'
 - name: Apt Cache
   apt:
     update_cache: yes

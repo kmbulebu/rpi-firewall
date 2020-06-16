@@ -48,6 +48,14 @@ wan_iface: eth0
 
 ### LAN Interface
 
+#### Router hostname
+
+Set the router hostname.
+
+```
+router_hostname: router
+```
+
 #### LAN Ethernet Device
 
 The ethernet device to use for the local area network. The first attached USB
