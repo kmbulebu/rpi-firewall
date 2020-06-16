@@ -1,6 +1,9 @@
 - name: netplan apply
   command: netplan apply
   become: yes
+- name: mount auto
+  command: mount -a
+  become: yes
 - name: restart systemd-networkd
   service:
     name: systemd-networkd
