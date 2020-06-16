@@ -25,7 +25,6 @@
     group: root
     mode: '0644'
   notify: mount auto
-  warn: false
 - name: Remote Syslog configuration
   template:
     src: 60-remote.conf
