@@ -24,7 +24,9 @@
     owner: root
     group: root
     mode: '0644'
-  notify: mount auto
+  notify:
+    - mount auto
+    - restart rsyslog
 - name: Remote Syslog configuration
   template:
     src: 60-remote.conf
@@ -33,6 +35,7 @@
     group: root
     mode: '0644'
   when: rsyslog_udp_server is defined
+  notify: restart rsyslog
 - name: Apt Cache
   apt:
     update_cache: yes
