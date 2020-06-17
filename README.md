@@ -104,6 +104,16 @@ the destination server and UDP port. `192.168.1.10:514`
 rsyslog_udp_server:
 ```
 
+### Automatic Updates
+
+To ensure the router remains patched and current, packages updates are installed
+automatically. Specify a time when reboots, if needed, are scheduled. The time
+zone is in Coordinated Universal Time (UTC).
+
+```
+upgrade_reboot_time: '07:00'
+```
+
 ### DHCP
 
 #### DHCP Lease Length
