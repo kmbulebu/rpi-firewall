@@ -131,7 +131,7 @@ upgrade_reboot_time: '07:00'
 Enable the prometheus node exporter on the LAN interface, TCP port 9100.
 
 ```
-enable_prometheus_node_exporter: true
+enable_prometheus_node_exporter: no
 ```
 
 ### DHCP
