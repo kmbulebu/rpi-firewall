@@ -11,6 +11,3 @@
 - include_tasks: forwarding.yml
 - include_tasks: firewalld.yml
 - include_tasks: wireguard_client.yml
-  when: enable_lan_vpn_bool
-- include_tasks: wireguard_client_disable.yml
-  when: not enable_lan_vpn_bool
