@@ -1,9 +1,0 @@
-lan_address: "{{ router_ip_address | ipaddr('address') }}"
-lan_network: "{{ router_ip_address | ipaddr('network') }}"
-lan_netmask: "{{ router_ip_address | ipaddr('netmask') }}"
-lan_broadcast: "{{ router_ip_address | ipaddr('broadcast') }}"
-
-lan_vpn_address: "{{ lan_vpn_router_ip_address | ipaddr('address') }}"
-lan_vpn_network: "{{ lan_vpn_router_ip_address | ipaddr('network') }}"
-lan_vpn_netmask: "{{ lan_vpn_router_ip_address | ipaddr('netmask') }}"
-lan_vpn_broadcast: "{{ lan_vpn_router_ip_address | ipaddr('broadcast') }}"

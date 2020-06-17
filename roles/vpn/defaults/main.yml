@@ -1,6 +1,0 @@
----
-lan_vpn_wg_listen_port: 51820
-lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0
-lan_vpn_wg_peer_persistent_keep_alive: 15
-vpn_client_interface: wg0
-lan_vpn_interface: lan_vpn

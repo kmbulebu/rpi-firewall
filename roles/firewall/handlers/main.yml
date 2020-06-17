@@ -1,3 +1,28 @@
+- name: netplan apply
+  command: netplan apply
+  become: yes
+- name: mount auto
+  command: mount -a
+  become: yes
+- name: restart systemd-networkd
+  service:
+    name: systemd-networkd
+    state: restarted
+- name: restart systemd-timesyncd
+  systemd:
+    name: systemd-timesyncd.service
+    state: restarted
+- name: restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted
+- name: systemctl daemon-reload
+  systemd:
+    daemon_reload: yes
+- name: restart dnsmasq
+  service:
+    name: dnsmasq
+    state: restarted
 - name: reload firewalld
   service:
     name: firewalld
