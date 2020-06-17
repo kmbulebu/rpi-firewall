@@ -3,6 +3,11 @@
   apt:
     name: ufw
     state: absent
+- name: Mask ufw
+  service:
+    name: ufw
+    enabled: no
+    state: stopped
     masked: yes
 - name: Install firewalld
   apt:
