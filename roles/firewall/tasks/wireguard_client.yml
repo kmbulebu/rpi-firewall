@@ -1,0 +1,92 @@
+---
+- name: Let dnsmasq use any VRF with tcp
+  sysctl:
+    name: net.ipv4.tcp_l3mdev_accept
+    value: '1'
+    sysctl_file: /etc/sysctl.d/20-dnsmasq.conf
+    reload: yes
+    sysctl_set: yes
+- name: Let dnsmasq use any VRF with udp
+  sysctl:
+    name: net.ipv4.udp_l3mdev_accept
+    value: '1'
+    sysctl_file: /etc/sysctl.d/20-dnsmasq.conf
+    reload: yes
+    sysctl_set: yes
+- name: Create vrf0 device
+  when: lan_vpn_enabled_bool
+  template:
+    src: 00-vrf0.netdev
+    dest: /etc/systemd/network/00-vrf0.netdev
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure vrf0 network
+  template:
+    src: 00-vrf0.network
+    dest: /etc/systemd/network/00-vrf0.network
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Create lan_vpn VLAN network
+  template:
+    src: 00-eth1-2.netdev
+    dest: /etc/systemd/network/00-eth1-2.netdev
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure lan_vpn network
+  template:
+    src: 20-lan_vpn.network
+    dest: /etc/systemd/network/20-lan_vpn.network
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Template internal VPN zone config
+  template:
+    src: internal_vpn.xml
+    dest: /etc/firewalld/zones/internal_vpn.xml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload firewalld
+- name: Template external vpn zone config
+  template:
+    src: external_vpn.xml
+    dest: /etc/firewalld/zones/external_vpn.xml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload firewalld
+- name: Enable dnsmasq on lan_vpn
+  template:
+    src: dnsmasq-vpn.conf
+    dest: /etc/dnsmasq.d/dnsmasq-vpn.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart dnsmasq
+- name: Install Wireguard
+  apt:
+    name: wireguard
+    state: latest
+- name: Create wireguard client network
+  template:
+    src: 30-wireguard-client.netdev
+    dest: "/etc/systemd/network/30-{{ vpn_client_interface }}.netdev"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure wireguard client network
+  template:
+    src: 30-wireguard-client.network
+    dest: "/etc/systemd/network/30-{{ vpn_client_interface }}.network"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd

@@ -26,26 +26,10 @@
     group: root
     mode: '0644'
   notify: reload firewalld
-- name: Template internal VPN zone config
-  template:
-    src: internal_vpn.xml
-    dest: /etc/firewalld/zones/internal_vpn.xml
-    owner: root
-    group: root
-    mode: '0644'
-  notify: reload firewalld
 - name: Template external zone config
   template:
     src: external.xml
     dest: /etc/firewalld/zones/external.xml
-    owner: root
-    group: root
-    mode: '0644'
-  notify: reload firewalld
-- name: Template external vpn zone config
-  template:
-    src: external_vpn.xml
-    dest: /etc/firewalld/zones/external_vpn.xml
     owner: root
     group: root
     mode: '0644'

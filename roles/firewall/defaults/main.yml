@@ -1,6 +1,7 @@
 ---
 domain: my.home
 enable_prometheus_node_exporter: false
+enable_lan_vpn: true
 lan_iface: eth1
 lan_vpn_interface: lan_vpn
 lan_vpn_router_ip_address: 192.168.254.1/24
