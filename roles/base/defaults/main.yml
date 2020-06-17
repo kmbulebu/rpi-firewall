@@ -5,3 +5,6 @@ router_hostname: router
 domain: my.home
 lan_vpn_router_ip_address: 192.168.254.1/24
 upgrade_reboot_time: '07:00'
+ntp_servers:
+  - ntp.ubuntu.com
+  

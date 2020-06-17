@@ -8,6 +8,10 @@
   service:
     name: systemd-networkd
     state: restarted
+- name: restart systemd-timesyncd
+  systemd:
+    name: systemd-timesyncd.service
+    state: restarted
 - name: restart rsyslog
   service:
     name: rsyslog

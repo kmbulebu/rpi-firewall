@@ -95,6 +95,18 @@ name_servers:
   - 1.0.0.3
 ```
 
+### NTP Servers
+
+To customize the automatic setting of the system clock, provide a list of NTP servers.
+
+> Note: The Raspbery Pi does not have a real time clock. The clock must be set on
+every boot from an NTP server.
+
+```
+ntp_servers:
+  - ntp.ubuntu.com
+```
+
 ### Remote Syslog
 
 To send router and firewall logs to a remote syslog server, provide
