@@ -1,5 +1,5 @@
 [Match]
-Name=lan_vpn
+Name={{ lan_vpn_interface }}
 
 [Link]
 RequiredForOnline=no

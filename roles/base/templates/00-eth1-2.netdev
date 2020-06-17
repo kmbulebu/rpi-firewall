@@ -1,5 +1,5 @@
 [NetDev]
-Name=lan_vpn
+Name={{ lan_vpn_interface }}
 Kind=vlan
 
 [VLAN]

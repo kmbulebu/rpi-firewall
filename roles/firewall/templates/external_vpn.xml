@@ -2,6 +2,6 @@
 <zone target="DROP">
   <short>External VPN</short>
   <description>For use on external networks. You do not trust the other computers on networks to not harm your computer. Only selected incoming connections are accepted.</description>
-  <interface name="wg0"/>
+  <interface name="{{ vpn_client_interface }}"/>
   <masquerade/>
 </zone>

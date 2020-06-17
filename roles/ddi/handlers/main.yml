@@ -2,7 +2,3 @@
   service:
     name: dnsmasq
     state: restarted
-- name: restart radvd
-  service:
-    name: radvd
-    state: restarted

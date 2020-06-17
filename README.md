@@ -202,6 +202,14 @@ The VLAN ID to use for the LAN privacy network. All outbound traffic on this net
 lan_vpn_vlan_id: 2
 ```
 
+#### LAN VPN Interface Name
+
+The desired name of the VLAN network interface.
+
+```
+lan_vpn_interface: lan_vpn
+```
+
 #### LAN VPN IP Address
 
 The IP address and prefix to assign to the VPN LAN side of the router. This address and prefix will determine the IP address range for the plocal area network attached to the VPN. For example, a setting of `192.168.254.1/24` will assign the router an IP address of `192.168.254.1`, and the network will have an IP address range of `192.168.254.1` to `192.168.254.255` with `192.168.254.255` as the broadcast address.
@@ -219,6 +227,14 @@ lan_vpn_dhcp_ip_address_range_start: 192.168.254.2
 ```
 ```
 lan_vpn_dhcp_ip_address_range_stop: 192.168.254.254
+```
+
+#### Wireguard Interface Name
+
+The desired name of the wireguard network interface.
+
+```
+vpn_client_interface: wg0
 ```
 
 #### Wireguard Private Key

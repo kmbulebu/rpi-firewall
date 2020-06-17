@@ -1,3 +1,5 @@
 ---
 wan_iface: eth0
 lan_iface: eth1
+vpn_client_interface: wg0
+lan_vpn_interface: lan_vpn

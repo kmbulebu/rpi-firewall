@@ -1,19 +1,4 @@
 ## TODO Items:
-- Migrate these to GitHub issues
-- Docs
-- Automate DNSSEC trust anchors
-- Automated security updates and reboots.
-- Syslog output
-- Enable IPv6
-  - Whitelist IPv6 inbound connections
-  - NAT 6to4 inbound IPv6 connections for devices without IPv6
-  - Allow forwarded IPv6 Traffic without target="ACCEPT" on internal zone.
-- Setup Router hostname
-- Make the LAN VPN conditional
-- Make IPv6 Conditional
-- Template wg0 and lan_vpn iface names.
-- Calculate default start and stop DHCP ranges.
-- user-data sets default username/password.
 
 Hardening:
 - Read Only Root:https://wiki.debian.org/ReadonlyRoot#Enable_readonly_root

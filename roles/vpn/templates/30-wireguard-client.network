@@ -1,5 +1,5 @@
 [Match]
-Name=wg0
+Name={{ vpn_client_interface }}
 
 [Link]
 RequiredForOnline=no
