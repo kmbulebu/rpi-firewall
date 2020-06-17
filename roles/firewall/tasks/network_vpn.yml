@@ -29,19 +29,19 @@
     group: root
     mode: '0644'
   notify: restart systemd-networkd
-  - name: Create lan_vpn VLAN network
-    template:
-      src: 00-eth1-2.netdev
-      dest: /etc/systemd/network/00-eth1-2.netdev
-      owner: root
-      group: root
-      mode: '0644'
-    notify: restart systemd-networkd
-  - name: Configure lan_vpn network
-    template:
-      src: 20-lan_vpn.network
-      dest: /etc/systemd/network/20-lan_vpn.network
-      owner: root
-      group: root
-      mode: '0644'
-    notify: restart systemd-networkd
+- name: Create lan_vpn VLAN network
+  template:
+    src: 00-eth1-2.netdev
+    dest: /etc/systemd/network/00-eth1-2.netdev
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure lan_vpn network
+  template:
+    src: 20-lan_vpn.network
+    dest: /etc/systemd/network/20-lan_vpn.network
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
