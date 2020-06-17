@@ -69,14 +69,14 @@
     enabled: yes
     state: started
     masked: no
-  when: enable_prometheus_node_exporter is true
+  when: enable_prometheus_node_exporter|bool
 - name: Disable prometheus-node-exporter.service
   systemd:
     name: prometheus-node-exporter.service
     enabled: no
     state: stopped
     masked: no
-  when: enable_prometheus_node_exporter is false
+  when: not enable_prometheus_node_exporter|bool
 - name: Apt Cache
   apt:
     update_cache: yes
