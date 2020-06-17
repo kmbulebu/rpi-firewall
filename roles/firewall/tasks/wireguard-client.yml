@@ -1,0 +1,21 @@
+---
+- name: Install Wireguard
+  apt:
+    name: wireguard
+    state: latest
+- name: Create wireguard client network
+  template:
+    src: 30-wireguard-client.netdev
+    dest: "/etc/systemd/network/30-{{ vpn_client_interface }}.netdev"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure wireguard client network
+  template:
+    src: 30-wireguard-client.network
+    dest: "/etc/systemd/network/30-{{ vpn_client_interface }}.network"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd

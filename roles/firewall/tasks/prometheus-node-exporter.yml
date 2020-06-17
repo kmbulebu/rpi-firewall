@@ -1,0 +1,34 @@
+---
+- name: Install Prometheus Node Exporter
+  apt:
+    name: prometheus-node-exporter
+    state: latest
+    install_recommends: false
+- name: Configure Prometheus Node Exporter
+  copy:
+    src: prometheus-node-exporter
+    dest: /etc/default/prometheus-node-exporter
+    owner: root
+    group: root
+    mode: '0644'
+- name: Firewalld Prometheus Node Exporter Service
+  copy:
+    src: prometheus-node-exporter.xml
+    dest: /etc/firewalld/services/prometheus-node-exporter.xml
+    owner: root
+    group: root
+    mode: '0644'
+- name: Enable prometheus-node-exporter.service
+  systemd:
+    name: prometheus-node-exporter.service
+    enabled: yes
+    state: started
+    masked: no
+  when: enable_prometheus_node_exporter|bool
+- name: Disable prometheus-node-exporter.service
+  systemd:
+    name: prometheus-node-exporter.service
+    enabled: no
+    state: stopped
+    masked: no
+  when: not enable_prometheus_node_exporter|bool

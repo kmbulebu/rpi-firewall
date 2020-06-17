@@ -1,0 +1,10 @@
+---
+- name: Remote Syslog configuration
+  template:
+    src: 60-remote.conf
+    dest: /etc/rsyslog.d/60-remote.conf
+    owner: root
+    group: root
+    mode: '0644'
+  when: rsyslog_udp_server is defined
+  notify: restart rsyslog

@@ -1,0 +1,10 @@
+---
+- hostname:
+    name: "{{ router_hostname }}"
+- name: Setup /etc/hosts
+  template:
+    src: hosts
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: '0644'

@@ -1,0 +1,43 @@
+---
+- name: Install DHCP server
+  apt:
+    name: dnsmasq
+    state: latest
+    install_recommends: false
+- name: Template a file to /etc/dnsmasq.conf
+  template:
+    src: dnsmasq.conf
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart dnsmasq
+- name: Template DHCP reservations
+  template:
+    src: ethers
+    dest: /etc/ethers
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart dnsmasq
+- name: Template DNS hosts file
+  template:
+    src: hosts.dnsmasq
+    dest: /etc/hosts.dnsmasq
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart dnsmasq
+- name: Disable systemd-resolved
+  ignore_errors: true
+  systemd:
+    name: systemd-resolved
+    enabled: no
+    state: stopped
+    masked: yes
+- name: Enable dnsmasq
+  systemd:
+    name: dnsmasq
+    enabled: yes
+    state: started
+    masked: no

@@ -1,0 +1,29 @@
+---
+- name: Apt Cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 86400 # 1 day
+- name: Install unattended-upgrades
+  apt:
+    name: unattended-upgrades
+    state: latest
+    install_recommends: false
+- name: Configure upgrade reboots
+  template:
+    src: 50unattended-upgrades
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    owner: root
+    group: root
+    mode: '0644'
+- name: Apt Unused Packages
+  apt:
+    name:
+      - snapd
+      - multipath-tools
+      - popularity-contest
+      - byobu
+      - packagekit
+    state: absent
+    purge: yes
+    autoclean: yes
+    autoremove: yes

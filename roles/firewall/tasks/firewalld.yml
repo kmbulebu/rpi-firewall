@@ -1,0 +1,67 @@
+---
+- name: Remove ufw
+  apt:
+    name: ufw
+    state: absent
+    masked: yes
+- name: Install firewalld
+  apt:
+    name: firewalld
+    state: latest
+    install_recommends: false
+- name: Remove packages
+  apt:
+    autoclean: yes
+    autoremove: yes
+- name: Template internal zone config
+  template:
+    src: internal.xml
+    dest: /etc/firewalld/zones/internal.xml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload firewalld
+- name: Template internal VPN zone config
+  template:
+    src: internal_vpn.xml
+    dest: /etc/firewalld/zones/internal_vpn.xml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload firewalld
+- name: Template external zone config
+  template:
+    src: external.xml
+    dest: /etc/firewalld/zones/external.xml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload firewalld
+- name: Template external vpn zone config
+  template:
+    src: external_vpn.xml
+    dest: /etc/firewalld/zones/external_vpn.xml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload firewalld
+- name: Template lockdown whitelist
+  template:
+    src: lockdown-whitelist.xml
+    dest: /etc/firewalld/lockdown-whitelist.xml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload firewalld
+- name: Template firewalld configuration
+  template:
+    src: firewalld.conf
+    dest: /etc/firewalld/firewalld.conf
+    owner: root
+    group: root
+    mode: '0600'
+  notify: reload firewalld
+- name: Start firewalld
+  service:
+    name: firewalld
+    state: started

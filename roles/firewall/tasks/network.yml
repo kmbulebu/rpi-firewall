@@ -1,0 +1,33 @@
+---
+- name: Disable cloud-init network configuration
+  copy:
+    content: "network: {config: disabled}"
+    dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+- name: Remove cloud-init netplan configuration
+  file:
+    path: /etc/netplan/50-cloud-init.yaml
+    state: absent
+  notify: netplan apply
+- name: Configure eth0 network
+  template:
+    src: 10-eth0.network
+    dest: /etc/systemd/network/10-eth0.network
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure eth1 network
+  template:
+    src: 10-eth1.network
+    dest: /etc/systemd/network/10-eth1.network
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Setup system DNS
+  template:
+    src: resolv.conf
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: '0644'
