@@ -1,0 +1,5 @@
+<service>
+  <short>Prometheus Node Exporter</short>
+  <description>The Prometheus Node Exporter exposes a wide variety of hardware- and kernel-related metrics.</description>
+  <port port="9100" protocol="tcp"/>
+</service>

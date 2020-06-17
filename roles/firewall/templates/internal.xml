@@ -10,4 +10,5 @@
   <service name="dhcpv6"/>
   <service name="dhcp"/>
   <service name="dns"/>
+  <service name="prometheus-node-exporter"/>
 </zone>

@@ -1,0 +1,1 @@
+ARGS="--collector.qdisc --no-collector.infiniband --no-collector.mdadm --no-collector.nfs --no-collector.nfsd"

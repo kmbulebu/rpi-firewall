@@ -126,6 +126,14 @@ zone is in Coordinated Universal Time (UTC).
 upgrade_reboot_time: '07:00'
 ```
 
+### Prometheus Node Exporter
+
+Enable the prometheus node exporter on the LAN interface, TCP port 9100.
+
+```
+enable_prometheus_node_exporter: true
+```
+
 ### DHCP
 
 #### DHCP Lease Length
