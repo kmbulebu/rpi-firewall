@@ -4,11 +4,13 @@
 - include_tasks: filesystems.yml
 - include_tasks: rsyslog.yml
 - include_tasks: apt.yml
-- include_tasks: prometheus-node-exporter.yml
+- include_tasks: prometheus_node_exporter.yml
 - include_tasks: ansible-pull.yml
 - include_tasks: network.yml
-- include_tasks: network_vpn.yml
 - include_tasks: dnsmasq.yml
 - include_tasks: forwarding.yml
 - include_tasks: firewalld.yml
-- include_tasks: wireguard-client.yml
+- include_tasks: wireguard_client.yml
+  when: lan_vpn_enabled_bool
+- include_tasks: wireguard_client_disable.yml
+  when: not lan_vpn_enabled_bool

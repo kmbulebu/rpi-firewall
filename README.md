@@ -202,6 +202,14 @@ port_forwards:
 
 ### LAN VPN Interface
 
+#### Enabling
+
+The VPN client and associated LAN is disabled by default. Set to true to enable.
+
+```
+enable_lan_vpn: false
+```
+
 #### VLAN ID
 
 The VLAN ID to use for the LAN privacy network. All outbound traffic on this network will route through a Wireguard VPN.

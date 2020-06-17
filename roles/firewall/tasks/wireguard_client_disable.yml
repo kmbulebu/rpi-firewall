@@ -1,0 +1,62 @@
+---
+- name: Do not let dnsmasq use any VRF with tcp
+  sysctl:
+    name: net.ipv4.tcp_l3mdev_accept
+    value: '0'
+    sysctl_file: /etc/sysctl.d/20-dnsmasq.conf
+    reload: yes
+    sysctl_set: yes
+- name: Do not let dnsmasq use any VRF with udp
+  sysctl:
+    name: net.ipv4.udp_l3mdev_accept
+    value: '0'
+    sysctl_file: /etc/sysctl.d/20-dnsmasq.conf
+    reload: yes
+    sysctl_set: yes
+- name: Delete vrf0 device
+  file:
+    path: /etc/systemd/network/00-vrf0.netdev
+    state: absent
+  notify: restart systemd-networkd
+- name: Delete vrf0 network
+  file:
+    path: /etc/systemd/network/00-vrf0.network
+    state: absent
+  notify: restart systemd-networkd
+- name: Delete lan_vpn VLAN network
+  file:
+    path: /etc/systemd/network/00-eth1-2.netdev
+    state: absent
+  notify: restart systemd-networkd
+- name: Configure lan_vpn network
+  file:
+    path: /etc/systemd/network/20-lan_vpn.network
+    state: absent
+  notify: restart systemd-networkd
+- name: Remove internal VPN zone config
+  file:
+    path: /etc/firewalld/zones/internal_vpn.xml
+  notify: reload firewalld
+- name: Remove external vpn zone config
+  file:
+    path: /etc/firewalld/zones/external_vpn.xml
+  notify: reload firewalld
+- name: Disable dnsmasq on lan_vpn
+  file:
+    path: /etc/dnsmasq.d/dnsmasq-vpn.conf
+    state: absent
+  notify: restart dnsmasq
+- name: Uninstall Wireguard
+  apt:
+    name: wireguard
+    state: absent
+- name: Delete wireguard client interface
+  file:
+    path: "/etc/systemd/network/30-{{ vpn_client_interface }}.netdev"
+    state: absent
+  notify: restart systemd-networkd
+- name: Delete wireguard client network
+  file:
+    path: "/etc/systemd/network/30-{{ vpn_client_interface }}.network"
+    state: absent
+  notify: restart systemd-networkd
