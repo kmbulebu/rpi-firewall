@@ -14,7 +14,6 @@
     reload: yes
     sysctl_set: yes
 - name: Create vrf0 device
-  when: lan_vpn_enabled_bool
   template:
     src: 00-vrf0.netdev
     dest: /etc/systemd/network/00-vrf0.netdev
