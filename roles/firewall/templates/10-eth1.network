@@ -14,8 +14,10 @@ IPv6PrefixDelegation=yes
 
 [IPv6PrefixDelegation]
 RouterLifetimeSec=3600
-DNSLifetimeSec=3600
-EmitDNS=true
-DNS=_link_local
+# Disabling IPv6 DNS while debugging
+#DNSLifetimeSec=3600
+#EmitDNS=true
+EmitDNS=false
+#DNS=_link_local
 EmitDomains=true
 Domains={{ domain }}
