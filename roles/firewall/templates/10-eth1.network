@@ -6,11 +6,12 @@ RequiredForOnline=no
 
 [Network]
 ConfigureWithoutCarrier=yes
-IPv6AcceptRA=no
-LinkLocalAddressing=ipv6
 Address={{ router_ip_address }}
 VLAN=lan_vpn
 IPv6PrefixDelegation=yes
+
+[DHCPv6]
+AssignAcquiredDelegatedPrefixAddress=yes
 
 [IPv6PrefixDelegation]
 RouterLifetimeSec=3600
