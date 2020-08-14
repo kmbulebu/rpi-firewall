@@ -9,16 +9,20 @@ ConfigureWithoutCarrier=yes
 Address={{ router_ip_address }}
 VLAN=lan_vpn
 IPv6PrefixDelegation=yes
+LinkLocalAddressing=ipv6
+IPv6LinkLocalAddressGenerationMode=eui64
+MulticastDNS=true
 
 [DHCPv6]
 AssignAcquiredDelegatedPrefixAddress=yes
 
 [IPv6PrefixDelegation]
 RouterLifetimeSec=3600
-# Disabling IPv6 DNS while debugging
+# DNS clients can not use an IPv6 Link Local address as they
+# do not know which interface to reach that address through.
+EmitDNS=false
 #DNSLifetimeSec=3600
 #EmitDNS=true
-EmitDNS=false
 #DNS=_link_local
 EmitDomains=true
 Domains={{ domain }}

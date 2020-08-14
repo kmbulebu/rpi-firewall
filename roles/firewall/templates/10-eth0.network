@@ -11,18 +11,15 @@ LinkLocalAddressing=ipv6
 DHCP=yes
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
-#IPv6PrivacyExtensions=yes
+IPv6PrivacyExtensions=yes
+IPv6LinkLocalAddressGenerationMode=stable-privacy
 
 [IPv6AcceptRA]
 UseDNS=false
 DHCPv6Client=always
 
 [DHCPv6]
-ForceDHCPv6PDOtherInformation=true
+ForceDHCPv6PDOtherInformation=false
 
 [DHCP]
 UseMTU=true
-
-[IPv6PrefixDelegation]
-Managed=true
-OtherInformation=true
