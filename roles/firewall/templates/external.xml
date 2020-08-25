@@ -7,7 +7,7 @@
   <icmp-block-inversion/>
   <icmp-block name="neighbour-advertisement"/>
   <icmp-block name="neighbour-solicitation"/>
-  <protocol value="ipv6-icmp" />
+  <icmp-block name="router-advertisement"/>
   <service name="dhcpv6-client" />
   {% for port_forward in port_forwards %}
   <!-- {{ port_forward.description }} -->
