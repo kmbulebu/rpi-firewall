@@ -1,0 +1,19 @@
+---
+- name: Add admin user
+  user:
+    name: firewall
+    groups: adm,sudo,netdev
+    expires: -1
+    create_home: yes
+    password: "{{ admin_user_password_hash }} "
+    append: yes
+- name: Set authorized key for admin user
+  authorized_key:
+    user: firewall
+    state: present
+    key: "{{ admin_user_authorized_key }}"
+# - name: Remove the user 'ubuntu'
+#   user:
+#     name: ubuntu
+#     state: absent
+#     remove: yes

@@ -1,4 +1,7 @@
 ---
+# Default password: MyPasswordIsMyVoice
+# https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
+admin_user_password_hash: '$6$.PKuLy7JxcwGR8$GeHpj./OiBfpMgWkEaI0yLkZ9jLHoTrwlMgbLRV2rf81FAk5CKeQRcoZLg4Z70YvII7MkFDv6BlgcfgAWlYsA/'
 domain: my.home
 enable_prometheus_node_exporter: no
 lan_iface: eth1
