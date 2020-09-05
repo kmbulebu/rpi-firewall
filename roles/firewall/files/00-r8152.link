@@ -1,0 +1,7 @@
+[Match]
+Driver=r8152
+
+[Link]
+# At the time of this writing, the r8152 driver/hardware
+# is producing incorrect UDP checksums.
+TransmitChecksumOffload=false

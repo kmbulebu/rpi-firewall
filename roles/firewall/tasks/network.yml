@@ -8,6 +8,14 @@
     path: /etc/netplan/50-cloud-init.yaml
     state: absent
   notify: netplan apply
+- name: Configure r8152
+  copy:
+    src: 00-r8152.link
+    dest: /etc/systemd/network/00-r8152.link
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
 - name: Configure eth0 network
   template:
     src: 10-eth0.network
