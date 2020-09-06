@@ -8,6 +8,7 @@
     password: "{{ admin_user_password_hash }} "
     append: yes
 - name: Set authorized key for admin user
+  wheb: admin_user_authorized_key is defined
   authorized_key:
     user: firewall
     state: present
