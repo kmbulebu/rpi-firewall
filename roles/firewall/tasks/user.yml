@@ -5,7 +5,7 @@
     groups: adm,sudo,netdev
     expires: -1
     create_home: yes
-    password: "{{ admin_user_password_hash }} "
+    password: "{{ admin_user_password_hash }}"
     append: yes
 - name: Set authorized key for admin user
   when: admin_user_authorized_key is defined
