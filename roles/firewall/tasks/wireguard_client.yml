@@ -78,8 +78,8 @@
     src: 30-wireguard-client.netdev
     dest: "/etc/systemd/network/30-{{ vpn_client_interface }}.netdev"
     owner: root
-    group: root
-    mode: '0644'
+    group: systemd-network
+    mode: '0640'
   notify: restart systemd-networkd
 - name: Configure wireguard client network
   template:

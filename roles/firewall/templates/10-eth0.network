@@ -12,11 +12,11 @@ DHCP=yes
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=yes
-IPv6LinkLocalAddressGenerationMode=stable-privacy
+#IPv6LinkLocalAddressGenerationMode=stable-privacy # Not supported in this version
 
 [IPv6AcceptRA]
 UseDNS=false
-DHCPv6Client=always
+# DHCPv6Client=always # Not supported in this version
 
 [DHCPv6]
 ForceDHCPv6PDOtherInformation=false

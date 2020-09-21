@@ -10,11 +10,11 @@ Address={{ router_ip_address }}
 VLAN=lan_vpn
 IPv6PrefixDelegation=yes
 LinkLocalAddressing=ipv6
-IPv6LinkLocalAddressGenerationMode=eui64
+#IPv6LinkLocalAddressGenerationMode=eui64 # Not supported in this version   
 MulticastDNS=true
 
 [DHCPv6]
-AssignAcquiredDelegatedPrefixAddress=yes
+#AssignAcquiredDelegatedPrefixAddress=yes # Not supported in this version
 
 [IPv6PrefixDelegation]
 RouterLifetimeSec=3600

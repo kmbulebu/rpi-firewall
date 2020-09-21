@@ -35,6 +35,29 @@ Coming Soon...
 
 ## Configuration Reference
 
+### Admin user
+
+Username: `firewall`
+Password: `MyPasswordIsMyVoice`
+
+### Password
+
+To change the `firewall` user password, provide a valid shadow password hash. The password is required for SSH authentication and sudo.
+
+See: https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
+
+```
+admin_user_password_hash: '$6$.PKuLy7JxcwGR8$GeHpj./OiBfpMgWkEaI0yLkZ9jLHoTrwlMgbLRV2rf81FAk5CKeQRcoZLg4Z70YvII7MkFDv6BlgcfgAWlYsA/'
+```
+
+### SSH Authorized Key
+
+
+
+```
+admin_user_authorized_key=
+```
+
 ### WAN Interface (Internet Side)
 
 #### WAN Ethernet Device
