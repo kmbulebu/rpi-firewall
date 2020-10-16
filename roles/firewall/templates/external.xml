@@ -8,6 +8,10 @@
   <icmp-block name="neighbour-advertisement"/>
   <icmp-block name="neighbour-solicitation"/>
   <icmp-block name="router-advertisement"/>
+  <icmp-block name="destination-unreachable"/>
+  <icmp-block name="parameter-problem"/>
+  <icmp-block name="packet-too-big"/>
+  <icmp-block name="time-exceeded"/>
   <service name="dhcpv6-client" />
   {% for port_forward in port_forwards %}
   <!-- {{ port_forward.description }} -->
