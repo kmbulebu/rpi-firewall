@@ -1,0 +1,8 @@
+[Match]
+Driver=!bcmgenet
+PermanentMACAddress={{ lan_device_mac_address }}
+
+[Link]
+Description="LAN (Periphereal Network Adapter))"
+NamePolicy=
+Name={{ lan_iface }}
