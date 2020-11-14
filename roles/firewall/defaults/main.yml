@@ -5,6 +5,7 @@ admin_user_password_hash: '$6$.PKuLy7JxcwGR8$GeHpj./OiBfpMgWkEaI0yLkZ9jLHoTrwlMg
 domain: my.home
 enable_prometheus_node_exporter: no
 lan_iface: eth1
+lan_device_mac_address: 
 lan_vpn_interface: lan_vpn
 lan_vpn_router_ip_address: 192.168.254.1/24
 lan_vpn_vlan_id: 2
