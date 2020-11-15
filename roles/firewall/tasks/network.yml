@@ -19,7 +19,7 @@
 - name: Configure WAN Link
   template:
     src: 00-wan.link
-    dest: /etc/systemd/network/00-wan.link
+    dest: /etc/systemd/network/00-phys-wan.link
     owner: root
     group: root
     mode: '0644'
@@ -28,6 +28,14 @@
   template:
     src: 00-lan.link
     dest: /etc/systemd/network/00-lan.link
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure WAN VLAN Device
+  template:
+    src: 00-wan-vlan.netdev
+    dest: /etc/systemd/network/00-wan-vlan.netdev
     owner: root
     group: root
     mode: '0644'

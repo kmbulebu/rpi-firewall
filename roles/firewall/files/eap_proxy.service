@@ -1,0 +1,14 @@
+[Unit]
+Description=Proxy EAP packets between network interfaces
+Documentation=https://github.com/jaysoffian/eap_proxy
+
+[Service]
+Restart=always
+User=root
+EnvironmentFile=/etc/default/eap_proxy
+ExecStart=/usr/bin/eap_proxy "$IF_WAN" "$IF_ROUTER" "$CONFIG_OPTIONS"
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+
+[Install]
+WantedBy=multi-user.target

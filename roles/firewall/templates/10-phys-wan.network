@@ -1,0 +1,12 @@
+[Match]
+Name={{ phys_wan_iface }}
+
+[Link]
+RequiredForOnline=yes
+
+[Network]
+LinkLocalAddressing=no
+DHCP=no
+IPv6AcceptRA=no
+ConfigureWithoutCarrier=yes
+VLAN={{ wan_iface }}

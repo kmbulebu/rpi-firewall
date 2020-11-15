@@ -1,8 +1,0 @@
-[Match]
-Driver=bcmgenet
-
-[Link]
-Description="WAN (Raspberry Pi Internal Gigabit Ethernet)"
-NamePolicy=
-Name={{ wan_iface }}
-

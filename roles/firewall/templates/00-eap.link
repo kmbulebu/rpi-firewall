@@ -1,0 +1,8 @@
+[Match]
+Driver=!bcmgenet
+PermanentMACAddress={{ eap_device_mac_address }}
+
+[Link]
+Description="EAP (Periphereal Network Adapter))"
+NamePolicy=
+Name={{ eap_iface }}
