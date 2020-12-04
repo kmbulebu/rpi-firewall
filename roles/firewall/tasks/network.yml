@@ -40,10 +40,10 @@
     group: root
     mode: '0644'
   notify: restart systemd-networkd
-- name: Configure eth0 network
+- name: Configure wan network
   template:
-    src: 10-eth0.network
-    dest: /etc/systemd/network/10-eth0.network
+    src: 10-wan.network
+    dest: /etc/systemd/network/10-wan.network
     owner: root
     group: root
     mode: '0644'

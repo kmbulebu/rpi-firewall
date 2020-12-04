@@ -1,5 +1,5 @@
 [Match]
-Name=eth0
+Name={{ wan_iface }}
 
 [Link]
 RequiredForOnline=yes
