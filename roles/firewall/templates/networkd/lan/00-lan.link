@@ -1,7 +1,7 @@
 [Match]
 Driver=!bcmgenet
 #PermanentMACAddress={{ lan_device_mac_address }}
-PermanentMACAddress=!{{ wan_device_set_mac_address }}
+#PermanentMACAddress=!{{ wan_device_set_mac_address }}
 
 [Link]
 Description="LAN (Periphereal Network Adapter))"
