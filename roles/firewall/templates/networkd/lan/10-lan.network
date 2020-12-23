@@ -2,7 +2,7 @@
 Name={{ lan_iface }}
 
 [Link]
-RequiredForOnline=no
+RequiredForOnline=yes
 
 [Network]
 ConfigureWithoutCarrier=yes

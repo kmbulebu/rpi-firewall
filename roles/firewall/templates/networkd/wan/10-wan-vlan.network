@@ -2,7 +2,7 @@
 Name={{ wan_vlan_iface }}
 
 [Link]
-RequiredForOnline=yes
+RequiredForOnline=no
 
 [Network]
 LinkLocalAddressing=ipv6
