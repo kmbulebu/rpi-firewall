@@ -2,7 +2,7 @@
 - include_tasks: time.yml
 - include_tasks: hostname.yml
 - include_tasks: user.yml
-- include_tasks: filesystems.yml
+- include_tasks: mounts.yml
 - include_tasks: rsyslog.yml
 - include_tasks: apt.yml
 - include_tasks: prometheus_node_exporter.yml
