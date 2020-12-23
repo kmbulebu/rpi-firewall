@@ -1,5 +1,5 @@
 [Match]
-Name={{ wan_iface }}
+Name={{ wan_vlan_iface }}
 
 [Link]
 RequiredForOnline=yes
@@ -11,7 +11,6 @@ IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=yes
 #IPv6LinkLocalAddressGenerationMode=stable-privacy # Not supported in this version
-VLAN={{ wan_vlan_iface }}
 
 [IPv6AcceptRA]
 UseDNS=false
