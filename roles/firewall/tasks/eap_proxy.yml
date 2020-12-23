@@ -9,7 +9,7 @@
     group: root
     mode: '0754'
 - name: eap_proxy.service
-  copy:
+  template:
     src: eap_proxy/eap_proxy.service
     dest: /etc/systemd/system/eap_proxy.service
     owner: root

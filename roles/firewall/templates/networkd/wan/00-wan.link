@@ -5,5 +5,5 @@ Driver=bcmgenet
 Description="Physical WAN (Raspberry Pi Internal Gigabit Ethernet)"
 NamePolicy=
 Name={{ wan_iface }}
-MACAddressPolicy=
+MACAddressPolicy=none
 MACAddress={{ wan_device_set_mac_address }}

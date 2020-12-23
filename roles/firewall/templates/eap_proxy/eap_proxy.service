@@ -1,6 +1,8 @@
 [Unit]
 Description=Proxy EAP packets between network interfaces
 Documentation=https://github.com/jaysoffian/eap_proxy
+BindsTo=sys-devices-virtual-net-{{ eap_iface }}.device
+After=sys-devices-virtual-net-{{ eap_iface }}.device
 
 [Service]
 Restart=always
