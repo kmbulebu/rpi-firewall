@@ -13,6 +13,7 @@ vpn_vrf_iface: vpn_vrf0
 lan_vpn_iface: lan_vpn
 lan_device_mac_address:
 eap_device_mac_address:
+wan_device_set_mac_address: 
 lan_vpn_router_ip_address: 192.168.254.1/24
 lan_vpn_vlan_id: 2
 wan_vlan_id: 0
