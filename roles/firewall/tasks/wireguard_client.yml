@@ -2,7 +2,7 @@
 ## VRF Network
 - name: Create vpn vrf netdev
   template:
-    src: networkd/lan_vpn/00-vpn-vrf.netdev
+    src: networkd/wireguard/00-vpn-vrf.netdev
     dest: /etc/systemd/network/00-vpn-vrf.netdev
     owner: root
     group: systemd-network
@@ -10,7 +10,7 @@
   notify: restart systemd-networkd
 - name: Configure vrf0 network
   template:
-    src: networkd/lan_vpn/00-vpn-vrf.network
+    src: networkd/wireguard/00-vpn-vrf.network
     dest: /etc/systemd/network/00-vpn-vrf.network
     owner: root
     group: systemd-network
