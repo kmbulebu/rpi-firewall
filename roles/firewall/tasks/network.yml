@@ -52,7 +52,7 @@
   notify: restart systemd-networkd
 - name: Configure lan network
   template:
-    src: networkd/wan/10-lan.network
+    src: networkd/lan/10-lan.network
     dest: /etc/systemd/network/10-lan.network
     owner: root
     group: systemd-network
