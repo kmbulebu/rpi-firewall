@@ -33,4 +33,20 @@
     group: root
     mode: '0644'
   notify: restart eap_proxy
-
+## EAP Network
+- name: Configure eap link
+  template:
+    src: networkd/eap/00-eap.link
+    dest: /etc/systemd/network/00-eap.link
+    owner: root
+    group: systemd-network
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure eap network
+  template:
+    src: networkd/eap/10-eap.network
+    dest: /etc/systemd/network/10-eap.network
+    owner: root
+    group: systemd-network
+    mode: '0644'
+  notify: restart systemd-networkd
