@@ -23,6 +23,7 @@
       - popularity-contest
       - byobu
       - packagekit
+      - cloud-init # No longer needed after first boot
     state: absent
     purge: yes
     autoclean: yes
