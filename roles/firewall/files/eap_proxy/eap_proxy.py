@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 usage: eap_proxy [-h] [--ping-gateway] [--ping-ip PING_IP]
                  [--ignore-when-wan-up] [--ignore-start] [--ignore-logoff]
