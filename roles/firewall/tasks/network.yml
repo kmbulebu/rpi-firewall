@@ -35,6 +35,14 @@
   notify: restart systemd-networkd
 - name: Configure wan network
   template:
+    src: networkd/wan/10-phys-wan.network
+    dest: /etc/systemd/network/10-phys-wan.network
+    owner: root
+    group: systemd-network
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure wan network
+  template:
     src: networkd/wan/10-wan.network
     dest: /etc/systemd/network/10-wan.network
     owner: root

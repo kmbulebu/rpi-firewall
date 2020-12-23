@@ -6,8 +6,6 @@ RequiredForOnline=yes
 
 [Network]
 LinkLocalAddressing=ipv6
-#DHCP=ipv6
-#DHCP=ipv4
 DHCP=yes
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
