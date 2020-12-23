@@ -1,5 +1,5 @@
 [Match]
-Name=vrf0
+Name={{ vpn_vrf_iface }}
 
 [Link]
 RequiredForOnline=no

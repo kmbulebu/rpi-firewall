@@ -3,7 +3,7 @@
     name: "{{ router_hostname }}"
 - name: Setup /etc/hosts
   template:
-    src: hosts
+    src: hostname/hosts
     dest: /etc/hosts
     owner: root
     group: root

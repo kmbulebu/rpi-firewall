@@ -6,14 +6,14 @@
     install_recommends: false
 - name: Configure Prometheus Node Exporter
   copy:
-    src: prometheus-node-exporter
+    src: node-exporter/prometheus-node-exporter
     dest: /etc/default/prometheus-node-exporter
     owner: root
     group: root
     mode: '0644'
 - name: Firewalld Prometheus Node Exporter Service
   copy:
-    src: prometheus-node-exporter.xml
+    src: node-exporter/prometheus-node-exporter.xml
     dest: /etc/firewalld/services/prometheus-node-exporter.xml
     owner: root
     group: root

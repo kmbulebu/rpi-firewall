@@ -1,11 +1,11 @@
 [Match]
-Name={{ vpn_client_interface }}
+Name={{ vpn_client_iface }}
 
 [Link]
 RequiredForOnline=no
 
 [Network]
-VRF=vrf0
+VRF={{ vpn_vrf_iface }}
 DefaultRouteOnDevice=yes
 ConfigureWithoutCarrier=no
 IPv6AcceptRA=no

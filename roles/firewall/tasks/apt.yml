@@ -10,7 +10,7 @@
     install_recommends: false
 - name: Configure upgrade reboots
   template:
-    src: 50unattended-upgrades
+    src: apt/50unattended-upgrades
     dest: /etc/apt/apt.conf.d/50unattended-upgrades
     owner: root
     group: root

@@ -4,14 +4,18 @@
 admin_user_password_hash: '$6$.PKuLy7JxcwGR8$GeHpj./OiBfpMgWkEaI0yLkZ9jLHoTrwlMgbLRV2rf81FAk5CKeQRcoZLg4Z70YvII7MkFDv6BlgcfgAWlYsA/'
 domain: my.home
 enable_prometheus_node_exporter: no
-lan_iface: eth1
+wan_iface: wan0
+wan_vlan_iface: wan_vlan0
+lan_iface: lan1
 eap_iface: eap0
+vpn_client_iface: wg0
+vpn_vrf_iface: vpn_vrf0
+lan_vpn_iface: lan_vpn
 lan_device_mac_address:
 eap_device_mac_address:
-lan_vpn_interface: lan_vpn
 lan_vpn_router_ip_address: 192.168.254.1/24
 lan_vpn_vlan_id: 2
-wan_vlan_id: 1
+wan_vlan_id: 0
 lan_vpn_wg_listen_port: 51820
 lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0
 lan_vpn_wg_peer_persistent_keep_alive: 15
@@ -25,6 +29,7 @@ ntp_servers:
 router_hostname: router
 router_ip_address: 192.168.1.1/24
 upgrade_reboot_time: '07:00'
-vpn_client_interface: wg0
-phys_wan_iface: wan_phys0
-wan_iface: eth0
+
+
+
+

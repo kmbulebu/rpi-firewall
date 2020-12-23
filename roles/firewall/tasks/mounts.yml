@@ -1,7 +1,7 @@
 ---
-- name: Setup filesystems
+- name: Setup mounts
   copy:
-    src: fstab
+    src: mounts/fstab
     dest: /etc/fstab
     owner: root
     group: root

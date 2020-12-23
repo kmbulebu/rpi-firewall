@@ -4,7 +4,7 @@
     name: UTC
 - name: Update timesyncd configuration
   template:
-    src: timesyncd.conf
+    src: timesyncd/timesyncd.conf
     dest: /etc/systemd/timesyncd.conf
     owner: root
     group: root

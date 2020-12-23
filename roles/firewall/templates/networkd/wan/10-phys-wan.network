@@ -1,0 +1,24 @@
+[Match]
+Name={{ wan_iface }}
+
+[Link]
+RequiredForOnline=yes
+
+[Network]
+LinkLocalAddressing=ipv6
+DHCP=yes
+IPv6AcceptRA=yes
+ConfigureWithoutCarrier=yes
+IPv6PrivacyExtensions=yes
+#IPv6LinkLocalAddressGenerationMode=stable-privacy # Not supported in this version
+VLAN={{ wan_vlan_iface }}
+
+[IPv6AcceptRA]
+UseDNS=false
+# DHCPv6Client=always # Not supported in this version
+
+[DHCPv6]
+ForceDHCPv6PDOtherInformation=false
+
+[DHCP]
+UseMTU=true

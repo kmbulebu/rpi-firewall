@@ -1,11 +1,11 @@
 [Match]
-Name={{ lan_vpn_interface }}
+Name={{ lan_vpn_iface }}
 
 [Link]
 RequiredForOnline=no
 
 [Network]
-VRF=vrf0
+VRF={{ vpn_vrf_iface }}
 ConfigureWithoutCarrier=yes
 IPv6AcceptRA=no
 LinkLocalAddressing=no

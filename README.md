@@ -66,7 +66,7 @@ The ethernet device to use for the wide area network. The built-in ethernet port
 of a Raspberry Pi is `eth0`.
 
 ```
-wan_iface: eth0
+wan_vlan_iface: eth0
 ```
 
 ### LAN Interface
@@ -246,7 +246,7 @@ lan_vpn_vlan_id: 2
 The desired name of the VLAN network interface.
 
 ```
-lan_vpn_interface: lan_vpn
+lan_vpn_iface: lan_vpn
 ```
 
 #### LAN VPN IP Address
@@ -273,7 +273,7 @@ lan_vpn_dhcp_ip_address_range_stop: 192.168.254.254
 The desired name of the wireguard network interface.
 
 ```
-vpn_client_interface: wg0
+vpn_client_iface: wg0
 ```
 
 #### Wireguard Private Key

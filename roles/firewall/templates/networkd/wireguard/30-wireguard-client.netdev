@@ -1,5 +1,5 @@
 [NetDev]
-Name={{ vpn_client_interface }}
+Name={{ vpn_client_iface }}
 Kind=wireguard
 
 [WireGuard]

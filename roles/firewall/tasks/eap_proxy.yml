@@ -3,14 +3,14 @@
 # of AT&T gateways to an ONT device.
 - name: Copy eap_proxy.py 
   copy:
-    src: eap_proxy.py
+    src: eap_proxy/eap_proxy.py
     dest: /usr/bin/eap_proxy
     owner: root
     group: root
     mode: '0754'
 - name: eap_proxy.service
   copy:
-    src: eap_proxy.service
+    src: eap_proxy/eap_proxy.service
     dest: /etc/systemd/system/eap_proxy.service
     owner: root
     group: root
@@ -27,7 +27,7 @@
     masked: no
 - name: Template eap_proxy config
   template:
-    src: eap_proxy.conf
+    src: eap_proxy/eap_proxy.conf
     dest: /etc/default/eap_proxy
     owner: root
     group: root

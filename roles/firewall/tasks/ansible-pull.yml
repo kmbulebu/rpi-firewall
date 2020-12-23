@@ -1,14 +1,14 @@
 ---
 - name: Setup ansible-pull config
   copy:
-    src: ansible-pull
+    src: ansible-pull/ansible-pull
     dest: /etc/default/ansible-pull
     owner: root
     group: root
     mode: '0640'
 - name: Setup ansible-pull service
   copy:
-    src: ansible-pull.service
+    src: ansible-pull/ansible-pull.service
     dest: /etc/systemd/system/ansible-pull.service
     owner: root
     group: root
@@ -16,7 +16,7 @@
   notify: systemctl daemon-reload
 - name: Setup ansible-pull-reconfigure service
   copy:
-    src: ansible-pull-reconfigure.service
+    src: ansible-pull/ansible-pull-reconfigure.service
     dest: /etc/systemd/system/ansible-pull-reconfigure.service
     owner: root
     group: root
@@ -24,7 +24,7 @@
   notify: systemctl daemon-reload
 - name: Setup ansible-pull timer
   copy:
-    src: ansible-pull.timer
+    src: ansible-pull/ansible-pull.timer
     dest: /etc/systemd/system/ansible-pull.timer
     owner: root
     group: root
@@ -32,7 +32,7 @@
   notify: systemctl daemon-reload
 - name: Setup ansible-pull-reconfigure path watch
   copy:
-    src: ansible-pull-reconfigure.path
+    src: ansible-pull/ansible-pull-reconfigure.path
     dest: /etc/systemd/system/ansible-pull-reconfigure.path
     owner: root
     group: root

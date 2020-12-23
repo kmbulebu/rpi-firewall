@@ -1,5 +1,5 @@
 [Match]
-Name={{ wan_iface }}
+Name={{ wan_vlan_iface }}
 
 [Link]
 RequiredForOnline=yes

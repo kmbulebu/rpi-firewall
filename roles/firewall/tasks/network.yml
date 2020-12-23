@@ -8,33 +8,26 @@
     path: /etc/netplan/50-cloud-init.yaml
     state: absent
   notify: netplan apply
-- name: Configure r8152
+- name: Configure r8152 workaround
   copy:
-    src: 00-r8152.link
+    src: networkd/00-r8152.link
     dest: /etc/systemd/network/00-r8152.link
     owner: root
     group: root
     mode: '0644'
   notify: restart systemd-networkd
-- name: Configure WAN Link
+## WAN Network
+- name: Configure physical wan Link
   template:
-    src: 00-phys-wan.link
+    src: networkd/wan/00-phys-wan.link
     dest: /etc/systemd/network/00-phys-wan.link
     owner: root
     group: root
     mode: '0644'
   notify: restart systemd-networkd
-- name: Configure LAN Link
+- name: Configure wan vlan netdev
   template:
-    src: 00-lan.link
-    dest: /etc/systemd/network/00-lan.link
-    owner: root
-    group: root
-    mode: '0644'
-  notify: restart systemd-networkd
-- name: Configure WAN VLAN Device
-  template:
-    src: 00-wan-vlan.netdev
+    src: networkd/wan/00-wan-vlan.netdev
     dest: /etc/systemd/network/00-wan-vlan.netdev
     owner: root
     group: root
@@ -42,23 +35,32 @@
   notify: restart systemd-networkd
 - name: Configure wan network
   template:
-    src: 10-wan.network
+    src: networkd/wan/10-wan.network
     dest: /etc/systemd/network/10-wan.network
     owner: root
     group: root
     mode: '0644'
   notify: restart systemd-networkd
-- name: Configure eth1 network
+## LAN Network
+- name: Configure lan link
   template:
-    src: 10-eth1.network
-    dest: /etc/systemd/network/10-eth1.network
+    src: networkd/lan/00-lan.link
+    dest: /etc/systemd/network/00-lan.link
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure lan network
+  template:
+    src: networkd/wan/10-lan.network
+    dest: /etc/systemd/network/10-lan.network
     owner: root
     group: root
     mode: '0644'
   notify: restart systemd-networkd
 - name: Setup system DNS
   template:
-    src: resolv.conf
+    src: dns/resolv.conf
     dest: /etc/resolv.conf
     owner: root
     group: root

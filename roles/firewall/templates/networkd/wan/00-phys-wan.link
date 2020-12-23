@@ -4,5 +4,5 @@ Driver=bcmgenet
 [Link]
 Description="Physical WAN (Raspberry Pi Internal Gigabit Ethernet)"
 NamePolicy=
-Name={{ phys_wan_iface }}
+Name={{ wan_iface }}
 

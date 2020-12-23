@@ -2,8 +2,8 @@
 <zone>
   <short>Internal VPN</short>
   <description>For use on internal networks. You mostly trust the other computers on the networks to not harm your computer. Only selected incoming connections are accepted.</description>
-  <interface name="{{ lan_vpn_interface }}"/>
-  <interface name="vrf0"/>
+  <interface name="{{ lan_vpn_iface }}"/>
+  <interface name="{{ vpn_vrf_iface }}"/>
   <service name="dhcp"/>
   <service name="dns"/>
 </zone>

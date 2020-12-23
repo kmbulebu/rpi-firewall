@@ -20,7 +20,7 @@
     autoremove: yes
 - name: Template internal zone config
   template:
-    src: internal.xml
+    src: firewalld/internal.xml
     dest: /etc/firewalld/zones/internal.xml
     owner: root
     group: root
@@ -28,7 +28,7 @@
   notify: reload firewalld
 - name: Template external zone config
   template:
-    src: external.xml
+    src: firewalld/external.xml
     dest: /etc/firewalld/zones/external.xml
     owner: root
     group: root
@@ -36,7 +36,7 @@
   notify: reload firewalld
 - name: Template lockdown whitelist
   template:
-    src: lockdown-whitelist.xml
+    src: firewalld/lockdown-whitelist.xml
     dest: /etc/firewalld/lockdown-whitelist.xml
     owner: root
     group: root
@@ -44,7 +44,7 @@
   notify: reload firewalld
 - name: Template firewalld configuration
   template:
-    src: firewalld.conf
+    src: firewalld/firewalld.conf
     dest: /etc/firewalld/firewalld.conf
     owner: root
     group: root
