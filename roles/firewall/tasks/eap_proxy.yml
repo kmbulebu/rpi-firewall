@@ -19,12 +19,6 @@
 - name: systemctl daemon-reload
   systemd:
     daemon_reload: yes
-- name: Enable eap_proxy.service
-  systemd:
-    name: eap_proxy.service
-    state: started
-    enabled: yes
-    masked: no
 - name: Template eap_proxy config
   template:
     src: eap_proxy/eap_proxy.conf
@@ -50,3 +44,11 @@
     group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
+# Enable eap proxy
+- name: Enable eap_proxy.service
+  ignore_errors: yes
+  systemd:
+    name: eap_proxy.service
+    state: started
+    enabled: yes
+    masked: no
