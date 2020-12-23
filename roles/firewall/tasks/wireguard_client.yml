@@ -92,6 +92,6 @@
     src: networkd/wireguard/30-wireguard-client.network
     dest: "/etc/systemd/network/30-wireguard-client.network"
     owner: root
-    group: root
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
