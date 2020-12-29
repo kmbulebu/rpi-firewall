@@ -7,6 +7,10 @@ Type=oneshot
 EnvironmentFile=/etc/default/ansible-pull
 ExecStart=/usr/bin/ansible-pull --force --inventory "/boot/firmware/inventory.yml" --checkout "$PLAYBOOK_GIT_REF" --url "$PLAYBOOK_GIT_URL" "$PLAYBOOK"
 RemainAfterExit=false
+Nice=+10
+CPUAffinity=3
+IOSchedulingClass=idle
+IOSchedulingPriority=7
 
 [Install]
 WantedBy=multi-user.target
