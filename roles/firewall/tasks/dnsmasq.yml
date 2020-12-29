@@ -4,6 +4,22 @@
     name: dnsmasq
     state: latest
     install_recommends: false
+- name: Create systemd dnsmasq.service.d overrides directory
+  file:
+    path: /etc/systemd/dnsmasq.service.d/
+    state: directory
+    mode: '0755'
+  notify: 
+    - systemctl daemon-reload
+    - restart dnsmasq
+- name: Override systemd settings
+  copy:
+    src: dnsmasq/10-priority.conf
+    dest: /etc/systemd/dnsmasq.service.d/10-priority.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-journald
 - name: Template a file to /etc/dnsmasq.conf
   template:
     src: dnsmasq/dnsmasq.conf
