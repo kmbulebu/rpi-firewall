@@ -1,4 +1,12 @@
 ---
+- name: Copy journald.conf
+  copy:
+    src: journald/journald.conf
+    dest: /etc/systemd/journald.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-journald
 - name: Remote Syslog configuration
   template:
     src: rsyslog/60-remote.conf
@@ -7,4 +15,14 @@
     group: root
     mode: '0644'
   when: rsyslog_udp_server is defined
+  notify: restart rsyslog
+- name: Remove 20-ufw.conf
+  file:
+    path: /etc/rsyslog.d/20-ufw.conf
+    state: absent
+  notify: restart rsyslog
+- name: Remove 50-default.conf
+  file:
+    path: /etc/rsyslog.d/50-default.conf
+    state: absent
   notify: restart rsyslog

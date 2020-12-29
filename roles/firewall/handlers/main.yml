@@ -16,6 +16,10 @@
   service:
     name: rsyslog
     state: restarted
+- name: restart systemd-journald
+  service:
+    name: systemd-journald
+    state: restarted
 - name: systemctl daemon-reload
   systemd:
     daemon_reload: yes
