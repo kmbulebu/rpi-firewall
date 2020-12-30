@@ -20,12 +20,11 @@
   <icmp-block name="beyond-scope"/>
   <icmp-block name="port-unreachable"/>
   <icmp-block name="no-route"/>
-  <icmp-block name="parameter-problem"/>
   <icmp-block name="reject-route"/>
   <icmp-block name="ttl-zero-during-reassembly"/>
   <icmp-block name="ttl-zero-during-transit"/>
   <icmp-block name="unknown-header-type"/>
-  <icmp-block name="unknown-type"/>
+  <icmp-block name="unknown-option"/>
   <icmp-block name="failed-policy"/>
   <service name="dhcpv6-client" />
   {% for port_forward in port_forwards %}
