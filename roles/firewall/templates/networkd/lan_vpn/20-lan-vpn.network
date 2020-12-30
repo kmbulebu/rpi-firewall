@@ -10,3 +10,11 @@ ConfigureWithoutCarrier=yes
 IPv6AcceptRA=no
 LinkLocalAddressing=no
 Address={{ lan_vpn_router_ip_address }}
+DHCPServer=yes
+
+[DHCPServer]
+EmitDNS=yes
+DNS=1.1.1.1
+DNS=1.0.0.1
+EmitRouter=yes
+

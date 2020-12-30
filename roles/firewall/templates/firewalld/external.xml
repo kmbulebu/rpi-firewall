@@ -5,6 +5,7 @@
   <interface name="{{ wan_iface }}"/>
   <interface name="{{ wan_vlan_iface }}"/>
   <masquerade/>
+  <!-- Allow list ICMP instead of deny list -->
   <icmp-block-inversion/>
   <icmp-block name="echo-request"/>
   <icmp-block name="echo-reply"/>
