@@ -50,31 +50,6 @@
     group: root
     mode: '0644'
   notify: reload firewalld
-## dnsmasq
-- name: Let dnsmasq use any VRF with tcp
-  sysctl:
-    name: net.ipv4.tcp_l3mdev_accept
-    # DISABLED FOR NOW BECAUSE NO DNSMASQ ON LAN_VPN
-    value: '0' 
-    sysctl_file: /etc/sysctl.d/20-dnsmasq.conf
-    reload: yes
-    sysctl_set: yes
-- name: Let dnsmasq use any VRF with udp
-  sysctl:
-    name: net.ipv4.udp_l3mdev_accept
-    # DISABLED FOR NOW BECAUSE NO DNSMASQ ON LAN_VPN
-    value: '0'
-    sysctl_file: /etc/sysctl.d/20-dnsmasq.conf
-    reload: yes
-    sysctl_set: yes
-- name: Enable dnsmasq on lan_vpn
-  template:
-    src: dnsmasq/dnsmasq-vpn.conf
-    dest: /etc/dnsmasq.d/dnsmasq-vpn.conf
-    owner: root
-    group: root
-    mode: '0644'
-  notify: restart dnsmasq
 ## Wireguard
 - name: Install Wireguard
   apt:
