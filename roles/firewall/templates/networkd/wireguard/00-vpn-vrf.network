@@ -11,3 +11,4 @@ ConfigureWithoutCarrier=yes
 # Help ensure our non VPN traffic is separate
 Type=prohibit
 Destination={{ lan_cidr }}
+Table=200
