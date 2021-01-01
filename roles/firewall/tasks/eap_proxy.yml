@@ -50,5 +50,5 @@
   systemd:
     name: eap_proxy.service
     state: started
-    enabled: yes
+    enabled: no
     masked: no
