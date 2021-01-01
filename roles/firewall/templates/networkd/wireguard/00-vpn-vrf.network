@@ -6,3 +6,8 @@ RequiredForOnline=no
 
 [Network]
 ConfigureWithoutCarrier=yes
+
+[Route]
+# Help ensure our non VPN traffic is separate
+Type=prohibit
+Destination={{ lan_cidr }}

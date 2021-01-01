@@ -26,3 +26,8 @@ EmitDNS=false
 #DNS=_link_local
 EmitDomains=true
 Domains={{ domain }}
+
+[Route]
+# Help ensure our non VPN traffic is separate
+Type=prohibit
+Destination={{ lan_vpn_cidr }}
