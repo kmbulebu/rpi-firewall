@@ -8,7 +8,6 @@
 - include_tasks: prometheus_node_exporter.yml
 - include_tasks: ansible-pull.yml
 - include_tasks: network.yml
-- include_tasks: eap_proxy.yml
 - include_tasks: dnsmasq.yml
 - include_tasks: forwarding.yml
 - include_tasks: firewalld.yml
