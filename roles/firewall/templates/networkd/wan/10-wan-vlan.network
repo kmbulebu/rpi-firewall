@@ -10,14 +10,23 @@ DHCP=yes
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=yes
-#IPv6LinkLocalAddressGenerationMode=stable-privacy # Not supported in this version
 
 [IPv6AcceptRA]
 UseDNS=false
-# DHCPv6Client=always # Not supported in this version
-
-[DHCPv6]
-ForceDHCPv6PDOtherInformation=false
 
 [DHCP]
 UseMTU=true
+
+[DHCPv4]
+UseDNS=false
+ClientIdentifier=mac
+SendHostname=false
+UseHostname=false
+
+[DHCPv6]
+UseDNS=false
+RapidCommit=false
+ForceDHCPv6PDOtherInformation=true
+PrefixDelegationHint=::/60
+
+

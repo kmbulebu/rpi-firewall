@@ -5,20 +5,9 @@ Name={{ wan_iface }}
 RequiredForOnline=no
 
 [Network]
-LinkLocalAddressing=ipv6
-DHCP=yes
-IPv6AcceptRA=yes
+LinkLocalAddressing=no
+DHCP=no
+IPv6AcceptRA=no
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=yes
-#IPv6LinkLocalAddressGenerationMode=stable-privacy # Not supported in this version
 VLAN={{ wan_vlan_iface }}
-
-[IPv6AcceptRA]
-UseDNS=false
-# DHCPv6Client=always # Not supported in this version
-
-[DHCPv6]
-ForceDHCPv6PDOtherInformation=false
-
-[DHCP]
-UseMTU=true
