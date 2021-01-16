@@ -31,7 +31,7 @@
   service:
     name: firewalld
     state: reloaded
-- name: restart eap_proxy
+- name: restart att_eap
   systemd:
-    name: eap_proxy.service
+    name: att_eap.service
     state: restarted

@@ -7,7 +7,6 @@ enable_prometheus_node_exporter: no
 wan_iface: wan0
 wan_vlan_iface: wan_vlan0
 lan_iface: lan1
-eap_iface: eap0
 vpn_client_iface: wg0
 vpn_vrf_iface: vpn_vrf0
 lan_vpn_iface: lan_vpn
@@ -30,7 +29,6 @@ ntp_servers:
 router_hostname: router
 router_ip_address: 192.168.1.1/24
 upgrade_reboot_time: '07:00'
-
-
-
-
+att_eap_ca_certificates_pem:
+att_eap_client_certificate_pem:
+att_eap_client_key_pem:
