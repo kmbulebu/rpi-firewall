@@ -1,6 +1,7 @@
 [Match]
 Driver=!bcmgenet
 PermanentMACAddress={{ lan_device_mac_address }}
+# This didn't work as intended. Revisit later.
 #PermanentMACAddress=!{{ wan_device_set_mac_address }}
 
 [Link]
