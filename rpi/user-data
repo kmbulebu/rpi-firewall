@@ -3,5 +3,15 @@
 packages:
   - ansible
 
+# On first boot, set the (default) ubuntu user's password to "ubuntu" and
+# expire user passwords
+chpasswd:
+  expire: true
+  list:
+  - ubuntu:ubuntu
+
+# Enable password authentication with the SSH daemon
+ssh_pwauth: true
+
 runcmd:
   - "ansible-pull --inventory /boot/firmware/inventory.yml --checkout master --url https://github.com/kmbulebu/rpi-firewall.git -o playbook.yml"
