@@ -6,7 +6,7 @@ domain: my.home
 enable_prometheus_node_exporter: no
 wan_iface: wan0
 wan_vlan_iface: wan_vlan0
-lan_iface: lan1
+lan_iface: lan0
 vpn_client_iface: wg0
 vpn_vrf_iface: vpn_vrf0
 lan_vpn_iface: lan_vpn
