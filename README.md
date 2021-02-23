@@ -38,7 +38,7 @@ Coming Soon...
 ### Admin user
 
 Username: `firewall`
-Password: `MyPasswordIsMyVoice`
+Password: `MyVoiceIsMyPassword`
 
 ### Password
 
