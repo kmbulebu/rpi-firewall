@@ -4,10 +4,14 @@ Hardening:
 - Read Only Root:https://wiki.debian.org/ReadonlyRoot#Enable_readonly_root
 - CIS Benchmark?
 
+Possible Sysctl Tweaks:
+
+```
+kernel.sem = 250 256000 100 1024
+```
+
 Feature Ideas:
 - Alternative source for inventory/variables.
-- SNMP or Prometheus telemetry
-- Configurable ntp
 - DMZ VLAN
 - Guest VLAN
   - Routes to internet, not to other LAN vlans

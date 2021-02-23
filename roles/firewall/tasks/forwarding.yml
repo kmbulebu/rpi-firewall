@@ -33,3 +33,10 @@
     sysctl_file: /etc/sysctl.d/20-router.conf
     reload: yes
     sysctl_set: yes
+- name: Expand ephemeral port range
+  sysctl:
+    name: net.ipv4.ip_local_port_range
+    value: '10000 65535'
+    sysctl_file: /etc/sysctl.d/20-router.conf
+    reload: yes
+    sysctl_set: yes
