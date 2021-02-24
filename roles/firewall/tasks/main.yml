@@ -5,10 +5,10 @@
 - include_tasks: mounts.yml
 - include_tasks: rsyslog.yml
 - include_tasks: apt.yml
-- include_tasks: prometheus_node_exporter.yml
 - include_tasks: ansible-pull.yml
 - include_tasks: network.yml
 - include_tasks: dnsmasq.yml
 - include_tasks: forwarding.yml
 - include_tasks: firewalld.yml
 - include_tasks: wireguard_client.yml
+- include_tasks: prometheus_node_exporter.yml
