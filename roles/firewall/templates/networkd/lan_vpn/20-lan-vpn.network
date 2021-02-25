@@ -20,9 +20,3 @@ EmitDNS=yes
 DNS=1.1.1.1
 DNS=1.0.0.1
 EmitRouter=yes
-
-# TODO: Test
-#[Route]
-## Help ensure our non VPN traffic is separate
-#Type=prohibit
-#Destination={{ lan_cidr }}

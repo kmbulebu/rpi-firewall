@@ -28,5 +28,3 @@ UseDNS=false
 RapidCommit=false
 ForceDHCPv6PDOtherInformation=true
 PrefixDelegationHint=::/60
-
-
