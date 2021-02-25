@@ -16,6 +16,12 @@
     mode: '0644'
   when: rsyslog_udp_server is defined
   notify: restart rsyslog
+- name: Remove Syslog configuration
+  file:
+    path: rsyslog/60-remote.conf
+    state: absent
+  when: rsyslog_udp_server is not defined
+  notify: restart rsyslog
 - name: Remove 20-ufw.conf
   file:
     path: /etc/rsyslog.d/20-ufw.conf
