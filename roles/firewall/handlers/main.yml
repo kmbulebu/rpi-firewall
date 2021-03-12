@@ -35,3 +35,7 @@
   systemd:
     name: att_eap.service
     state: restarted
+- name: restart prometheus-node-exporter
+  systemd:
+    name: prometheus-node-exporter.service
+    state: restarted
