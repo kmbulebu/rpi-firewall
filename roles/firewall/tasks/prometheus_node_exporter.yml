@@ -12,6 +12,11 @@
     group: root
     mode: '0644'
   notify: restart systemd-journald
+- name: Create systemd prometheus-node-exporter.service.d overrides directory
+  file:
+    path: /etc/systemd/system/prometheus-node-exporter.service.d/
+    state: directory
+    mode: '0755'
 - name: Override systemd settings
   copy:
     src: node-exporter/10-priority.conf
