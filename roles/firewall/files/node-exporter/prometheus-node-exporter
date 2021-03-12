@@ -1,1 +1,1 @@
-ARGS="--collector.qdisc --no-collector.infiniband --no-collector.mdadm --no-collector.nfs --no-collector.nfsd"
+ARGS="--collector.qdisc --collector.interrupts --collector.network_route --collector.tcpstat --collector.wifi --no-collector.infiniband --no-collector.mdadm --no-collector.nfs --no-collector.nfsd"
