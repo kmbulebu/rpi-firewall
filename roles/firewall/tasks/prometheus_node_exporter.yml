@@ -12,6 +12,16 @@
     group: root
     mode: '0644'
   notify: restart systemd-journald
+- name: Override systemd settings
+  copy:
+    src: node-exporter/10-priority.conf
+    dest: /etc/systemd/system/prometheus-node-exporter.service.d/10-priority.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: 
+    - systemctl daemon-reload
+    - restart prometheus-node-exporter 
 - name: Firewalld Prometheus Node Exporter Service
   copy:
     src: node-exporter/prometheus-node-exporter.xml

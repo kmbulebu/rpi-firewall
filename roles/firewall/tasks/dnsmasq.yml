@@ -19,7 +19,9 @@
     owner: root
     group: root
     mode: '0644'
-  notify: restart systemd-journald
+  notify: 
+    - systemctl daemon-reload
+    - restart dnsmasq 
 - name: Template a file to /etc/dnsmasq.conf
   template:
     src: dnsmasq/dnsmasq.conf
