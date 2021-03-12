@@ -40,3 +40,10 @@
     sysctl_file: /etc/sysctl.d/20-router.conf
     reload: yes
     sysctl_set: yes
+- name: Adjust net_rx_action budget
+  sysctl:
+    name: net.core.netdev_budget
+    value: '500'
+    sysctl_file: /etc/sysctl.d/20-router.conf
+    reload: yes
+    sysctl_set: yes
