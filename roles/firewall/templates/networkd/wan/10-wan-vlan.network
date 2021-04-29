@@ -26,5 +26,6 @@ UseHostname=false
 [DHCPv6]
 UseDNS=false
 RapidCommit=false
+WithoutRA=solicit
 ForceDHCPv6PDOtherInformation=true
 PrefixDelegationHint=::/60
