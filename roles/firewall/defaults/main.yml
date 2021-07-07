@@ -28,7 +28,8 @@ ntp_servers:
   - ntp.ubuntu.com
 router_hostname: router
 router_ip_address: 192.168.1.1/24
-upgrade_reboot_time: '07:00'
+upgrade_reboot_time: '02:00'
+upgrade_automatic_reboot: yes
 att_eap_ca_certificates_pem:
 att_eap_client_certificate_pem:
 att_eap_client_key_pem:
