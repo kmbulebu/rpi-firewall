@@ -10,6 +10,7 @@ Address={{ router_ip_address }}
 VLAN=lan_vpn
 IPv6PrefixDelegation=yes
 LinkLocalAddressing=ipv6
+LLMNR=true
 MulticastDNS=true
 LLDP=true
 EmitLLDP=nearest-bridge
