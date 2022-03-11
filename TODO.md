@@ -29,3 +29,4 @@ Feature Ideas:
   - Allow traffic from regular LAN to IoT VLAN but not in reverse
 - Layer 7 or DNS filtering PiHole?
 - ipfix/netflow or packetbeat
+- Surricata 
