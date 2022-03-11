@@ -5,9 +5,24 @@ Name={{ wan_iface }}
 RequiredForOnline=no
 
 [Network]
-LinkLocalAddressing=no
-DHCP=no
-IPv6AcceptRA=no
+LinkLocalAddressing=ipv6
+DHCP=yes
+IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=yes
-VLAN={{ wan_vlan_iface }}
+
+[IPv6AcceptRA]
+UseDNS=false
+
+[DHCP]
+UseMTU=true
+
+[DHCPv4]
+UseDNS=false
+ClientIdentifier=mac
+SendHostname=false
+UseHostname=false
+
+[DHCPv6]
+UseDNS=false
+PrefixDelegationHint=::/60

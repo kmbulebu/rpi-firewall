@@ -25,26 +25,10 @@
     group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
-- name: Configure wan vlan netdev
-  template:
-    src: networkd/wan/00-wan-vlan.netdev
-    dest: /etc/systemd/network/00-wan-vlan.netdev
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
 - name: Configure wan network
   template:
     src: networkd/wan/10-wan.network
     dest: /etc/systemd/network/10-wan.network
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
-- name: Configure wan network
-  template:
-    src: networkd/wan/10-wan-vlan.network
-    dest: /etc/systemd/network/10-wan-vlan.network
     owner: root
     group: systemd-network
     mode: '0644'

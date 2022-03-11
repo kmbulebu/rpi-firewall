@@ -1,6 +1,0 @@
-[NetDev]
-Name={{ wan_vlan_iface }}
-Kind=vlan
-
-[VLAN]
-Id={{ wan_vlan_id }}

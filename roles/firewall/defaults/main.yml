@@ -11,11 +11,9 @@ vpn_client_iface: wg0
 vpn_vrf_iface: vpn_vrf0
 lan_vpn_iface: lan_vpn
 lan_device_mac_address:
-eap_device_mac_address:
 wan_device_set_mac_address: 
 lan_vpn_router_ip_address: 192.168.254.1/24
 lan_vpn_vlan_id: 2
-wan_vlan_id: 0
 lan_vpn_wg_listen_port: 51820
 lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0
 lan_vpn_wg_peer_persistent_keep_alive: 15
@@ -30,6 +28,3 @@ router_hostname: router
 router_ip_address: 192.168.1.1/24
 upgrade_reboot_time: '02:00'
 upgrade_automatic_reboot: yes
-att_eap_ca_certificates_pem:
-att_eap_client_certificate_pem:
-att_eap_client_key_pem:
