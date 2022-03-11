@@ -32,3 +32,15 @@
     path: /etc/rsyslog.d/50-default.conf
     state: absent
   notify: restart rsyslog
+- name: enable rsyslog
+  service:
+    name: rsyslog
+    state: started
+    enabled: true
+  when: rsyslog_udp_server is defined
+- name: disable rsyslog
+  service:
+    name: rsyslog
+    state: stopped
+    enabled: false
+  when: rsyslog_udp_server is not defined
