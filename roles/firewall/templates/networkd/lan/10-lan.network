@@ -8,17 +8,22 @@ RequiredForOnline=yes
 ConfigureWithoutCarrier=yes
 Address={{ router_ip_address }}
 VLAN=lan_vpn
-IPv6PrefixDelegation=yes
+DHCPv6PrefixDelegation=yes
 LinkLocalAddressing=ipv6
 LLMNR=true
 MulticastDNS=true
 LLDP=true
 EmitLLDP=nearest-bridge
+IPv6AcceptRA=false
+IPv6SendRA=true
 
 [DHCPv6]
 #AssignAcquiredDelegatedPrefixAddress=yes # Not supported in this version
 
 [IPv6PrefixDelegation]
+
+[IPv6SendRA]
+RouterPreference=high
 RouterLifetimeSec=3600
 # DNS clients can not use an IPv6 Link Local address as they
 # do not know which interface to reach that address through.

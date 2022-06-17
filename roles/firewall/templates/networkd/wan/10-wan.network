@@ -26,3 +26,7 @@ UseHostname=false
 [DHCPv6]
 UseDNS=false
 PrefixDelegationHint=::/60
+
+[Route]
+Gateway=_ipv6ra
+IPv6Preference=high
