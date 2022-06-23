@@ -3,6 +3,7 @@ Name={{ vpn_client_iface }}
 
 [Link]
 RequiredForOnline=no
+MTUBytes=1420
 
 [Network]
 VRF={{ vpn_vrf_iface }}

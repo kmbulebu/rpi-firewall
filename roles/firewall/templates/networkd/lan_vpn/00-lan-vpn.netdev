@@ -1,6 +1,7 @@
 [NetDev]
 Name={{ lan_vpn_iface }}
 Kind=vlan
+MTUBytes=1420
 
 [VLAN]
 Id={{ lan_vpn_vlan_id }}
