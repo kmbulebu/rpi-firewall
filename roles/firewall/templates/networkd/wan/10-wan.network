@@ -10,6 +10,8 @@ DHCP=yes
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=yes
+LLMNR=false
+MulticastDNS=false
 
 [IPv6AcceptRA]
 UseDNS=false
