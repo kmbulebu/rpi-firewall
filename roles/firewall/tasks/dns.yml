@@ -1,4 +1,12 @@
 ---
+- name: Configure systemd-resolved
+  template:
+    src: resolved/resolved.conf
+    dest: /etc/systemd/resolved.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-resolved
 - name: Install DHCP server
   apt:
     name: dnsmasq

@@ -24,6 +24,10 @@
   service:
     name: systemd-journald
     state: restarted
+- name: restart systemd-resolved
+  service:
+    name: systemd-resolved
+    state: restarted
 - name: systemctl daemon-reload
   systemd:
     daemon_reload: yes
