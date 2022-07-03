@@ -11,6 +11,8 @@ ExecStart=/usr/bin/ansible-pull --only-if-changed --inventory "/boot/firmware/in
 RemainAfterExit=false
 Nice=+10
 CPUAffinity=3
+IOSchedulingClass=idle
+IOSchedulingPriority=7
 
 [Install]
 WantedBy=multi-user.target
