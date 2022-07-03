@@ -1,6 +1,7 @@
 [Unit]
 Description=Run ansible-pull to apply configuration changes.
-After=network.target auditd.service ansible-pull.service
+After=network-online.target auditd.service ansible-pull.service
+Wants=network-online.target
 
 [Service]
 Type=oneshot

@@ -1,6 +1,7 @@
 [Unit]
 Description=Run ansible-pull to check for updates.
-After=network.target auditd.service
+After=network-online.target auditd.service
+Wants=network-online.target
 
 [Service]
 Type=oneshot
