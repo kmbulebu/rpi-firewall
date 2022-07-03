@@ -47,17 +47,3 @@
     sysctl_file: /etc/sysctl.d/20-router.conf
     reload: yes
     sysctl_set: yes
-- name: Adjust Receive Packet Streeting on WAN Interface
-  sysctl:
-    name: /sys/class/net/{{ wan_iface }}/queues/rx-0/rps_cpus 
-    value: '1' # 0001 CPU core 1
-    sysctl_file: /etc/sysctl.d/20-router.conf
-    reload: yes
-    sysctl_set: yes
-- name: Adjust Receive Packet Streeting on LAN Interface
-  sysctl:
-    name: /sys/class/net/{{ lan_iface }}/queues/rx-0/rps_cpus 
-    value: '2' # 0010 CPU core 2
-    sysctl_file: /etc/sysctl.d/20-router.conf
-    reload: yes
-    sysctl_set: yes

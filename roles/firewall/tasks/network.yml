@@ -57,3 +57,11 @@
     owner: root
     group: root
     mode: '0644'
+- name: Set network receive queue cpu assignment
+  template:
+    src: udev/zz-network-tunings.rules
+    dest: /etc/udev/rules.d/zz-network-tunings.rules
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
