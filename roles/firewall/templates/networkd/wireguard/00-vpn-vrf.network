@@ -7,6 +7,8 @@ MTUBytes=1420
 
 [Network]
 ConfigureWithoutCarrier=yes
+LLMNR=false
+MulticastDNS=false
 
 [Route]
 # Help ensure our non VPN traffic is separate

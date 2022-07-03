@@ -14,6 +14,8 @@ Address={{ lan_vpn_router_ip_address }}
 DHCPServer=yes
 BindCarrier=wg0
 LLDP=false
+LLMNR=false
+MulticastDNS=false
 
 [DHCPServer]
 EmitDNS=yes

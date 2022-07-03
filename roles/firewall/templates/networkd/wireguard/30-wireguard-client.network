@@ -12,3 +12,5 @@ ConfigureWithoutCarrier=no
 IPv6AcceptRA=no
 LinkLocalAddressing=no
 Address={{ lan_vpn_wg_address }}
+LLMNR=false
+MulticastDNS=false
