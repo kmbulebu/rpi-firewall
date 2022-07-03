@@ -1,6 +1,7 @@
 [Unit]
 Description=Run ansible-pull to check for updates.
 After=network-online.target auditd.service
+Before=ansible-pull-reconfigure.service
 Wants=network-online.target
 
 [Service]

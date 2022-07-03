@@ -2,6 +2,7 @@
 Description=Run ansible-pull to apply configuration changes.
 After=network-online.target auditd.service ansible-pull.service
 Wants=network-online.target
+Conflicts=ansible-pull.service
 
 [Service]
 Type=oneshot
