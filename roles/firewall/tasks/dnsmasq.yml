@@ -43,13 +43,13 @@
     group: root
     mode: '0644'
   notify: restart dnsmasq
-- name: Disable systemd-resolved
+- name: Enable systemd-resolved
   ignore_errors: true
   systemd:
     name: systemd-resolved
-    enabled: no
-    state: stopped
-    masked: yes
+    enabled: yes
+    state: started
+    masked: no
 - name: Enable dnsmasq
   systemd:
     name: dnsmasq
