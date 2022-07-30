@@ -1,2 +1,2 @@
-SUBSYSTEM=="net", ACTION=="move", KERNEL=="{{ wan_iface }}" RUN{program}+="/bin/bash -c 'for x in /sys/class/net/$name/queues/rx-*; do echo 1 > $$x/rps_cpus; done'"
-SUBSYSTEM=="net", ACTION=="move", KERNEL=="{{ lan_iface }}" RUN{program}+="/bin/bash -c 'for x in /sys/class/net/$name/queues/rx-*; do echo 2 > $$x/rps_cpus; done'"
+SUBSYSTEM=="net", ACTION=="add", KERNEL=="{{ wan_iface }}" RUN{program}+="/bin/bash -c 'for x in /sys/class/net/$name/queues/rx-*; do echo 1 > $$x/rps_cpus; done'"
+SUBSYSTEM=="net", ACTION=="add", KERNEL=="{{ lan_iface }}" RUN{program}+="/bin/bash -c 'for x in /sys/class/net/$name/queues/rx-*; do echo 2 > $$x/rps_cpus; done'"
