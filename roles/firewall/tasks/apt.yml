@@ -28,3 +28,12 @@
     purge: yes
     autoclean: yes
     autoremove: yes
+- name: Tailscale
+  apt:
+    name:
+      - tailscale # Temp to try and remove cleanup my mess.
+    state: absent
+    purge: no
+    autoclean: yes
+    autoremove: yes
+ 
