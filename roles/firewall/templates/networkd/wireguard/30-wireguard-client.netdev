@@ -1,7 +1,7 @@
 [NetDev]
 Name={{ vpn_client_iface }}
 Kind=wireguard
-MTUBytes=1420
+MTUBytes=1292
 
 [WireGuard]
 PrivateKey={{ lan_vpn_wg_private_key }}
