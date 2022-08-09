@@ -1,7 +1,7 @@
 [NetDev]
 Name={{ vpn_vrf_iface }}
 Kind=vrf
-MTUBytes=1420
+MTUBytes=1292
 
 [VRF]
 Table=200

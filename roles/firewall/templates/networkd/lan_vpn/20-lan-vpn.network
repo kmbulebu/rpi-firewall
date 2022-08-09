@@ -3,7 +3,7 @@ Name={{ lan_vpn_iface }}
 
 [Link]
 RequiredForOnline=no
-MTUBytes=1420
+MTUBytes=1292
 
 [Network]
 VRF={{ vpn_vrf_iface }}
@@ -23,4 +23,4 @@ EmitDNS=yes
 DNS=1.1.1.1
 DNS=1.0.0.1
 EmitRouter=yes
-SendOption=26:uint16:1420
+SendOption=26:uint16:1292

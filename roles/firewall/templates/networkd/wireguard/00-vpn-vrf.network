@@ -3,7 +3,7 @@ Name={{ vpn_vrf_iface }}
 
 [Link]
 RequiredForOnline=no
-MTUBytes=1420
+MTUBytes=1292
 
 [Network]
 ConfigureWithoutCarrier=yes
