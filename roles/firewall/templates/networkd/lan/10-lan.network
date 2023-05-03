@@ -20,7 +20,8 @@ IPv6SendRA=true
 [DHCPv6]
 #AssignAcquiredDelegatedPrefixAddress=yes # Not supported in this version
 
-[IPv6PrefixDelegation]
+[DHCPv6PrefixDelegation]
+Assign=false # No need for 'real' IPv6 address on lan interface. Routing through fe80 works fine.
 
 [IPv6SendRA]
 RouterPreference=high
