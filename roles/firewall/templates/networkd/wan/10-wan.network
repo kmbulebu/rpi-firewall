@@ -9,7 +9,7 @@ LinkLocalAddressing=ipv6
 DHCP=yes
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
-IPv6PrivacyExtensions=yes
+IPv6PrivacyExtensions=false
 LLMNR=false
 MulticastDNS=false
 
