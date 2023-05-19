@@ -17,11 +17,10 @@ EmitLLDP=nearest-bridge
 IPv6AcceptRA=false
 IPv6SendRA=true
 
-[DHCPv6]
-#AssignAcquiredDelegatedPrefixAddress=yes # Not supported in this version
-
 [DHCPv6PrefixDelegation]
-Assign=false # No need for 'real' IPv6 address on lan interface. Routing through fe80 works fine.
+Assign=true
+Announce=true
+Token=::1
 
 [IPv6SendRA]
 RouterPreference=high
