@@ -24,7 +24,7 @@ Token=::1
 
 [IPv6SendRA]
 RouterPreference=high
-RouterLifetimeSec=3600
+RouterLifetimeSec=300 # 5 Minutes
 # DNS clients can not use an IPv6 Link Local address as they
 # do not know which interface to reach that address through.
 EmitDNS=false
