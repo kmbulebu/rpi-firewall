@@ -10,8 +10,8 @@ DHCP=yes
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=false
-LLMNR=false
-MulticastDNS=false
+LLMNR=resolve
+MulticastDNS=resolve
 
 [IPv6AcceptRA]
 UseDNS=false
@@ -31,4 +31,6 @@ PrefixDelegationHint=::/60
 
 [Route]
 Gateway=_ipv6ra
+Scope=global
 IPv6Preference=high
+Protocol=ra
