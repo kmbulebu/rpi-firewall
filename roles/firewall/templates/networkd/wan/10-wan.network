@@ -28,6 +28,7 @@ UseHostname=false
 [DHCPv6]
 UseDNS=false
 PrefixDelegationHint=::/60
+WithoutRA=solicit
 
 [Route]
 Gateway=_ipv6ra
