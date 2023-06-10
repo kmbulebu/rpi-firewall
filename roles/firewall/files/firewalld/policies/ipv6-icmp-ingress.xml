@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policy target="CONTINUE" priority="-1000">
+  <short>Allow IPv6 icmp from external to internal.</short>
+  <description>Allow IPv6 to work well with the outside world.</description>
+  <ingress-zone name="external" />
+  <egress-zone name="internal" />
+  <rule family="ipv6">
+    <icmp-type name="echo-request" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="echo-reply" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="destination-unreachable" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="parameter-problem" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="packet-too-big" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="time-exceeded" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="bad-header" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="address-unreachable" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="beyond-scope" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="port-unreachable" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="no-route" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="reject-route" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="ttl-zero-during-reassembly" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="ttl-zero-during-transit" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="unknown-header-type" />
+    <accept />
+  </rule>
+  <rule family="ipv6">
+    <icmp-type name="unknown-option" />
+    <accept />
+  </rule>  
+  <rule family="ipv6">
+    <icmp-type name="failed-policy" />
+    <accept />
+  </rule>  
+</policy>
