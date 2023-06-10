@@ -55,6 +55,14 @@
     group: root
     mode: '0600'
   notify: reload firewalld
+- name: Add ingress ICMPv6 policy.
+  copy:
+    src: firewalld/policies/ipv6-icmp-ingress.xml
+    dest: /etc/firewalld/policies/ipv6-icmp-ingress.xml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload firewalld
 - name: Start firewalld
   service:
     name: firewalld
