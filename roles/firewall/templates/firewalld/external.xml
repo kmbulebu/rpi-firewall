@@ -27,6 +27,7 @@
   <icmp-block name="unknown-header-type"/>
   <icmp-block name="unknown-option"/>
   <icmp-block name="failed-policy"/>
+  <icmp-block name="fragmentation-needed"/>
   <service name="dhcpv6-client" />
   {% for port_forward in port_forwards %}
   <!-- {{ port_forward.description }} -->
