@@ -1,5 +1,5 @@
 [Match]
-Driver=bcmgenet
+Property=ID_BUS=usb
 
 [Link]
 Description="Physical WAN (Raspberry Pi Internal Gigabit Ethernet)"

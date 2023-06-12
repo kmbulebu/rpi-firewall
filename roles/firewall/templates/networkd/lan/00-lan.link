@@ -1,5 +1,5 @@
 [Match]
-Property=ID_BUS=usb
+Driver=bcmgenet
 
 [Link]
 Description="LAN (Periphereal Network Adapter))"
