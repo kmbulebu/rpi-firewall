@@ -82,6 +82,11 @@
     group: root
     mode: '0644'
   notify: restart unbound
+- name: Create systemd unbound.service.d overrides directory
+  file:
+    path: /etc/systemd/system/unbound.service.d/
+    state: directory
+    mode: '0755'
 - name: Override systemd unbound settings
   copy:
     src: unbound/10-priority.conf
