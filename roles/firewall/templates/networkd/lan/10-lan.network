@@ -38,3 +38,12 @@ Domains={{ domain }}
 # Help ensure our non VPN traffic is separate
 Type=prohibit
 Destination={{ lan_vpn_cidr }}
+
+{% for dhcp_reservation in dhcp_reservations %}
+# {{ dhcp_reservation.hostname }}
+[DHCPServerStaticLease]
+MACAddress={{ dhcp_reservation.mac_address }}
+Address={{ dhcp_reservation.ip_address }}
+
+{% endfor %}
+
