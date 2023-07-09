@@ -64,3 +64,23 @@
     enabled: yes
     state: started
     masked: no
+- name: Install Unbound server
+  apt:
+    name: unbound
+    state: latest
+    install_recommends: false
+- name: Install Unbound DNSSEC anchor updater
+  apt:
+    name: unbound-anchor
+    state: latest
+    install_recommends: false
+- name: Override systemd unbound settings
+  copy:
+    src: dnsmasq/10-priority.conf
+    dest: /etc/systemd/system/unbound.service.d/10-priority.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: 
+    - systemctl daemon-reload
+#    - restart unbound 
