@@ -16,6 +16,7 @@ LLDP=true
 EmitLLDP=nearest-bridge
 IPv6AcceptRA=false
 IPv6SendRA=true
+DHCPServer=yes
 
 [DHCPv6PrefixDelegation]
 Assign=true
