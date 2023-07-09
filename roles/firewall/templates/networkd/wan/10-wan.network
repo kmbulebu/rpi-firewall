@@ -34,4 +34,5 @@ WithoutRA=solicit
 Gateway=_ipv6ra
 Scope=global
 IPv6Preference=high
-Protocol=ra
+# Documented option didn't pass parsing validation.
+#Protocol=ra
