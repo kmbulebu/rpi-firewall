@@ -39,6 +39,19 @@ Domains={{ domain }}
 Type=prohibit
 Destination={{ lan_vpn_cidr }}
 
+#[DHCPServer]
+#PoolOffset=150
+#PoolSize=100
+#EmitDNS=yes
+#DNS={{ router_ip_address }}
+#EmitRouter=yes
+#EmitNTP=yes
+{% for ntp_server in ntp_servers %}
+#NTP={{ ntp_server }}
+{% endfor %}
+#EmitTimezone=yes
+#Timezone=America/New_York
+
 {% for dhcp_reservation in dhcp_reservations %}
 # {{ dhcp_reservation.hostname }}
 [DHCPServerStaticLease]
