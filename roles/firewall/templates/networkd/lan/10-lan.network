@@ -21,6 +21,7 @@ DHCPServer=yes
 [DHCPv6PrefixDelegation]
 Assign=true
 Announce=true
+SubnetId=0
 Token=::1
 
 [IPv6SendRA]
