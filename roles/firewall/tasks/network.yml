@@ -8,14 +8,6 @@
     path: /etc/netplan/50-cloud-init.yaml
     state: absent
   notify: netplan apply
-- name: Configure r8152 workaround
-  copy:
-    src: networkd/00-r8152.link
-    dest: /etc/systemd/network/00-r8152.link
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
 ## WAN Network
 - name: Configure physical wan Link
   template:
