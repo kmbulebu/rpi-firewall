@@ -58,12 +58,12 @@
     enabled: yes
     state: started
     masked: no
-- name: Enable dnsmasq
+- name: Disable dnsmasq
   systemd:
     name: dnsmasq
-    enabled: yes
-    state: started
-    masked: no
+    enabled: no
+    state: stopped
+    masked: yes
 - name: Install Unbound server
   apt:
     name: unbound
