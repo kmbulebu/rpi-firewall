@@ -35,6 +35,10 @@
   service:
     name: dnsmasq
     state: restarted
+- name: restart unbound
+  service:
+    name: unbound
+    state: restarted
 - name: reload firewalld
   service:
     name: firewalld

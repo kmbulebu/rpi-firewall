@@ -74,13 +74,27 @@
     name: unbound-anchor
     state: latest
     install_recommends: false
+- name: Template a file to /etc/unbound/unbound.conf.d/server.conf
+  template:
+    src: unbound/server.conf
+    dest: /etc/unbound/unbound.conf.d/server.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart unbound
 - name: Override systemd unbound settings
   copy:
-    src: dnsmasq/10-priority.conf
+    src: unbound/10-priority.conf
     dest: /etc/systemd/system/unbound.service.d/10-priority.conf
     owner: root
     group: root
     mode: '0644'
   notify: 
     - systemctl daemon-reload
-#    - restart unbound 
+    - restart unbound 
+- name: Enable unbound
+  systemd:
+    name: unbound
+    enabled: yes
+    state: started
+    masked: no
