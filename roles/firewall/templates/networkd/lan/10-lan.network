@@ -43,8 +43,8 @@ Type=prohibit
 Destination={{ lan_vpn_cidr }}
 
 [DHCPServer]
-PoolOffset=150
-PoolSize=100
+PoolOffset={{ lan_dhcp_pool_offset }}
+PoolSize={{ lan_dhcp_pool_size }}
 EmitDNS=yes
 DNS={{ lan_address }}
 EmitRouter=yes

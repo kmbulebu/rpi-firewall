@@ -7,6 +7,8 @@ enable_prometheus_node_exporter: no
 wan_iface: wan0
 wan_vlan_iface: wan_vlan0
 lan_iface: lan0
+lan_dhcp_pool_offset: 10
+lan_dhcp_pool_size: 200
 vpn_client_iface: wg0
 vpn_vrf_iface: vpn_vrf0
 lan_vpn_iface: lan_vpn
@@ -18,8 +20,6 @@ lan_vpn_wg_listen_port: 51820
 lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0
 lan_vpn_wg_peer_persistent_keep_alive: 15
 name_servers:
-  - 2606:4700:4700::1113#family.cloudflare-dns.com 
-  - 2606:4700:4700::1003#family.cloudflare-dns.com 
   - 1.1.1.3#family.cloudflare-dns.com 
   - 1.0.0.3#family.cloudflare-dns.com
 ntp_servers:
