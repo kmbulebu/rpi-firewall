@@ -1,3 +1,0 @@
-{% for dhcp_reservation in dhcp_reservations %}
-{{ dhcp_reservation.ip_address }} {{ dhcp_reservation.hostname }}
-{% endfor %}

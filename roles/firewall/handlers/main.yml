@@ -31,10 +31,6 @@
 - name: systemctl daemon-reload
   systemd:
     daemon_reload: yes
-- name: restart dnsmasq
-  service:
-    name: dnsmasq
-    state: restarted
 - name: restart unbound
   service:
     name: unbound

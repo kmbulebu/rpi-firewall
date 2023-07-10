@@ -7,50 +7,6 @@
     group: root
     mode: '0644'
   notify: restart systemd-resolved
-- name: Install DHCP server
-  apt:
-    name: dnsmasq
-    state: latest
-    install_recommends: false
-- name: Create systemd dnsmasq.service.d overrides directory
-  file:
-    path: /etc/systemd/system/dnsmasq.service.d/
-    state: directory
-    mode: '0755'
-- name: Override systemd settings
-  copy:
-    src: dnsmasq/10-priority.conf
-    dest: /etc/systemd/system/dnsmasq.service.d/10-priority.conf
-    owner: root
-    group: root
-    mode: '0644'
-  notify: 
-    - systemctl daemon-reload
-    - restart dnsmasq 
-- name: Template a file to /etc/dnsmasq.conf
-  template:
-    src: dnsmasq/dnsmasq.conf
-    dest: /etc/dnsmasq.conf
-    owner: root
-    group: root
-    mode: '0644'
-  notify: restart dnsmasq
-- name: Template DHCP reservations
-  template:
-    src: dnsmasq/ethers
-    dest: /etc/ethers
-    owner: root
-    group: root
-    mode: '0644'
-  notify: restart dnsmasq
-- name: Template DNS hosts file
-  template:
-    src: dnsmasq/hosts.dnsmasq
-    dest: /etc/hosts.dnsmasq
-    owner: root
-    group: root
-    mode: '0644'
-  notify: restart dnsmasq
 - name: Enable systemd-resolved
   ignore_errors: true
   systemd:
@@ -58,12 +14,6 @@
     enabled: yes
     state: started
     masked: no
-- name: Disable dnsmasq
-  systemd:
-    name: dnsmasq
-    enabled: no
-    state: stopped
-    masked: yes
 - name: Install Unbound server
   apt:
     name: unbound
