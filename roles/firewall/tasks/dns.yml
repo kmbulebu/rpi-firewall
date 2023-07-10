@@ -24,6 +24,10 @@
     name: unbound-anchor
     state: latest
     install_recommends: false
+- name: Run unbound-anchor
+  ansible.builtin.command:
+    cmd: /usr/sbin/unbound-anchor -v
+#    creates: /var/lib/unbound/root.key
 - name: Template a file to /etc/unbound/unbound.conf.d/server.conf
   template:
     src: unbound/server.conf
@@ -31,7 +35,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: restart unbound
+  notify: reload unbound
 - name: Create systemd unbound.service.d overrides directory
   file:
     path: /etc/systemd/system/unbound.service.d/

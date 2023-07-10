@@ -35,6 +35,10 @@
   service:
     name: unbound
     state: restarted
+- name: reload unbound
+  service:
+    name: unbound
+    state: reloaded
 - name: reload firewalld
   service:
     name: firewalld
