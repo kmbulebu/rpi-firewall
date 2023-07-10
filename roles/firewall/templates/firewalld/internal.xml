@@ -3,6 +3,7 @@
   <short>Internal</short>
   <description>For use on internal networks. You mostly trust the other computers on the networks to not harm your computer. Only selected incoming connections are accepted.</description>
   <interface name="{{ lan_iface }}"/>
+  <interface name="lan_kids"/>
   <!-- These are redundant with target ACCEPT -->
   <service name="ssh"/>
   <service name="mdns"/>
