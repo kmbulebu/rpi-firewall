@@ -8,6 +8,7 @@ RequiredForOnline=yes
 ConfigureWithoutCarrier=yes
 Address={{ router_ip_address }}
 VLAN=lan_vpn
+VLAN=lan_kids
 DHCPv6PrefixDelegation=yes
 LinkLocalAddressing=ipv6
 LLMNR=true
@@ -53,6 +54,8 @@ EmitRouter=yes
 {% endfor %}
 EmitTimezone=yes
 Timezone=America/New_York
+DefaultLeaseTimeSec=3600
+MaxLeaseTimeSec=43200
 
 {% for dhcp_reservation in dhcp_reservations %}
 # {{ dhcp_reservation.hostname }}

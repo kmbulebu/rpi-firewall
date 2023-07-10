@@ -24,3 +24,5 @@ DNS=1.1.1.1
 DNS=1.0.0.1
 EmitRouter=yes
 SendOption=26:uint16:1292
+DefaultLeaseTimeSec=3600
+MaxLeaseTimeSec=43200
