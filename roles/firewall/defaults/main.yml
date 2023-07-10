@@ -12,8 +12,13 @@ lan_dhcp_pool_size: 200
 vpn_client_iface: wg0
 vpn_vrf_iface: vpn_vrf0
 lan_vpn_iface: lan_vpn
+lan_kids_iface: lan_kids
 lan_device_mac_address:
 wan_device_set_mac_address: 
+lan_kids_router_ip_address: 192.168.110.1/24
+lan_kids_vlan_id: 3
+lan_kids_dhcp_pool_offset: 10
+lan_kids_dhcp_pool_size: 200
 lan_vpn_router_ip_address: 192.168.254.1/24
 lan_vpn_vlan_id: 2
 lan_vpn_wg_listen_port: 51820

@@ -7,8 +7,8 @@ RequiredForOnline=yes
 [Network]
 ConfigureWithoutCarrier=yes
 Address={{ router_ip_address }}
-VLAN=lan_vpn
-VLAN=lan_kids
+VLAN={{ lan_vpn_iface }}
+VLAN={{ lan_kids_iface }}
 DHCPv6PrefixDelegation=yes
 LinkLocalAddressing=ipv6
 LLMNR=true

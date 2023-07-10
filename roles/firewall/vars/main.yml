@@ -4,6 +4,12 @@ lan_cidr: "{{ router_ip_address | ipaddr('network/prefix') }}"
 lan_netmask: "{{ router_ip_address | ipaddr('netmask') }}"
 lan_broadcast: "{{ router_ip_address | ipaddr('broadcast') }}"
 
+lan_kids_address: "{{ lan_kids_router_ip_address | ipaddr('address') }}"
+lan_kids_network: "{{ lan_kids_router_ip_address | ipaddr('network') }}"
+lan_kids_cidr: "{{ lan_kids_router_ip_address | ipaddr('network/prefix') }}"
+lan_kids_netmask: "{{ lan_kids_router_ip_address | ipaddr('netmask') }}"
+lan_kids_broadcast: "{{ lan_kids_router_ip_address | ipaddr('broadcast') }}"
+
 lan_vpn_address: "{{ lan_vpn_router_ip_address | ipaddr('address') }}"
 lan_vpn_network: "{{ lan_vpn_router_ip_address | ipaddr('network') }}"
 lan_vpn_cidr: "{{ lan_vpn_router_ip_address | ipaddr('network/prefix') }}"

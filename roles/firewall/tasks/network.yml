@@ -57,3 +57,20 @@
     group: root
     mode: '0644'
   notify: restart systemd-networkd
+## Kids VLAN Network
+- name: Create lan kids netdev
+  template:
+    src: networkd/lan_kids/30-lan-kids.netdev
+    dest: /etc/systemd/network/30-lan-kids.netdev
+    owner: root
+    group: systemd-network
+    mode: '0644'
+  notify: restart systemd-networkd
+- name: Configure lan kids network
+  template:
+    src: networkd/lan_kids/30-lan-kids.network
+    dest: /etc/systemd/network/30-lan-kids.network
+    owner: root
+    group: systemd-network
+    mode: '0644'
+  notify: restart systemd-networkd
