@@ -9,6 +9,7 @@
   <!-- todo: move to separate zone -->
   <interface name="{{ lan_guests_iface }}"/>
   <!-- These are redundant with target ACCEPT -->
+  <protocol value="igmp"/>
   <service name="ssh"/>
   <service name="mdns"/>
   <service name="dhcpv6-client"/>
