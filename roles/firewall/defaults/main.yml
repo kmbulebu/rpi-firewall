@@ -23,12 +23,12 @@ lan_media_dhcp_pool_offset: 10
 lan_media_dhcp_pool_size: 200
 lan_things_iface: lan_things
 lan_things_router_ip_address: 192.168.130.254/24
-lan_things_vlan_id: 4
+lan_things_vlan_id: 5
 lan_things_dhcp_pool_offset: 10
 lan_things_dhcp_pool_size: 200
 lan_guests_iface: lan_guests
 lan_guests_router_ip_address: 192.168.200.254/24
-lan_guests_vlan_id: 5
+lan_guests_vlan_id: 6
 lan_guests_dhcp_pool_offset: 10
 lan_guests_dhcp_pool_size: 200
 vpn_client_iface: wg0
