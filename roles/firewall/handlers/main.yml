@@ -47,3 +47,7 @@
   systemd:
     name: prometheus-node-exporter.service
     state: restarted
+- name: restart avahi-daemon
+  service:
+    name: avahi-daemon
+    state: restarted
