@@ -9,16 +9,31 @@ wan_vlan_iface: wan_vlan0
 lan_iface: lan0
 lan_dhcp_pool_offset: 10
 lan_dhcp_pool_size: 200
-vpn_client_iface: wg0
-vpn_vrf_iface: vpn_vrf0
-lan_vpn_iface: lan_vpn
-lan_kids_iface: lan_kids
 lan_device_mac_address:
 wan_device_set_mac_address: 
-lan_kids_router_ip_address: 192.168.110.1/24
+lan_kids_iface: lan_kids
+lan_kids_router_ip_address: 192.168.110.254/24
 lan_kids_vlan_id: 3
 lan_kids_dhcp_pool_offset: 10
 lan_kids_dhcp_pool_size: 200
+lan_media_iface: lan_media
+lan_media_router_ip_address: 192.168.120.254/24
+lan_media_vlan_id: 4
+lan_media_dhcp_pool_offset: 10
+lan_media_dhcp_pool_size: 200
+lan_things_iface: lan_things
+lan_things_router_ip_address: 192.168.130.254/24
+lan_things_vlan_id: 4
+lan_things_dhcp_pool_offset: 10
+lan_things_dhcp_pool_size: 200
+lan_guests_iface: lan_guests
+lan_guests_router_ip_address: 192.168.200.254/24
+lan_guests_vlan_id: 5
+lan_guests_dhcp_pool_offset: 10
+lan_guests_dhcp_pool_size: 200
+vpn_client_iface: wg0
+vpn_vrf_iface: vpn_vrf0
+lan_vpn_iface: lan_vpn
 lan_vpn_router_ip_address: 192.168.254.1/24
 lan_vpn_vlan_id: 2
 lan_vpn_wg_listen_port: 51820

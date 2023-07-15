@@ -1,0 +1,47 @@
+[Match]
+Name={{ lan_guests_iface }}
+
+[Link]
+RequiredForOnline=no
+MTUBytes=1500
+
+[Network]
+ConfigureWithoutCarrier=yes
+Address={{ lan_guests_router_ip_address }}
+DHCPv6PrefixDelegation=yes
+LinkLocalAddressing=ipv6
+LLMNR=false
+MulticastDNS=false
+LLDP=true
+EmitLLDP=nearest-bridge
+IPv6AcceptRA=false
+IPv6SendRA=true
+DHCPServer=true
+
+[DHCPv6PrefixDelegation]
+Assign=true
+Announce=true
+Token=::1
+SubnetId=4
+
+[DHCPServer]
+EmitDNS=yes
+PoolOffset={{ lan_guests_dhcp_pool_offset }}
+PoolSize={{ lan_guests_dhcp_pool_size }}
+# todo: Do not use internal DNS server for guests
+DNS={{ lan_guests_address }}
+EmitRouter=yes
+#EmitNTP=yes
+{% for ntp_server in ntp_servers %}
+#NTP={{ ntp_server }}
+{% endfor %}
+EmitTimezone=yes
+Timezone=America/New_York
+DefaultLeaseTimeSec=3600
+MaxLeaseTimeSec=43200
+
+[IPv6SendRA]
+RouterPreference=high
+RouterLifetimeSec=300
+EmitDomains=true
+Domains={{ domain }}

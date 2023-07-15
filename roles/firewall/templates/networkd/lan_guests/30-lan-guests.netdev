@@ -1,0 +1,7 @@
+[NetDev]
+Name={{ lan_guests_iface }}
+Kind=vlan
+MTUBytes=1500
+
+[VLAN]
+Id={{ lan_guests_vlan_id }}

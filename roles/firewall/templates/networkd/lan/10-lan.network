@@ -9,6 +9,9 @@ ConfigureWithoutCarrier=yes
 Address={{ router_ip_address }}
 VLAN={{ lan_vpn_iface }}
 VLAN={{ lan_kids_iface }}
+VLAN={{ lan_media_iface }}
+VLAN={{ lan_things_iface }}
+VLAN={{ lan_guests_iface }}
 DHCPv6PrefixDelegation=yes
 LinkLocalAddressing=ipv6
 LLMNR=true
@@ -41,6 +44,11 @@ Domains={{ domain }}
 # Help ensure our non VPN traffic is separate
 Type=prohibit
 Destination={{ lan_vpn_cidr }}
+
+[Route]
+# Help ensure our guest traffic is separate
+Type=prohibit
+Destination={{ lan_guests_cidr }}
 
 [DHCPServer]
 PoolOffset={{ lan_dhcp_pool_offset }}

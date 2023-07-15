@@ -1,0 +1,46 @@
+[Match]
+Name={{ lan_media_iface }}
+
+[Link]
+RequiredForOnline=no
+MTUBytes=1500
+
+[Network]
+ConfigureWithoutCarrier=yes
+Address={{ lan_media_router_ip_address }}
+DHCPv6PrefixDelegation=yes
+LinkLocalAddressing=ipv6
+LLMNR=true
+MulticastDNS=true
+LLDP=true
+EmitLLDP=nearest-bridge
+IPv6AcceptRA=false
+IPv6SendRA=true
+DHCPServer=true
+
+[DHCPv6PrefixDelegation]
+Assign=true
+Announce=true
+Token=::1
+SubnetId=2
+
+[DHCPServer]
+EmitDNS=yes
+PoolOffset={{ lan_media_dhcp_pool_offset }}
+PoolSize={{ lan_media_dhcp_pool_size }}
+DNS={{ lan_media_address }}
+EmitRouter=yes
+#EmitNTP=yes
+{% for ntp_server in ntp_servers %}
+#NTP={{ ntp_server }}
+{% endfor %}
+EmitTimezone=yes
+Timezone=America/New_York
+DefaultLeaseTimeSec=3600
+MaxLeaseTimeSec=43200
+
+[IPv6SendRA]
+RouterPreference=high
+RouterLifetimeSec=300
+EmitDomains=true
+Domains={{ domain }}
