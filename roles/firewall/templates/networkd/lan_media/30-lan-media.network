@@ -43,4 +43,6 @@ MaxLeaseTimeSec=43200
 RouterPreference=high
 RouterLifetimeSec=300
 EmitDomains=true
+EmitDNS=true
+DNS=_link_local
 Domains={{ domain }}
