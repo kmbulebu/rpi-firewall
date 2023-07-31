@@ -40,8 +40,8 @@ DefaultLeaseTimeSec=3600
 MaxLeaseTimeSec=43200
 
 [IPv6SendRA]
-RouterPreference=15
-RouterLifetimeSec=300
+RouterPreference=high
+RouterLifetimeSec=15
 EmitDomains=true
 EmitDNS=true
 DNS=_link_local
