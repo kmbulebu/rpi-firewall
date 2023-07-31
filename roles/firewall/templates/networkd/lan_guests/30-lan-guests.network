@@ -42,6 +42,6 @@ MaxLeaseTimeSec=43200
 
 [IPv6SendRA]
 RouterPreference=high
-RouterLifetimeSec=300
+RouterLifetimeSec=15
 EmitDomains=true
 Domains={{ domain }}
