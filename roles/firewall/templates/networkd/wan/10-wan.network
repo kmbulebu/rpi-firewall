@@ -6,12 +6,13 @@ RequiredForOnline=no
 
 [Network]
 LinkLocalAddressing=ipv6
+IPv6LinkLocalAddressGenerationMode=eui64
 DHCP=yes
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=false
-LLMNR=resolve
-MulticastDNS=resolve
+LLMNR=false
+MulticastDNS=false
 
 [IPv6AcceptRA]
 UseDNS=false

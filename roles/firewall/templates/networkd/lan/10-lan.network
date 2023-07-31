@@ -14,6 +14,7 @@ VLAN={{ lan_things_iface }}
 VLAN={{ lan_guests_iface }}
 DHCPv6PrefixDelegation=yes
 LinkLocalAddressing=ipv6
+IPv6LinkLocalAddressGenerationMode=eui64
 LLMNR=true
 MulticastDNS=true
 LLDP=true

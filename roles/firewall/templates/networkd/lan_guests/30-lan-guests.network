@@ -3,13 +3,13 @@ Name={{ lan_guests_iface }}
 
 [Link]
 RequiredForOnline=no
-MTUBytes=1500
 
 [Network]
 ConfigureWithoutCarrier=yes
 Address={{ lan_guests_router_ip_address }}
 DHCPv6PrefixDelegation=yes
 LinkLocalAddressing=ipv6
+IPv6LinkLocalAddressGenerationMode=eui64
 LLMNR=false
 MulticastDNS=false
 LLDP=true
