@@ -39,6 +39,14 @@
     group: root
     mode: '0644'
   notify: reload firewalld
+- name: Template guest zone config
+  template:
+    src: firewalld/guest.xml
+    dest: /etc/firewalld/zones/guest.xml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: reload firewalld
 - name: Template lockdown whitelist
   template:
     src: firewalld/lockdown-whitelist.xml

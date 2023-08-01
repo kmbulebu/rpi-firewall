@@ -22,7 +22,7 @@ DHCPServer=true
 Assign=true
 Announce=true
 Token=::1
-SubnetId=4
+SubnetId=15
 
 [DHCPServer]
 EmitDNS=yes
@@ -43,5 +43,4 @@ MaxLeaseTimeSec=43200
 [IPv6SendRA]
 RouterPreference=high
 RouterLifetimeSec=15
-EmitDomains=true
-Domains={{ domain }}
+EmitDomains=false

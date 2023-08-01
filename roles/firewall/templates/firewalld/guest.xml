@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<zone target="ACCEPT">
-  <short>Internal</short>
-  <description>For use on internal networks. You mostly trust the other computers on the networks to not harm your computer. Only selected incoming connections are accepted.</description>
-  <interface name="{{ lan_iface }}"/>
-  <interface name="{{ lan_kids_iface }}"/>
-  <interface name="{{ lan_things_iface }}"/>
-  <interface name="{{ lan_media_iface }}"/>
-  <!-- These are redundant with target ACCEPT -->
+<zone target="REJECT">
+  <short>Guest</short>
+  <description>For use on geuest networks.</description>
+  <interface name="{{ lan_guests_iface }}"/>
   <!-- Allow list ICMP instead of deny list -->
   <icmp-block-inversion/>
   <icmp-block name="echo-request"/>
@@ -14,6 +10,7 @@
   <icmp-block name="neighbour-advertisement"/>
   <icmp-block name="neighbour-solicitation"/>
   <icmp-block name="router-advertisement"/>
+  <icmp-block name="router-solicitation"/>
   <icmp-block name="destination-unreachable"/>
   <icmp-block name="parameter-problem"/>
   <icmp-block name="packet-too-big"/>
@@ -30,11 +27,6 @@
   <icmp-block name="unknown-option"/>
   <icmp-block name="failed-policy"/>
   <icmp-block name="fragmentation-needed"/>
-  <protocol value="igmp"/>
-  <service name="ssh"/>
-  <service name="mdns"/>
-  <service name="llmnr"/>
   <service name="dhcp"/>
   <service name="dns"/>
-  <service name="prometheus-node-exporter"/>
 </zone>
