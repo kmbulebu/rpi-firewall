@@ -46,10 +46,10 @@ Domains={{ domain }}
 Type=prohibit
 Destination={{ lan_vpn_cidr }}
 
-[Route]
+#[Route]
 # Help ensure our guest traffic is separate
-Type=prohibit
-Destination={{ lan_guests_cidr }}
+#Type=prohibit
+#Destination={{ lan_guests_cidr }}
 
 [DHCPServer]
 PoolOffset={{ lan_dhcp_pool_offset }}

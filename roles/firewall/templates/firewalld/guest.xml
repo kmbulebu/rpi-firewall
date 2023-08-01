@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<zone target="REJECT">
+<zone target="default">
   <short>Guest</short>
-  <description>For use on geuest networks.</description>
+  <description>For use on guest networks.</description>
   <interface name="{{ lan_guests_iface }}"/>
   <!-- Allow list ICMP instead of deny list -->
   <icmp-block-inversion/>
