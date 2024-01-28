@@ -6,7 +6,8 @@ RequiredForOnline=no
 
 [Network]
 LinkLocalAddressing=ipv6
-IPv6LinkLocalAddressGenerationMode=random
+IPv6LinkLocalAddressGenerationMode=eui64
+IPv6DuplicateAddressDetection=0
 DHCP=yes
 IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
