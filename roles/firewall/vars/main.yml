@@ -27,7 +27,7 @@ lan_things_network: "{{ lan_things_router_ip_address | ipaddr('network') }}"
 lan_things_cidr: "{{ lan_things_router_ip_address | ipaddr('network/prefix') }}"
 lan_things_netmask: "{{ lan_things_router_ip_address | ipaddr('netmask') }}"
 lan_things_broadcast: "{{ lan_things_router_ip_address | ipaddr('broadcast') }}"
-lan_media_ip6_ula_cidr: 'fd5f:1047:55fc:0003::/64'
+lan_things_ip6_ula_cidr: 'fd5f:1047:55fc:0003::/64'
 #lan_things_ip6_ula_cidr: "{{ ip6_ula_cidr | ansible.utils.ipsubnet(64, 3) }}"
 
 lan_guests_address: "{{ lan_guests_router_ip_address | ipaddr('address') }}"
