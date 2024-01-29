@@ -44,3 +44,10 @@ RouterPreference=high
 RouterLifetimeSec=120
 EmitDomains=true
 Domains={{ domain }}
+
+# Unique Local Address
+[IPv6Prefix]
+Prefix={{ lan_kids_ip6_ula_cidr }}
+PreferredLifetimeSec=3600
+ValidLifetimeSec=7200
+Assign=true

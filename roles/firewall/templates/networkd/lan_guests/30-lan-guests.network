@@ -44,3 +44,10 @@ MaxLeaseTimeSec=43200
 RouterPreference=high
 RouterLifetimeSec=120
 EmitDomains=false
+
+# Unique Local Address
+[IPv6Prefix]
+Prefix={{ lan_guests_ip6_ula_cidr }}
+PreferredLifetimeSec=3600
+ValidLifetimeSec=7200
+Assign=true

@@ -41,6 +41,13 @@ EmitDNS=false
 EmitDomains=true
 Domains={{ domain }}
 
+# Unique Local Address
+[IPv6Prefix]
+Prefix={{ lan_ip6_ula_cidr }}
+PreferredLifetimeSec=3600
+ValidLifetimeSec=7200
+Assign=true
+
 [Route]
 # Help ensure our non VPN traffic is separate
 Type=prohibit
