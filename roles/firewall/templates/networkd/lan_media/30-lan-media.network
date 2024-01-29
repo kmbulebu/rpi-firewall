@@ -50,8 +50,8 @@ Domains={{ domain }}
 # Unique Local Address
 [IPv6Prefix]
 Prefix={{ lan_media_ip6_ula_cidr }}
-PreferredLifetimeSec=3600
-ValidLifetimeSec=7200
+PreferredLifetimeSec=86400
+ValidLifetimeSec=604800
 Assign=true
 
 [IPv6RoutePrefix]
