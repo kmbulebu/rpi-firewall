@@ -48,6 +48,10 @@ PreferredLifetimeSec=3600
 ValidLifetimeSec=7200
 Assign=true
 
+[IPv6RoutePrefix]
+Route={{ ip6_ula_cidr }}
+LifetimeSec=120
+
 [Route]
 # Help ensure our non VPN traffic is separate
 Type=prohibit

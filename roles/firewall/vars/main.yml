@@ -1,3 +1,5 @@
+ip6_ula_cidr: 'fd5f:1047:55fc::/48'
+
 lan_address: "{{ router_ip_address | ipaddr('address') }}"
 lan_network: "{{ router_ip_address | ipaddr('network') }}"
 lan_cidr: "{{ router_ip_address | ipaddr('network/prefix') }}"

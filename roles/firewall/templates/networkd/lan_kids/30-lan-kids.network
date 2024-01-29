@@ -51,3 +51,7 @@ Prefix={{ lan_kids_ip6_ula_cidr }}
 PreferredLifetimeSec=3600
 ValidLifetimeSec=7200
 Assign=true
+
+[IPv6RoutePrefix]
+Route={{ ip6_ula_cidr }}
+LifetimeSec=120
