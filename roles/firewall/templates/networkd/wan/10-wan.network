@@ -38,3 +38,11 @@ Scope=global
 IPv6Preference=high
 # Documented option didn't pass parsing validation.
 #Protocol=ra
+
+[Route]
+Type=blackhole
+Destination={{ ip6_ula_cidr }}
+
+[Route]
+Type=blackhole
+Destination=fd00::/8

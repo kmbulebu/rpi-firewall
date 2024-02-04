@@ -19,7 +19,7 @@ LLMNR=true
 MulticastDNS=true
 LLDP=true
 EmitLLDP=nearest-bridge
-IPv6AcceptRA=false
+IPv6AcceptRA=true
 IPv6SendRA=true
 DHCPServer=yes
 
@@ -28,6 +28,13 @@ Assign=true
 Announce=true
 SubnetId=0
 Token=::1
+
+# Accept routes from other devices
+# such as a Thread border router
+[IPv6AcceptRA]
+UseDNS=false
+UseDomains=false
+UseGateway=false
 
 [IPv6SendRA]
 RouterPreference=high
@@ -50,6 +57,13 @@ Assign=true
 
 [IPv6RoutePrefix]
 Route={{ ip6_ula_cidr }}
+LifetimeSec=120
+
+# Announce a route to any ULA address
+# as we may know some routes
+# received through RAs
+[IPv6RoutePrefix]
+Route=fd00::/8
 LifetimeSec=120
 
 [Route]
