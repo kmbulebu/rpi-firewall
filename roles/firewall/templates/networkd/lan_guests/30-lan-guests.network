@@ -44,3 +44,11 @@ MaxLeaseTimeSec=43200
 RouterPreference=high
 RouterLifetimeSec=120
 EmitDomains=false
+
+[Route]
+Type=blackhole
+Destination={{ ip6_ula_cidr }}
+
+[Route]
+Type=blackhole
+Destination=fd00::/8
