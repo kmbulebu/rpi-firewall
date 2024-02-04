@@ -57,23 +57,3 @@
     enabled: yes
     state: started
     masked: no
-- name: Install Avahi Daemon mDNS server
-  apt:
-    name: avahi-daemon
-    state: latest
-    install_recommends: false
-- name: Template Avahi Configuration
-  template:
-    src: dns/avahi-daemon.conf
-    dest: /etc/avahi/avahi-daemon.conf
-    owner: root
-    group: root
-    mode: '0644'
-  notify: restart avahi-daemon
-- name: Enable avahi-daemon
-  ignore_errors: false
-  systemd:
-    name: avahi-daemon
-    enabled: yes
-    state: started
-    masked: no

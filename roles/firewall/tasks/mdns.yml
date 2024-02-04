@@ -1,0 +1,18 @@
+- name: Install mDNS Reflector
+  apt:
+    deb: http://http.us.debian.org/debian/pool/main/m/mdns-reflector/mdns-reflector_0.0.1+git20230316.f1bd0f1-1_arm64.deb
+- name: Template mDNS Reflector Configuration
+  template:
+    src: mdns/mdns-reflector.conf
+    dest: /etc/mdns-reflector/conf.d/ansible.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart mdns-reflector
+- name: Enable mdns-reflector
+  ignore_errors: false
+  systemd:
+    name: mdns-reflector
+    enabled: yes
+    state: started
+    masked: no

@@ -47,7 +47,7 @@
   systemd:
     name: prometheus-node-exporter.service
     state: restarted
-- name: restart avahi-daemon
+- name: restart mdns-reflector
   service:
-    name: avahi-daemon
+    name: mdns-reflector
     state: restarted
