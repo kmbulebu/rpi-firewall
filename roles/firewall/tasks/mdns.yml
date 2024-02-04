@@ -1,6 +1,6 @@
 - name: Install mDNS Reflector
   apt:
-    deb: http://http.us.debian.org/debian/pool/main/m/mdns-reflector/mdns-reflector_0.0.1+git20230316.f1bd0f1-1_arm64.deb
+    deb: http://http.us.debian.org/debian/pool/main/m/mdns-reflector/mdns-reflector_0.0.1+git20230914.4b4cd3b-2_arm64.deb
 - name: Template mDNS Reflector Configuration
   template:
     src: mdns/mdns-reflector.conf
