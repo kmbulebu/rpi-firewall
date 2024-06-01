@@ -46,5 +46,6 @@ ntp_servers:
   - ntp.ubuntu.com
 router_hostname: router
 router_ip_address: 192.168.1.1/24
-upgrade_reboot_time: '02:00'
+# UTC
+upgrade_reboot_time: '04:55'
 upgrade_automatic_reboot: yes
