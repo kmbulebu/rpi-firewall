@@ -9,6 +9,8 @@
 - include_tasks: network.yml
 - include_tasks: dns.yml
 - include_tasks: mdns.yml
+- include_tasks: tailscale.yml
+  when: tailscale_auth_key is defined
 - include_tasks: firewalld.yml
 - include_tasks: forwarding.yml
 - include_tasks: wireguard_client.yml

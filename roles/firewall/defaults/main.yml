@@ -49,3 +49,5 @@ router_ip_address: 192.168.1.1/24
 # UTC
 upgrade_reboot_time: '04:55'
 upgrade_automatic_reboot: yes
+tailscaled_listen_port: 0
+tailscale_iface: tailscale0

@@ -6,6 +6,7 @@
   <interface name="{{ lan_kids_iface }}"/>
   <interface name="{{ lan_things_iface }}"/>
   <interface name="{{ lan_media_iface }}"/>
+  <interface name="{{ tailscale_iface }}"/>
   <!-- These are redundant with target ACCEPT -->
   <!-- Allow list ICMP instead of deny list -->
   <icmp-block-inversion/>

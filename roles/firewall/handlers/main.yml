@@ -51,3 +51,7 @@
   service:
     name: mdns-reflector
     state: restarted
+- name: restart tailscaled
+  service:
+    name: tailscaled
+    state: restarted
