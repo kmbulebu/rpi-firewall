@@ -25,7 +25,7 @@
     argv:
       - login
       - --auth-key
-      - {{ tailscale_auth_key }}
+      - "{{ tailscale_auth_key }}"
 - name: Tailscale Configure
   command:
     cmd: tailscale
@@ -34,4 +34,4 @@
       - --exit-node-allow-lan-access=false
       - --advertise-exit-node
       - --accept-routes=false
-      - --accept-dns=false  
+      - --accept-dns=false
