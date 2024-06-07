@@ -7,7 +7,7 @@
 - name: Update tailscaled configuration
   template:
     src: tailscale/defaults
-    dest: /etc/defaults/tailscaled
+    dest: /etc/default/tailscaled
     owner: root
     group: root
     mode: '0644'
