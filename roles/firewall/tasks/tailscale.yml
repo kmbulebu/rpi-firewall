@@ -13,6 +13,7 @@
     mode: '0644'
   notify: restart tailscaled
 - name: Tailscale Status
+  ignore_errors: True
   command:
     argv:
       - tailscale
