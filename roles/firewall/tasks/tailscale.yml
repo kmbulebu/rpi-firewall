@@ -17,7 +17,7 @@
     cmd: tailscale
     argv:
       - status
-    register: tailscale_status 
+  register: tailscale_status 
 - name: Tailscale Login
   when: tailscale_status.rc != 0
   command:
