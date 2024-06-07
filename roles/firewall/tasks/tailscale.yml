@@ -14,22 +14,22 @@
   notify: restart tailscaled
 - name: Tailscale Status
   command:
-    cmd: tailscale
     argv:
+      - tailscale
       - status
   register: tailscale_status 
 - name: Tailscale Login
   when: tailscale_status.rc != 0
   command:
-    cmd: tailscale
     argv:
+      - tailscale
       - login
       - --auth-key
       - "{{ tailscale_auth_key }}"
 - name: Tailscale Configure
   command:
-    cmd: tailscale
     argv:
+      - tailscale
       - set
       - --exit-node-allow-lan-access=false
       - --advertise-exit-node
