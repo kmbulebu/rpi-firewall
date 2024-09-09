@@ -3,6 +3,7 @@
 # https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
 admin_user_password_hash: '$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'
 domain: my.home
+dns_private_domains: []
 enable_prometheus_node_exporter: no
 wan_iface: wan0
 wan_vlan_iface: wan_vlan0
