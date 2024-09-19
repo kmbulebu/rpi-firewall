@@ -38,5 +38,7 @@
   <service name="llmnr"/>
   <service name="dhcp"/>
   <service name="dns"/>
+  <service name="dns-over-tls"/>
+  <service name="https"/>
   <service name="prometheus-node-exporter"/>
 </zone>
