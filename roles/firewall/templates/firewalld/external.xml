@@ -35,5 +35,14 @@
     <source address="{{ port_forward.address_from }}"/>
     <forward-port port="{{ port_forward.ports_from }}" protocol="{{ port_forward.proto }}" to-port="{{ port_forward.ports_to }}" to-addr="{{ port_forward.address_to }}"/>
   </rule>
+  <!-- Tailscale -->
+  <rule family="ipv4">
+    <source-port port="41641" protocol="udp"/>
+    <accept/>
+  </rule>
+  <rule family="ipv6">
+    <source-port port="41641" protocol="udp"/>
+    <accept/>
+  </rule>
   {% endfor %}
 </zone>
