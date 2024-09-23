@@ -41,4 +41,13 @@
   <service name="dns-over-tls"/>
   <service name="https"/>
   <service name="prometheus-node-exporter"/>
+  <!-- Tailscale -->
+  <rule family="ipv4">
+    <source-port port="41641" protocol="udp"/>
+    <accept/>
+  </rule>
+  <rule family="ipv6">
+    <source-port port="41641" protocol="udp"/>
+    <accept/>
+  </rule>
 </zone>
