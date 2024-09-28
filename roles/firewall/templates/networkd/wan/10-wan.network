@@ -31,6 +31,8 @@ UseHostname=false
 UseDNS=false
 PrefixDelegationHint=::/60
 WithoutRA=no
+# AT&T Gives us an IPv6 address they won't route traffic to
+UseAddress=false
 
 [Route]
 Gateway=_ipv6ra
