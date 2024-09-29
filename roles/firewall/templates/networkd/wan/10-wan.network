@@ -9,13 +9,17 @@ LinkLocalAddressing=ipv6
 IPv6LinkLocalAddressGenerationMode=eui64
 IPv6DuplicateAddressDetection=0
 DHCP=yes
-IPv6AcceptRA=no
+IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=false
 LLMNR=false
 MulticastDNS=false
 DHCPPrefixDelegation=yes
 IPv6SendRA=no
+
+[IPv6AcceptRA]
+UseGateway=true
+UseDNS=false
 
 # Give ourself our own prefix.
 [DHCPPrefixDelegation]
