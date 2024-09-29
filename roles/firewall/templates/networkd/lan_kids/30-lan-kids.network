@@ -51,8 +51,12 @@ UseGateway=false
 [IPv6SendRA]
 RouterPreference=high
 RouterLifetimeSec=120
+DNSLifetimeSec=3600
+EmitDNS=true
+DNS=_link_local
 EmitDomains=true
 Domains={{ domain }}
+
 
 # Unique Local Address
 [IPv6Prefix]

@@ -41,9 +41,6 @@ UseGateway=false
 [IPv6SendRA]
 RouterPreference=high
 RouterLifetimeSec=120
-# DNS clients can not use an IPv6 Link Local address as they
-# do not know which interface to reach that address through.
-#EmitDNS=false
 DNSLifetimeSec=3600
 EmitDNS=true
 DNS=_link_local
