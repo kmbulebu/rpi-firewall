@@ -1,10 +1,11 @@
 ---
 ## VRF Network
-- name: Install linux-modules-extra
-  apt:
-    name: linux-modules-extra-raspi
-    state: latest
-    install_recommends: false
+# No longer needed with Noble?
+# - name: Install linux-modules-extra
+#   apt:
+#     name: linux-modules-extra-raspi
+#     state: latest
+#     install_recommends: false
 - name: Create vpn vrf netdev
   template:
     src: networkd/wireguard/00-vpn-vrf.netdev
