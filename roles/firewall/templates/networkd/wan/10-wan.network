@@ -13,7 +13,7 @@ IPv6AcceptRA=yes
 ConfigureWithoutCarrier=no
 IPv6PrivacyExtensions=false
 LLMNR=false
-MulticastDNS=false.
+MulticastDNS=false
 
 [IPv6AcceptRA]
 UseDNS=false
@@ -30,7 +30,7 @@ UseHostname=false
 [DHCPv6]
 UseDNS=false
 PrefixDelegationHint=::/60
-WithoutRA=no
+WithoutRA=yes
 # AT&T Gives us an IPv6 address they won't route traffic to
 UseAddress=false
 
