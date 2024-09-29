@@ -35,6 +35,7 @@
     <source address="{{ port_forward.address_from }}"/>
     <forward-port port="{{ port_forward.ports_from }}" protocol="{{ port_forward.proto }}" to-port="{{ port_forward.ports_to }}" to-addr="{{ port_forward.address_to }}"/>
   </rule>
+  {% endfor %}
   <!-- Tailscale -->
   <rule family="ipv4">
     <source-port port="41641" protocol="udp"/>
@@ -44,5 +45,14 @@
     <source-port port="41641" protocol="udp"/>
     <accept/>
   </rule>
-  {% endfor %}
+  <!-- NAT internet traffic from our ULA range. -->
+  <rule family="ipv6">
+    <source address="fd00::/8"/>
+    <masquerade/>
+  </rule>
+  <!-- NAT internet traffic from our linklocal range. -->
+  <rule family="ipv6">
+    <source address="fe80::/10"/>
+    <masquerade/>
+  </rule>
 </zone>
