@@ -7,7 +7,7 @@ RequiredForOnline=no
 [Network]
 ConfigureWithoutCarrier=yes
 Address={{ lan_things_router_ip_address }}
-DHCPv6PrefixDelegation=yes
+DHCPPrefixDelegation=yes
 LinkLocalAddressing=ipv6
 IPv6LinkLocalAddressGenerationMode=eui64
 LLMNR=true
@@ -18,7 +18,8 @@ IPv6AcceptRA=true
 IPv6SendRA=true
 DHCPServer=true
 
-[DHCPv6PrefixDelegation]
+[DHCPPrefixDelegation]
+UplinkInterface={{ wan_iface }}
 Assign=true
 Announce=true
 Token=::1

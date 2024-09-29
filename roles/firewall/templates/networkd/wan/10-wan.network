@@ -28,9 +28,10 @@ SendHostname=false
 UseHostname=false
 
 [DHCPv6]
+SendHostname=false
 UseDNS=false
 PrefixDelegationHint=::/60
-WithoutRA=yes
+WithoutRA=solicit
 # AT&T Gives us an IPv6 address they won't route traffic to
 UseAddress=false
 

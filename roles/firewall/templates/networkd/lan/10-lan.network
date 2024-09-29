@@ -12,7 +12,7 @@ VLAN={{ lan_kids_iface }}
 VLAN={{ lan_media_iface }}
 VLAN={{ lan_things_iface }}
 VLAN={{ lan_guests_iface }}
-DHCPv6PrefixDelegation=yes
+DHCPPrefixDelegation=yes
 LinkLocalAddressing=ipv6
 IPv6LinkLocalAddressGenerationMode=eui64
 LLMNR=true
@@ -23,7 +23,8 @@ IPv6AcceptRA=true
 IPv6SendRA=true
 DHCPServer=yes
 
-[DHCPv6PrefixDelegation]
+[DHCPPrefixDelegation]
+UplinkInterface={{ wan_iface }}
 Assign=true
 Announce=true
 SubnetId=0
