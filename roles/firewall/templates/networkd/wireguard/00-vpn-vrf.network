@@ -9,6 +9,7 @@ MTUBytes=1292
 ConfigureWithoutCarrier=yes
 LLMNR=false
 MulticastDNS=false
+IPForward=true
 
 [Route]
 # Help ensure our non VPN traffic is separate

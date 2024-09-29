@@ -16,6 +16,7 @@ BindCarrier=wg0
 LLDP=false
 LLMNR=false
 MulticastDNS=false
+IPForward=true
 
 [DHCPServer]
 EmitDNS=yes

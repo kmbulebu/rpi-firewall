@@ -16,6 +16,7 @@ LLMNR=false
 MulticastDNS=false
 DHCPPrefixDelegation=yes
 IPv6SendRA=no
+IPForward=true
 
 [IPv6AcceptRA]
 UseGateway=true
