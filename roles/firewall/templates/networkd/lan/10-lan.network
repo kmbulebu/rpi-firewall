@@ -27,7 +27,7 @@ DHCPServer=yes
 UplinkInterface={{ wan_iface }}
 Assign=true
 Announce=true
-SubnetId=0
+SubnetId=1
 Token=::1
 
 # Accept routes from other devices

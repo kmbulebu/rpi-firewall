@@ -23,7 +23,7 @@ UplinkInterface={{ wan_iface }}
 Assign=true
 Announce=true
 Token=::1
-SubnetId=4
+SubnetId=5
 
 [DHCPServer]
 EmitDNS=yes
