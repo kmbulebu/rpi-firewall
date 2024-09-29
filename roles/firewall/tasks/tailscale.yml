@@ -1,4 +1,8 @@
 ---
+- name: Add Tailscale PPA repository
+  apt_repository:
+    repo: 'ppa:tailscale/tailscale'
+    state: present
 - name: Install tailscale
   apt:
     name: tailscale
