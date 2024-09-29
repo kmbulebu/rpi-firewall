@@ -4,6 +4,12 @@
     name: tailscale
     state: latest
     install_recommends: false
+- name: Start tailscaled
+  systemd:
+    name: tailscaled.service
+    enabled: yes
+    state: started
+    masked: no
 - name: Update tailscaled configuration
   template:
     src: tailscale/defaults
@@ -15,9 +21,7 @@
 - name: Tailscale Status
   ignore_errors: True
   command:
-    argv:
-      - tailscale
-      - status
+    cmd: 'tailscale status --peers=false --json | jq -e .HaveNodeKey'
   register: tailscale_status 
 - name: Tailscale Login
   when: tailscale_status.rc != 0
