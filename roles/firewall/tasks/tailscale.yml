@@ -1,10 +1,21 @@
 ---
-- name: Add Tailscale PPA repository
-  apt_repository:
-    repo: 'ppa:tailscale/tailscale'
-    state: present
+- name: Get Ubuntu OS release name
+  ansible.builtin.command:
+    cmd: lsb_release -cs
+  register: ubuntu_release_name
+- name: Add Tailscale GPG key
+  ansible.builtin.get_url:
+    url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ubuntu_release_name.stdout }}.noarmor.gpg"
+    dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+    mode: '0644'
+- name: Add Tailscale repository list
+  ansible.builtin.get_url:
+    url: https://pkgs.tailscale.com/stable/ubuntu/{{ ubuntu_release_name.stdout }}.tailscale-keyring.list
+    dest: /etc/apt/sources.list.d/tailscale.list
+    mode: '0644'
 - name: Install tailscale
   apt:
+    update_cache: yes
     name: tailscale
     state: latest
     install_recommends: false
