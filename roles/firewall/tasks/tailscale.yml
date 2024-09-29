@@ -35,7 +35,7 @@
   notify: restart tailscaled
 - name: Tailscale Status
   ignore_errors: True
-  command:
+  shell:
     cmd: 'tailscale status --peers=false --json | jq -e .HaveNodeKey'
   register: tailscale_status 
 - name: Tailscale Login
