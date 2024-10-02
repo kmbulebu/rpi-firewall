@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+set -e
+
+ethtool -K "$IFACE" rx-udp-gro-forwarding on
+
+exit 0

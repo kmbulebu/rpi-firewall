@@ -55,3 +55,7 @@
   service:
     name: tailscaled
     state: restarted
+- name: restart networkd-dispatcher
+  service:
+    name: networkd-dispatcher
+    state: restarted

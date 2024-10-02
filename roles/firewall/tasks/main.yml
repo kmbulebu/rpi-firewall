@@ -7,6 +7,7 @@
 - include_tasks: apt.yml
 - include_tasks: ansible-pull.yml
 - include_tasks: network.yml
+- include_tasks: ethtool.yml
 - include_tasks: dns.yml
 - include_tasks: mdns.yml
 - include_tasks: tailscale.yml
