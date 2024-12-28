@@ -35,7 +35,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: reload unbound
+  notify: restart unbound
 - name: Create systemd unbound.service.d overrides directory
   file:
     path: /etc/systemd/system/unbound.service.d/
