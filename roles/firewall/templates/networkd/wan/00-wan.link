@@ -1,5 +1,5 @@
 [Match]
-Property=ID_BUS=usb
+{{ wan_iface_networkd_link_match }}
 
 [Link]
 Description="Physical WAN (Raspberry Pi Internal Gigabit Ethernet)"

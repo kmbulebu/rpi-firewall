@@ -1,5 +1,5 @@
 [Match]
-Driver=bcmgenet
+{{ lan_iface_networkd_link_match }}
 
 [Link]
 Description="LAN (Periphereal Network Adapter))"
