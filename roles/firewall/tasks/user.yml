@@ -2,7 +2,7 @@
 - name: Add admin user
   user:
     name: firewall
-    groups: adm,sudo,netdev
+    groups: adm,sudo
     expires: -1
     create_home: yes
     password: "{{ admin_user_password_hash }}"
