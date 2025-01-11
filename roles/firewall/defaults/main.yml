@@ -1,9 +1,10 @@
 ---
 # Default password: MyPasswordIsMyVoice
 # https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
-playbook_git_url: https://github.com/kmbulebu/rpi-firewall.git
-playbook_git_ref: master
-playbook_filename: playbook.yml
+ansible_playbook_git_url: https://github.com/kmbulebu/rpi-firewall.git
+ansible_playbook_git_ref: master
+ansible_playbook_filename: playbook.yml
+ansible_inventory: /boot/firmware/inventory.yml
 admin_user_password_hash: '$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'
 domain: my.home
 dns_private_domains: []

@@ -2,7 +2,7 @@
 Description=Run ansible-pull on a timer.
 
 [Timer]
-OnUnitActiveSec=5min
+OnUnitActiveSec=60min
 
 [Install]
 WantedBy=timers.target

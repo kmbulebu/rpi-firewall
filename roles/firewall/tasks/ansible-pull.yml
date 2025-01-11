@@ -31,7 +31,7 @@
     mode: '0644'
   notify: systemctl daemon-reload
 - name: Setup ansible-pull-reconfigure path watch
-  copy:
+  template:
     src: ansible-pull/ansible-pull-reconfigure.path
     dest: /etc/systemd/system/ansible-pull-reconfigure.path
     owner: root

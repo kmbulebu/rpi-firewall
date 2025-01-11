@@ -1,3 +1,4 @@
-PLAYBOOK_GIT_URL={{ playbook_git_url }}
-PLAYBOOK_GIT_REF={{ playbook_git_ref }}
-PLAYBOOK={{ playbook_filename }}
+PLAYBOOK_GIT_URL={{ ansible_playbook_git_url }}
+PLAYBOOK_GIT_REF={{ ansible_playbook_git_ref }}
+PLAYBOOK={{ ansible_playbook_filename }}
+INVENTORY={{ ansible_inventory }}
