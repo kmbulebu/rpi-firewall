@@ -16,7 +16,6 @@ lan_iface_networkd_link_match: "Driver=bcmgenet"
 lan_iface: lan0
 lan_dhcp_pool_offset: 10
 lan_dhcp_pool_size: 200
-lan_device_mac_address:
 wan_device_set_mac_address: 
 lan_kids_iface: lan_kids
 lan_kids_router_ip_address: 192.168.110.254/24
@@ -58,3 +57,4 @@ upgrade_reboot_time: '04:55'
 upgrade_automatic_reboot: yes
 tailscaled_listen_port: 0
 tailscale_iface: tailscale0
+mdns_reflector_deb_url: http://http.us.debian.org/debian/pool/main/m/mdns-reflector/mdns-reflector_0.0.1+git20230914.4b4cd3b-2.1+b1_arm64.deb
