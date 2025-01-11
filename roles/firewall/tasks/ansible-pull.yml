@@ -1,6 +1,6 @@
 ---
 - name: Setup ansible-pull config
-  copy:
+  template:
     src: ansible-pull/ansible-pull
     dest: /etc/default/ansible-pull
     owner: root

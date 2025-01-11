@@ -1,0 +1,3 @@
+PLAYBOOK_GIT_URL={{ playbook_git_url }}
+PLAYBOOK_GIT_REF={{ playbook_git_ref }}
+PLAYBOOK={{ playbook_filename }}
