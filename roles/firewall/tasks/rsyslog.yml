@@ -43,6 +43,5 @@
     name: rsyslog
     state: stopped
     enabled: false
-  when:
-    - rsyslog_udp_server is not defined
-    - "'rsyslog.service' in ansible_facts.services"
+  when: rsyslog_udp_server is not defined
+  ignore_errors: yes
