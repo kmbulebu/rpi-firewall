@@ -1,6 +1,6 @@
 - name: Install mDNS Reflector
   apt:
-    deb: {{ mdns_reflector_deb_url }}
+    deb: "{{ mdns_reflector_deb_url }}"
 - name: Template mDNS Reflector Configuration
   template:
     src: mdns/mdns-reflector.conf
