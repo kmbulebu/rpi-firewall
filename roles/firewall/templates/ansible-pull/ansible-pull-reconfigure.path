@@ -1,5 +1,5 @@
 [Path]
-PathModified="{{ ansible_inventory }}"
+PathModified={{ ansible_inventory }}
 
 #[Install]
 #WantedBy=multi-user.target
