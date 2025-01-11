@@ -16,3 +16,4 @@
 - include_tasks: forwarding.yml
 - include_tasks: wireguard_client.yml
 - include_tasks: prometheus_node_exporter.yml
+- meta: clear_facts

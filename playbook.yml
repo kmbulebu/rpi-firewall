@@ -1,5 +1,7 @@
 ---
-- hosts: '*:localhost'
+- name: rpi-firewall
+  hosts: all
   become: yes
+  gather_facts: true
   roles:
     - firewall
