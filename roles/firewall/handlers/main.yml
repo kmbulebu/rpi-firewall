@@ -47,10 +47,6 @@
   systemd:
     name: prometheus-node-exporter.service
     state: restarted
-- name: restart mdns-reflector
-  service:
-    name: mdns-reflector
-    state: restarted
 - name: restart tailscaled
   service:
     name: tailscaled

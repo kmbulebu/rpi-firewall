@@ -3,9 +3,6 @@
   <short>Internal</short>
   <description>For use on internal networks. You mostly trust the other computers on the networks to not harm your computer. Only selected incoming connections are accepted.</description>
   <interface name="{{ lan_iface }}"/>
-  <interface name="{{ lan_kids_iface }}"/>
-  <interface name="{{ lan_things_iface }}"/>
-  <interface name="{{ lan_media_iface }}"/>
   <interface name="{{ tailscale_iface }}"/>
   <!-- These are redundant with target ACCEPT -->
   <!-- Allow list ICMP instead of deny list -->

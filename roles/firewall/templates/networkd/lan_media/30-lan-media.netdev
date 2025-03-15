@@ -1,7 +1,0 @@
-[NetDev]
-Name={{ lan_media_iface }}
-Kind=vlan
-MTUBytes=1500
-
-[VLAN]
-Id={{ lan_media_vlan_id }}

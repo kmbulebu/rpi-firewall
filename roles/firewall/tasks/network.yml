@@ -57,57 +57,6 @@
     group: root
     mode: '0644'
   notify: restart systemd-networkd
-## Kids VLAN Network
-- name: Create lan kids netdev
-  template:
-    src: networkd/lan_kids/30-lan-kids.netdev
-    dest: /etc/systemd/network/30-lan-kids.netdev
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
-- name: Configure lan kids network
-  template:
-    src: networkd/lan_kids/30-lan-kids.network
-    dest: /etc/systemd/network/30-lan-kids.network
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
-## Media VLAN Network
-- name: Create lan media netdev
-  template:
-    src: networkd/lan_media/30-lan-media.netdev
-    dest: /etc/systemd/network/30-lan-media.netdev
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
-- name: Configure lan media network
-  template:
-    src: networkd/lan_media/30-lan-media.network
-    dest: /etc/systemd/network/30-lan-media.network
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
-## Things VLAN Network
-- name: Create lan things netdev
-  template:
-    src: networkd/lan_things/30-lan-things.netdev
-    dest: /etc/systemd/network/30-lan-things.netdev
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
-- name: Configure lan things network
-  template:
-    src: networkd/lan_things/30-lan-things.network
-    dest: /etc/systemd/network/30-lan-things.network
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
 ## Guests VLAN Network
 - name: Create lan guests netdev
   template:

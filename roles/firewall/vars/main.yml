@@ -6,31 +6,6 @@ lan_cidr: "{{ router_ip_address | ipaddr('network/prefix') }}"
 lan_netmask: "{{ router_ip_address | ipaddr('netmask') }}"
 lan_broadcast: "{{ router_ip_address | ipaddr('broadcast') }}"
 lan_ip6_ula_cidr: 'fd5f:1047:55fc:0000::/64'
-#lan_ip6_ula_cidr: "{{ ip6_ula_cidr | ansible.utils.ipsubnet(64, 0) }}"
-
-lan_kids_address: "{{ lan_kids_router_ip_address | ipaddr('address') }}"
-lan_kids_network: "{{ lan_kids_router_ip_address | ipaddr('network') }}"
-lan_kids_cidr: "{{ lan_kids_router_ip_address | ipaddr('network/prefix') }}"
-lan_kids_netmask: "{{ lan_kids_router_ip_address | ipaddr('netmask') }}"
-lan_kids_broadcast: "{{ lan_kids_router_ip_address | ipaddr('broadcast') }}"
-lan_kids_ip6_ula_cidr: 'fd5f:1047:55fc:0001::/64'
-#lan_kids_ip6_ula_cidr: "{{ ip6_ula_cidr | ansible.utils.ipsubnet(64, 1) }}"
-
-lan_media_address: "{{ lan_media_router_ip_address | ipaddr('address') }}"
-lan_media_network: "{{ lan_media_router_ip_address | ipaddr('network') }}"
-lan_media_cidr: "{{ lan_media_router_ip_address | ipaddr('network/prefix') }}"
-lan_media_netmask: "{{ lan_media_router_ip_address | ipaddr('netmask') }}"
-lan_media_broadcast: "{{ lan_media_router_ip_address | ipaddr('broadcast') }}"
-lan_media_ip6_ula_cidr: 'fd5f:1047:55fc:0002::/64'
-#lan_media_ip6_ula_cidr: "{{ ip6_ula_cidr | ansible.utils.ipsubnet(64, 2) }}"
-
-lan_things_address: "{{ lan_things_router_ip_address | ipaddr('address') }}"
-lan_things_network: "{{ lan_things_router_ip_address | ipaddr('network') }}"
-lan_things_cidr: "{{ lan_things_router_ip_address | ipaddr('network/prefix') }}"
-lan_things_netmask: "{{ lan_things_router_ip_address | ipaddr('netmask') }}"
-lan_things_broadcast: "{{ lan_things_router_ip_address | ipaddr('broadcast') }}"
-lan_things_ip6_ula_cidr: 'fd5f:1047:55fc:0003::/64'
-#lan_things_ip6_ula_cidr: "{{ ip6_ula_cidr | ansible.utils.ipsubnet(64, 3) }}"
 
 lan_guests_address: "{{ lan_guests_router_ip_address | ipaddr('address') }}"
 lan_guests_network: "{{ lan_guests_router_ip_address | ipaddr('network') }}"

@@ -1,7 +1,0 @@
-[NetDev]
-Name={{ lan_kids_iface }}
-Kind=vlan
-MTUBytes=1500
-
-[VLAN]
-Id={{ lan_kids_vlan_id }}

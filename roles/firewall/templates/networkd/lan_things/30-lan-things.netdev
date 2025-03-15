@@ -1,7 +1,0 @@
-[NetDev]
-Name={{ lan_things_iface }}
-Kind=vlan
-MTUBytes=1500
-
-[VLAN]
-Id={{ lan_things_vlan_id }}
