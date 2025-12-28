@@ -184,7 +184,7 @@ def sort_entries(entries, sort_key, reverse=False):
 def print_leases(entries):
     """Print lease entries (no header)."""
     for e in entries:
-        print(f"{e['ip']:15} {e['mac']:17} {e['rem_str']}")
+        print(f"   {e['ip']:15} {e['mac']:17} {e['rem_str']}")
 
 
 def resolve_hostnames(entries, max_workers=10, per_lookup_timeout=1.0, resolvers=None):
@@ -317,7 +317,7 @@ def main():
         # resolve hostnames only for the limited set
         resolve_hostnames(entries, per_lookup_timeout=args.resolver_timeout, resolvers=args.resolvers)
         for e in entries:
-            print(f"{e['ip']:15} {e.get('hostname','?'):30} {e['mac']:17} {e['rem_str']}")
+            print(f"   {e['ip']:15} {e.get('hostname','?'):30} {e['mac']:17} {e['rem_str']}")
     else:
         print_leases(entries)
 
