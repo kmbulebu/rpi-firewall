@@ -24,6 +24,14 @@
     name: unbound-anchor
     state: latest
     install_recommends: false
+# We don't need or want unbound to perform local resolution.
+# systemd-resolved is fine for that.
+- name: Disable and mask unbound-resolvconf.service
+  systemd:
+    name: unbound-resolvconf.service
+    enabled: no
+    state: stopped
+    masked: yes
 - name: Run unbound-anchor
   ansible.builtin.command:
     cmd: /usr/sbin/unbound-anchor -v
@@ -57,3 +65,5 @@
     enabled: yes
     state: started
     masked: no
+
+
