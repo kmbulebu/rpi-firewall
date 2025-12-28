@@ -39,8 +39,9 @@ EmitRouter=yes
 {% endfor %}
 EmitTimezone=yes
 Timezone=America/New_York
-DefaultLeaseTimeSec=3600
-MaxLeaseTimeSec=43200
+# Low for now. Allow longer once lease persistence is allowed.
+DefaultLeaseTimeSec=30m
+MaxLeaseTimeSec=3h
 
 [IPv6SendRA]
 RouterPreference=high
