@@ -11,7 +11,6 @@ dns_private_domains: []
 enable_prometheus_node_exporter: no
 wan_iface_networkd_link_match: "Property=ID_BUS=usb"
 wan_iface: wan0
-wan_vlan_iface: wan_vlan0
 lan_iface_networkd_link_match: "Driver=bcmgenet"
 lan_iface: lan0
 lan_dhcp_pool_offset: 10
