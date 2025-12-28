@@ -1,0 +1,28 @@
+---
+- name: Install MOTD WAN status script
+  ansible.builtin.template:
+    src: motd/60-wan-status
+    dest: /etc/update-motd.d/60-wan-status
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Install MOTD systemd health script
+  ansible.builtin.copy:
+    src: motd/70-systemd-health
+    dest: /etc/update-motd.d/70-systemd-health
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Ensure non-executable MOTD files have correct permissions
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - /etc/update-motd.d/10-help-text
+    - /etc/update-motd.d/50-motd-news
+    - /etc/update-motd.d/91-contract-ua-esm-status
+  when: ansible_facts['os_family'] is defined

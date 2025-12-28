@@ -1,0 +1,25 @@
+#!/bin/bash
+# MOTD systemd health indicator
+
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+RESET="\033[0m"
+
+# Determine system health
+health=$(systemctl is-system-running 2>/dev/null)
+errors=$(systemctl --failed --no-legend)
+
+echo
+
+if [ "$health" = "running" ] || [ "$health" = "starting" ]; then
+    echo -e " Systemd status: ${GREEN}${health}${RESET}"
+else
+    echo -e " Systemd status: ${RED}${health}${RESET}"
+fi
+
+# Show failed services if any
+if [ -n "$errors" ]; then
+    echo "  Failed units:"
+    # Prints service name and brief info
+    systemctl --failed --no-legend | awk '{printf "   - %s (Load:%s Active:%s Sub:%s)\n", $1,$2,$3,$4}'
+fi

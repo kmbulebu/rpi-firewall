@@ -1,0 +1,37 @@
+#!/bin/bash
+# Simple WAN status check for MOTD
+
+IFACE="{{ wan_iface }}"
+
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+YELLOW="\033[0;33m"
+RESET="\033[0m"
+
+# Check interface exists
+if ! ip link show "$IFACE" &>/dev/null; then
+    echo -e " WAN status (${IFACE}): ${YELLOW}interface not found${RESET}"
+    exit 0
+fi
+
+# IPv4: any global IPv4 address on IFACE
+ipv4_addr=$(ip -4 addr show dev "$IFACE" | awk '/inet / {print $2; exit}')
+
+# IPv6: any global (non-link-local) IPv6 on IFACE
+# "scope global" already excludes fe80::/64
+ipv6_addr=$(ip -6 addr show dev "$IFACE" scope global 2>/dev/null | awk '/inet6 / {print $2; exit}')
+
+echo
+echo " WAN status (${IFACE}):"
+
+if [ -n "$ipv4_addr" ]; then
+    echo -e "  IPv4: ${GREEN}OK${RESET}"
+else
+    echo -e "  IPv4: ${RED}MISSING${RESET}"
+fi
+
+if [ -n "$ipv6_addr" ]; then
+    echo -e "  IPv6: ${GREEN}OK${RESET}"
+else
+    echo -e "  IPv6: ${RED}MISSING${RESET}"
+fi
