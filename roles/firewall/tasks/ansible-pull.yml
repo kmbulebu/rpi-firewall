@@ -44,7 +44,7 @@
 - name: Enable ansible-pull.service
   systemd:
     name: ansible-pull.service
-    enabled: yes
+    enabled: no # Do not run on boot, only on timer trigger.
     masked: no
 - name: Enable ansible-pull.timer
   systemd:
@@ -55,7 +55,7 @@
 - name: Enable ansible-pull-reconfigure.service
   systemd:
     name: ansible-pull.service
-    enabled: yes
+    enabled: no # Do not run on boot, only on path trigger.
     masked: no
 - name: Enable ansible-pull-reconfigure.path
   systemd:

@@ -361,7 +361,7 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `tailscaled_listen_port` | `0` | Listening port for tailscaled (0 = default/no specific port). |
 | `upgrade_automatic_reboot` | `yes` | Whether to automatically reboot after upgrades when needed. |
 | `upgrade_reboot_time` | `'04:55'` | Time (UTC) to schedule automatic reboots after upgrades. |
-| `vpn_client_iface` | `wg0` | WireGuard client interface name. |
+| `vpn_client_iface` | `wg0` | Desired WireGuard client interface name. |
 | `vpn_vrf_iface` | `vpn_vrf0` | VRF interface name for VPN routing. |
 | `wan_device_set_mac_address` | `` | Optional MAC address to set on WAN device (empty by default). |
 | `wan_iface` | `wan0` | Desired WAN interface name. |

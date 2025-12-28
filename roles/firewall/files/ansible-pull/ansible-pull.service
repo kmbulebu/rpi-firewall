@@ -13,6 +13,3 @@ Nice=+10
 CPUAffinity=3
 IOSchedulingClass=idle
 IOSchedulingPriority=7
-
-#[Install]
-#WantedBy=multi-user.target
