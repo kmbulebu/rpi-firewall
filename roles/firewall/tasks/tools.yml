@@ -1,0 +1,11 @@
+---
+# Install helper tools used by the role
+- name: Install show_dhcp_leases script
+  copy:
+    src: tools/show_dhcp_leases.py
+    dest: /usr/local/bin/show_dhcp_leases
+    owner: root
+    group: root
+    mode: '0755'
+  tags:
+    - tools

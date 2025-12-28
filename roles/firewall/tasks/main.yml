@@ -7,6 +7,7 @@
 - include_tasks: rsyslog.yml
 - include_tasks: apt.yml
 - include_tasks: ansible-pull.yml
+- include_tasks: tools.yml
 - include_tasks: network.yml
 - include_tasks: ethtool.yml
 - include_tasks: dns.yml
