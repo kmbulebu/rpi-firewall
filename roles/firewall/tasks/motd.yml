@@ -25,4 +25,3 @@
     - /etc/update-motd.d/10-help-text
     - /etc/update-motd.d/50-motd-news
     - /etc/update-motd.d/91-contract-ua-esm-status
-  when: ansible_facts['os_family'] is defined
