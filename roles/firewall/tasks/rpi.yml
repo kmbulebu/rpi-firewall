@@ -28,3 +28,31 @@
     line: 'dtoverlay=disable-wifi'
     regexp: '^\s*dtoverlay=disable-wifi'
     insertafter: EOF
+
+- name: Ensure audio disabled in /boot/firmware/config.txt
+  become: yes
+  lineinfile:
+    path: /boot/firmware/config.txt
+    create: yes
+    line: 'dtparam=audio=off'
+    regexp: '^\s*dtparam=audio='
+    insertafter: EOF
+
+# I2C is needed for hardware monitoring and the POE hat.
+- name: Ensure I2C enabled in /boot/firmware/config.txt
+  become: yes
+  lineinfile:
+    path: /boot/firmware/config.txt
+    create: yes
+    line: 'dtparam=i2c_arm=on'
+    regexp: '^\s*dtparam=i2c_arm='
+    insertafter: EOF
+
+- name: Ensure SPI disabled in /boot/firmware/config.txt
+  become: yes
+  lineinfile:
+    path: /boot/firmware/config.txt
+    create: yes
+    line: 'dtparam=spi=off'
+    regexp: '^\s*dtparam=spi='
+    insertafter: EOF
