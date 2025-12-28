@@ -1,0 +1,30 @@
+---
+- name: Create disable-raspi.conf in /etc/modprobe.d
+  become: yes
+  copy:
+    src: modprobe.d/disable-raspi.conf
+    dest: /etc/modprobe.d/disable-raspi.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - run depmod apply
+    - restart systemd-udevd
+
+- name: Ensure Bluetooth disabled in /boot/firmware/config.txt
+  become: yes
+  lineinfile:
+    path: /boot/firmware/config.txt
+    create: yes
+    line: 'dtoverlay=disable-bt'
+    regexp: '^\s*dtoverlay=disable-bt'
+    insertafter: EOF
+
+- name: Ensure WiFi disabled in /boot/firmware/config.txt
+  become: yes
+  lineinfile:
+    path: /boot/firmware/config.txt
+    create: yes
+    line: 'dtoverlay=disable-wifi'
+    regexp: '^\s*dtoverlay=disable-wifi'
+    insertafter: EOF

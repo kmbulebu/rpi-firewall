@@ -55,3 +55,6 @@
   service:
     name: networkd-dispatcher
     state: restarted
+- name: run depmod apply
+  command: /sbin/depmod -a
+  become: yes
