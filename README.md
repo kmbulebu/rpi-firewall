@@ -60,15 +60,6 @@ admin_user_authorized_key=
 
 ### WAN Interface (Internet Side)
 
-#### WAN Ethernet Device
-
-The ethernet device to use for the wide area network. The built-in ethernet port
-of a Raspberry Pi is `eth0`.
-
-```
-wan_vlan_iface: eth0
-```
-
 ### LAN Interface
 
 #### Router hostname
@@ -331,3 +322,48 @@ How often, in seconds, to send a keepalive packet to the peer to ensure a networ
 ```
 lan_vpn_wg_peer_persistent_keep_alive: 15
 ```
+
+**Variables**
+
+The table below lists role variables defined in `roles/firewall/defaults/main.yml` and their default values. Variables that are derived from other variables (found in `roles/firewall/vars/main.yml`) are omitted.
+
+| Variable | Default | Description |
+|---|---|---|
+| `admin_user_password_hash` | `'$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'` | Shadow-format password hash for the `firewall` admin user. |
+| `ansible_inventory` | `/boot/firmware/inventory.yml` | Path to inventory file on the target system. |
+| `ansible_playbook_filename` | `playbook.yml` | Playbook filename in the repository. |
+| `ansible_playbook_git_ref` | `master` | Git ref/branch to check out. |
+| `ansible_playbook_git_url` | `https://github.com/kmbulebu/rpi-firewall.git` | Git repository URL for the playbook. |
+| `domain` | `my.home` | Local domain name for LAN devices. |
+| `dns_private_domains` | `[]` | List of private domains to allow DNS resolution to local IP addresses. |
+| `enable_prometheus_node_exporter` | `no` | Enable Prometheus node exporter and listen on LAN interface. |
+| `lan_dhcp_pool_offset` | `10` | Offset from router IP to start DHCP pool. |
+| `lan_dhcp_pool_size` | `200` | Number of DHCP addresses in the LAN pool. |
+| `lan_iface` | `lan0` | Desired LAN interface name. |
+| `lan_iface_networkd_link_match` | `"Driver=bcmgenet"` | `systemd-networkd` match string for LAN link. |
+| `lan_guests_dhcp_pool_offset` | `10` | DHCP pool offset for guests network. |
+| `lan_guests_dhcp_pool_size` | `200` | DHCP pool size for guests network. |
+| `lan_guests_iface` | `lan_guests` | Interface name for LAN guests network. |
+| `lan_guests_router_ip_address` | `192.168.200.254/24` | Router IP/prefix for the guests network. |
+| `lan_guests_vlan_id` | `6` | VLAN id for the guests network. |
+| `lan_vpn_iface` | `lan_vpn` | Desired interface name for the LAN VPN VLAN. |
+| `lan_vpn_router_ip_address` | `192.168.254.1/24` | Router IP/prefix for the LAN VPN network. |
+| `lan_vpn_vlan_id` | `2` | VLAN id for the LAN VPN network. |
+| `lan_vpn_wg_listen_port` | `51820` | WireGuard listen port for the VPN interface. |
+| `lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs for the WireGuard peer (routes through VPN). |
+| `lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard persistent keepalive interval in seconds. |
+| `motd_dhcp_leases_limit` | `5` | Number of DHCP leases shown in the MOTD per interface. |
+| `name_servers` | `- 1.1.1.3#family.cloudflare-dns.com\n- 1.0.0.3#family.cloudflare-dns.com` | List of upstream name servers (default uses Cloudflare Family DNS). |
+| `ntp_servers` | `- ntp.ubuntu.com` | List of NTP servers used to sync system time. |
+| `router_hostname` | `router` | Hostname for the router. |
+| `router_ip_address` | `192.168.1.1/24` | Router LAN IP and prefix. |
+| `tailscale_iface` | `tailscale0` | Interface name for Tailscale. |
+| `tailscaled_listen_port` | `0` | Listening port for tailscaled (0 = default/no specific port). |
+| `upgrade_automatic_reboot` | `yes` | Whether to automatically reboot after upgrades when needed. |
+| `upgrade_reboot_time` | `'04:55'` | Time (UTC) to schedule automatic reboots after upgrades. |
+| `vpn_client_iface` | `wg0` | WireGuard client interface name. |
+| `vpn_vrf_iface` | `vpn_vrf0` | VRF interface name for VPN routing. |
+| `wan_device_set_mac_address` | `` | Optional MAC address to set on WAN device (empty by default). |
+| `wan_iface` | `wan0` | Desired WAN interface name. |
+| `wan_iface_networkd_link_match` | `"Property=ID_BUS=usb"` | `systemd-networkd` match string for WAN link. |
+

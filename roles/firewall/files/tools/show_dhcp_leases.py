@@ -261,7 +261,7 @@ def main():
             print("Using piped stdin as input", file=sys.stderr)
         entries = parse_leases(data)
         if not entries:
-            print("No active DHCP leases.")
+            print("   No active DHCP leases.")
             return
         # sort per args
         entries = sort_entries(entries, args.sort, args.reverse)
@@ -280,7 +280,7 @@ def main():
             resolve_hostnames(entries, per_lookup_timeout=args.resolver_timeout, resolvers=args.resolvers)
             # print with hostname column
             for e in entries:
-                print(f"{e['ip']:15} {e.get('hostname','?'):30} {e['mac']:17} {e['rem_str']}")
+                print(f"   {e['ip']:15} {e.get('hostname','?'):30} {e['mac']:17} {e['rem_str']}")
         else:
             print_leases(entries)
         return
@@ -290,7 +290,7 @@ def main():
         try:
             link_id = get_link_id_from_iface(args.iface)
         except Exception as e:
-            print(f"Failed to determine link id: {e}", file=sys.stderr)
+            print(f"   Failed to determine link id: {e}", file=sys.stderr)
             sys.exit(1)
 
     try:
@@ -301,7 +301,7 @@ def main():
 
     entries = parse_leases(out)
     if not entries:
-        print("No active DHCP leases.")
+        print("   No active DHCP leases.")
         return
     entries = sort_entries(entries, args.sort, args.reverse)
     # apply optional limit (after sorting). non-positive values produce no results.
