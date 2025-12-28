@@ -1,4 +1,19 @@
 ---
+- name: Compute PTR /24 zones for LAN (set ptr_zones)
+  set_fact:
+    ptr_zones: >-
+      {% set net = (lan_network | default(router_ip_address | ipaddr('network'))) %}
+      {% set prefix = (lan_cidr | default(router_ip_address | ipaddr('network/prefix'))).split('/')[-1] | int %}
+      {% set octets = net.split('.') %}
+      {% set a = octets[0] | int %}
+      {% set b = octets[1] | int %}
+      {% set c = octets[2] | int %}
+      {% if prefix >= 24 %}
+      [ '{{ c }}.{{ b }}.{{ a }}.in-addr.arpa.' ]
+      {% else %}
+      {% set count = 2 ** (24 - prefix) %}
+      [ {% for i in range(count) %}'{{ (c + i) }}.{{ b }}.{{ a }}.in-addr.arpa.'{% if not loop.last %}, {% endif %}{% endfor %} ]
+      {% endif %}
 - name: Configure systemd-resolved
   template:
     src: resolved/resolved.conf

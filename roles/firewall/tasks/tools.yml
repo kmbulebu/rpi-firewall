@@ -1,5 +1,5 @@
 ---
-# Install helper tools used by the role
+# Install tools useful for administrators
 - name: Install show_dhcp_leases script
   copy:
     src: tools/show_dhcp_leases.py
