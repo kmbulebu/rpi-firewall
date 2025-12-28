@@ -1,0 +1,25 @@
+# Disable services we don't need. 
+
+# Not using udisks2 automount
+- name: Disable udisks2 automount
+  systemd:
+    name: udisks2.service
+    enabled: no
+    state: stopped
+    masked: yes
+
+# Not using apport crash reporting
+- name: Disable apport crash reporting
+  systemd:
+    name: apport.service
+    enabled: no
+    state: stopped
+    masked: yes
+
+# Not using LVM
+- name: Disable lvm2-monitor service
+  systemd:
+    name: lvm2-monitor.service
+    enabled: no
+    state: stopped
+    masked: yes
