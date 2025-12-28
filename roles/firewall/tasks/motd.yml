@@ -15,6 +15,14 @@
     group: root
     mode: '0755'
 
+- name: Install MOTD DHCP leases script
+  ansible.builtin.template:
+    src: motd/75-dhcp-leases
+    dest: /etc/update-motd.d/75-dhcp-leases
+    owner: root
+    group: root
+    mode: '0755'
+
 - name: Ensure non-executable MOTD files have correct permissions
   ansible.builtin.file:
     path: "{{ item }}"

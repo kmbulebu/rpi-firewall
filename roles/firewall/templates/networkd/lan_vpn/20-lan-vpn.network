@@ -26,5 +26,5 @@ DNS=1.0.0.1
 EmitRouter=yes
 SendOption=26:uint16:1292
 # Low for now. Allow longer once lease persistence is allowed.
-DefaultLeaseTimeSec=30m
-MaxLeaseTimeSec=3h
+DefaultLeaseTimeSec=1h
+MaxLeaseTimeSec=1h

@@ -37,6 +37,8 @@ ntp_servers:
   - ntp.ubuntu.com
 router_hostname: router
 router_ip_address: 192.168.1.1/24
+# MOTD: how many DHCP leases to show per-interface
+motd_dhcp_leases_limit: 5
 # UTC
 upgrade_reboot_time: '04:55'
 upgrade_automatic_reboot: yes

@@ -18,6 +18,9 @@ import shutil
 import socket
 import concurrent.futures
 
+# Use dnspython for DNS queries (assumed present)
+import dns.resolver
+import dns.reversename
 
 def read_stdin_if_any():
     try:
@@ -184,20 +187,36 @@ def print_leases(entries):
         print(f"{e['ip']:15} {e['mac']:17} {e['rem_str']}")
 
 
-def resolve_hostnames(entries, max_workers=10, per_lookup_timeout=1.0):
+def resolve_hostnames(entries, max_workers=10, per_lookup_timeout=1.0, resolvers=None):
     """Resolve reverse DNS for entries with IPv4 addresses.
 
     Performs lookups in a ThreadPool to avoid blocking the main thread
     and applies a timeout per lookup. Adds `hostname` key to each entry
     (value is a string or '?').
     """
+    # Normalize resolver list: prefer user-provided, else default to both
+    if resolvers is None:
+        resolvers = ["127.0.0.1", "127.0.0.53"]
+    elif isinstance(resolvers, str):
+        resolvers = [r.strip() for r in resolvers.split(',') if r.strip()]
+
     def lookup(ip):
-        try:
-            # socket.gethostbyaddr may block; caller will apply timeout
-            name, *_ = socket.gethostbyaddr(ip)
-            return name.rstrip('.')
-        except Exception:
-            return '?'
+        # Try each configured resolver in order using dnspython. Return the
+        # first successful PTR result or '?' on failure.
+        rname = dns.reversename.from_address(ip)
+        for resolver_addr in resolvers:
+            try:
+                res = dns.resolver.Resolver(configure=False)
+                res.nameservers = [resolver_addr]
+                res.timeout = max(0.1, per_lookup_timeout)
+                res.lifetime = max(0.1, per_lookup_timeout)
+                ans = res.resolve(rname, 'PTR')
+                for rr in ans:
+                    return rr.to_text().rstrip('.')
+            except Exception:
+                # try next resolver
+                continue
+        return '?'
 
     # Map futures to entries so we can assign results back
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as ex:
@@ -228,6 +247,12 @@ def main():
     parser.add_argument("--reverse", action="store_true", help="reverse sort order")
     parser.add_argument("--hostnames", action="store_true", help="resolve reverse DNS for IPs and show hostname column")
     parser.add_argument("--debug", action="store_true", help="print debug info to stderr")
+    parser.add_argument("--resolvers", default="127.0.0.1,127.0.0.53",
+                        help="comma-separated list of DNS resolver IPs to try for PTR lookups (default: 127.0.0.1,127.0.0.53)")
+    parser.add_argument("--resolver-timeout", type=float, default=1.0,
+                        help="per-resolver lookup timeout in seconds (default: 1.0)")
+    parser.add_argument("--limit", type=int,
+                        help="maximum number of entries to show (applied after sorting). If set, reverse DNS is only performed on these entries")
     args = parser.parse_args()
 
     data = read_stdin_if_any()
@@ -240,9 +265,19 @@ def main():
             return
         # sort per args
         entries = sort_entries(entries, args.sort, args.reverse)
+        # apply optional limit (after sorting). non-positive values produce no results.
+        if args.limit is not None:
+            try:
+                if args.limit <= 0:
+                    entries = []
+                else:
+                    entries = entries[:args.limit]
+            except Exception:
+                # ignore invalid limit and continue without limiting
+                pass
         if args.hostnames:
-            # resolve hostnames (adds 'hostname' key)
-            resolve_hostnames(entries)
+            # resolve hostnames (adds 'hostname' key) only for the limited set
+            resolve_hostnames(entries, per_lookup_timeout=args.resolver_timeout, resolvers=args.resolvers)
             # print with hostname column
             for e in entries:
                 print(f"{e['ip']:15} {e.get('hostname','?'):30} {e['mac']:17} {e['rem_str']}")
@@ -269,8 +304,18 @@ def main():
         print("No active DHCP leases.")
         return
     entries = sort_entries(entries, args.sort, args.reverse)
+    # apply optional limit (after sorting). non-positive values produce no results.
+    if args.limit is not None:
+        try:
+            if args.limit <= 0:
+                entries = []
+            else:
+                entries = entries[:args.limit]
+        except Exception:
+            pass
     if args.hostnames:
-        resolve_hostnames(entries)
+        # resolve hostnames only for the limited set
+        resolve_hostnames(entries, per_lookup_timeout=args.resolver_timeout, resolvers=args.resolvers)
         for e in entries:
             print(f"{e['ip']:15} {e.get('hostname','?'):30} {e['mac']:17} {e['rem_str']}")
     else:

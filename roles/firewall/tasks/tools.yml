@@ -9,3 +9,11 @@
     mode: '0755'
   tags:
     - tools
+
+- name: Ensure dnspython is installed (apt)
+  apt:
+    name: python3-dnspython
+    state: present
+    update_cache: yes
+  tags:
+    - tools

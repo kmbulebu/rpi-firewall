@@ -85,8 +85,8 @@ EmitRouter=yes
 EmitTimezone=yes
 Timezone=America/New_York
 # Low for now. Allow longer once lease persistence is allowed.
-DefaultLeaseTimeSec=30m
-MaxLeaseTimeSec=3h
+DefaultLeaseTimeSec=1h
+MaxLeaseTimeSec=1h
 
 {% for dhcp_reservation in dhcp_reservations %}
 # {{ dhcp_reservation.hostname }}

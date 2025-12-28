@@ -1,0 +1,18 @@
+#!/bin/bash
+# MOTD: show recent DHCP leases per interface
+# This is a template; interfaces come from role vars.
+
+LIMIT={{ motd_dhcp_leases_limit | default(5) }}
+
+echo
+echo " DHCP server ${LIMIT} oldest leases:"
+
+for IFACE in "{{ lan_iface }}" "{{ lan_vpn_iface }}" "{{ lan_guests_iface }}"; do
+    echo
+    echo " Interface: ${IFACE}"
+    if command -v /usr/local/bin/show_dhcp_leases >/dev/null 2>&1; then
+        /usr/local/bin/show_dhcp_leases --hostnames --limit ${LIMIT} --sort exp --iface "${IFACE}" || echo "  (failed to run show_dhcp_leases for ${IFACE})"
+    else
+        echo "  show_dhcp_leases not installed"
+    fi
+done
