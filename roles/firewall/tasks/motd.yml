@@ -33,3 +33,17 @@
     - /etc/update-motd.d/10-help-text
     - /etc/update-motd.d/50-motd-news
     - /etc/update-motd.d/91-contract-ua-esm-status
+
+- name: Disable MOTD news service
+  systemd:
+    name: motd-news.service
+    enabled: no
+    state: stopped
+    masked: yes
+
+- name: Disable MOTD news service timer
+  systemd:
+    name: motd-news.timer
+    enabled: no
+    state: stopped
+    masked: yes

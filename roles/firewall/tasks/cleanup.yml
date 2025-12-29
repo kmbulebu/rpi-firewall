@@ -19,6 +19,7 @@
       - lxd-agent-loader 
       - modemmanager
       - sosreport
+      - motd-news-config # Disabled motd-news
     state: absent
     purge: yes
     autoclean: yes
