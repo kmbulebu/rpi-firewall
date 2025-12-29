@@ -37,7 +37,9 @@
   <service name="dns"/>
   <service name="dns-over-tls"/>
   <service name="https"/>
+  {% if enable_prometheus_node_exporter_bool %}
   <service name="prometheus-node-exporter"/>
+  {% endif %}
   <!-- Tailscale -->
   <rule family="ipv4">
     <source-port port="41641" protocol="udp"/>
