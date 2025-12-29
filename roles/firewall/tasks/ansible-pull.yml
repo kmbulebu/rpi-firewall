@@ -41,7 +41,7 @@
 - name: systemctl daemon-reload
   systemd:
     daemon_reload: yes
-- name: Enable ansible-pull.service
+- name: Setup ansible-pull.service
   systemd:
     name: ansible-pull.service
     enabled: no # Do not run on boot, only on timer trigger.
@@ -52,9 +52,9 @@
     enabled: yes
     state: started
     masked: no
-- name: Enable ansible-pull-reconfigure.service
+- name: Setup ansible-pull-reconfigure.service
   systemd:
-    name: ansible-pull.service
+    name: ansible-pull-reconfigure.service
     enabled: no # Do not run on boot, only on path trigger.
     masked: no
 - name: Enable ansible-pull-reconfigure.path
