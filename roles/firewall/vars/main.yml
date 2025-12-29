@@ -109,6 +109,5 @@ apparmor_disable_profiles:
   - virtiofsd
   - vivaldi-bin
   - vpnns
-  - vscode
   - wike
   - wpcom

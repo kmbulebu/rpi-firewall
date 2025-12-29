@@ -9,6 +9,16 @@
     enabled: no
     state: stopped
     masked: yes
+- name: Enable nf_flow_table kernel modules
+  modprobe:
+    name: nf_flow_table
+    state: present
+    persistent: present
+- name: Enable nf_flow_table kernel modules
+  modprobe:
+    name: nf_flow_table_inet
+    state: present
+    persistent: present
 - name: Install firewalld
   apt:
     name: firewalld
