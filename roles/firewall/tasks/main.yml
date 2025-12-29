@@ -20,4 +20,5 @@
 - include_tasks: rpi.yml
 - include_tasks: apparmor.yml
 - include_tasks: cleanup.yml
+- include_tasks: watchdog.yml
 - meta: clear_facts

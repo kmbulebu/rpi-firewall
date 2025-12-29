@@ -1,0 +1,18 @@
+# Setup hardware watchdog in systemd manager
+
+- name: Create systemd system.conf.d directory
+  ansible.builtin.file:
+    path: /etc/systemd/system.conf.d/
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Install systemd watchdog configuration
+  ansible.builtin.copy:
+    src: systemd/watchdog.conf
+    dest: /etc/systemd/system.conf.d/watchdog.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: systemctl daemon-reload
