@@ -14,13 +14,15 @@
     owner: root
     group: root
     mode: '0644'
-  when: rsyslog_udp_server is defined
+  when: rsyslog_udp_server is defined or rsyslog_tcp_server is defined
   notify: restart rsyslog
 - name: Remove Syslog configuration
   file:
     path: rsyslog/60-remote.conf
     state: absent
-  when: rsyslog_udp_server is not defined
+  when: 
+    - rsyslog_udp_server is not defined
+    - rsyslog_tcp_server is not defined
   notify: restart rsyslog
 - name: Remove 20-ufw.conf
   file:
@@ -37,11 +39,13 @@
     name: rsyslog
     state: started
     enabled: true
-  when: rsyslog_udp_server is defined
+  when: rsyslog_udp_server is defined or rsyslog_tcp_server is defined
 - name: disable rsyslog
   service:
     name: rsyslog
     state: stopped
     enabled: false
-  when: rsyslog_udp_server is not defined
+  when: 
+    - rsyslog_udp_server is not defined
+    - rsyslog_tcp_server is not defined
   ignore_errors: yes

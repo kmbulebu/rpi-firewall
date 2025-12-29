@@ -124,10 +124,14 @@ ntp_servers:
 ### Remote Syslog
 
 To send router and firewall logs to a remote syslog server, provide
-the destination server and UDP port. `192.168.1.10:514`
+the destination server and port. `192.168.1.10:514`
 
 ```
 rsyslog_udp_server:
+```
+
+```
+rsyslog_tcp_server:
 ```
 
 ### Automatic Updates
