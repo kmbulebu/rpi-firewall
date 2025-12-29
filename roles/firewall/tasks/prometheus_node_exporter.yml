@@ -46,6 +46,7 @@
 
 - block:
     - name: Disable prometheus-node-exporter.service
+      ignore_errors: yes # If it's already uninstalled, this will fail
       systemd:
         name: prometheus-node-exporter.service
         enabled: no
