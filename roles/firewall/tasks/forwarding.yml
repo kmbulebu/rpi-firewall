@@ -33,4 +33,38 @@
     sysctl_file: /etc/sysctl.d/20-router.conf
     reload: yes
     sysctl_set: yes
-
+- name: Set nf_conntrack TCP established timeout
+  sysctl:
+    name: net.netfilter.nf_conntrack_tcp_timeout_established
+    value: '1800'
+    sysctl_file: /etc/sysctl.d/20-router.conf
+    reload: yes
+    sysctl_set: yes
+- name: Set nf_conntrack TCP syn_sent timeout
+  sysctl:
+    name: net.netfilter.nf_conntrack_tcp_timeout_syn_sent
+    value: '60'
+    sysctl_file: /etc/sysctl.d/20-router.conf
+    reload: yes
+    sysctl_set: yes
+- name: Set nf_conntrack TCP fin_wait timeout
+  sysctl:
+    name: net.netfilter.nf_conntrack_tcp_timeout_fin_wait
+    value: '120'
+    sysctl_file: /etc/sysctl.d/20-router.conf
+    reload: yes
+    sysctl_set: yes
+- name: Set nf_conntrack TCP time_wait timeout
+  sysctl:
+    name: net.netfilter.nf_conntrack_tcp_timeout_time_wait
+    value: '120'
+    sysctl_file: /etc/sysctl.d/20-router.conf
+    reload: yes
+    sysctl_set: yes
+- name: Set nf_conntrack TCP close_wait timeout
+  sysctl:
+    name: net.netfilter.nf_conntrack_tcp_timeout_close_wait
+    value: '60'
+    sysctl_file: /etc/sysctl.d/20-router.conf
+    reload: yes
+    sysctl_set: yes
