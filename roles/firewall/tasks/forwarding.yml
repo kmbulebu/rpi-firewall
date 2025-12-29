@@ -26,3 +26,11 @@
     sysctl_file: /etc/sysctl.d/20-router.conf
     reload: yes
     sysctl_set: yes
+- name: Adjust nf_conntrack_max
+  sysctl:
+    name: net.netfilter.nf_conntrack_max
+    value: '131072'
+    sysctl_file: /etc/sysctl.d/20-router.conf
+    reload: yes
+    sysctl_set: yes
+
