@@ -62,3 +62,6 @@
   service:
     name: apparmor
     state: reloaded
+- name: update initramfs
+  command: update-initramfs -u
+  become: yes

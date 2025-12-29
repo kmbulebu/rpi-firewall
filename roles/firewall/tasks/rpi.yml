@@ -31,6 +31,7 @@
   notify:
     - run depmod apply
     - restart systemd-udevd
+    - update initramfs
 
 - name: Ensure Bluetooth disabled in /boot/firmware/config.txt
   become: yes
