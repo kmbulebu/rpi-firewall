@@ -18,5 +18,6 @@
 - include_tasks: wireguard_client.yml
 - include_tasks: prometheus_node_exporter.yml
 - include_tasks: rpi.yml
+- include_tasks: apparmor.yml
 - include_tasks: cleanup.yml
 - meta: clear_facts

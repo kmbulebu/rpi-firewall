@@ -1,0 +1,17 @@
+---
+- name: Ensure disable directory exists
+  file:
+    path: /etc/apparmor.d/disable
+    state: directory
+    mode: '0755'
+
+- name: Disable AppArmor profiles that exist on system
+  loop: "{{ apparmor_disable_profiles }}"
+  vars:
+    profile_path: "/etc/apparmor.d/{{ item | regex_replace('^', '') | lower }}"
+  file:
+    src: "{{ profile_path }}"
+    dest: "/etc/apparmor.d/disable/{{ item }}"
+    state: link
+  notify:
+    - reload apparmor
