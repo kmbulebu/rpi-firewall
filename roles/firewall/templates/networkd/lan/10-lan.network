@@ -88,7 +88,7 @@ Timezone=America/New_York
 DefaultLeaseTimeSec=1h
 MaxLeaseTimeSec=1h
 
-{% for dhcp_reservation in dhcp_reservations %}
+{% for dhcp_reservation in (dhcp_reservations | default([], true))%}
 # {{ dhcp_reservation.hostname }}
 [DHCPServerStaticLease]
 MACAddress={{ dhcp_reservation.mac_address }}

@@ -29,7 +29,7 @@
   <icmp-block name="failed-policy"/>
   <icmp-block name="fragmentation-needed"/>
   <service name="dhcpv6-client" />
-  {% for port_forward in port_forwards %}
+  {% for port_forward in (port_forwards | default([], true)) %}
   <!-- {{ port_forward.description }} -->
   <rule family="ipv4">
     <source address="{{ port_forward.address_from }}"/>
