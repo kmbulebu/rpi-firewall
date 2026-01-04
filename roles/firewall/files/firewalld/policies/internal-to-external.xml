@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policy target="CONTINUE">
+  <short>internal-to-external</short>
+  <description>LAN and Tailscale out to WAN with masquerade</description>
+
+  <!-- From internal zone -->
+  <ingress-zone name="internal"/>
+
+  <!-- To external zone -->
+  <egress-zone name="external"/>
+
+  <!-- Do NAT on the way out -->
+  <masquerade/>
+
+  <!-- NAT internet traffic from our linklocal range. --> 
+  <rich-rule rule='rule family="ipv6" source address="fe80::/10" masquerade'/>
+  <!-- NAT internet traffic from our ULA range. --> 
+  <rich-rule rule='rule family="ipv6" source address="fd00::/8" masquerade'/>
+
+</policy>

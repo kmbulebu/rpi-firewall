@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policy>
+  <short>external-to-internal-dnat</short>
+  <description>Inbound from WAN to internal hosts (port forwards, v6 NAT)</description>
+
+  <!-- From the WAN -->
+  <ingress-zone name="external"/>
+
+  <!-- To the internal LAN -->
+  <egress-zone name="internal"/>
+
+{% for port_forward in port_forwards %}
+  <!-- {{ port_forward.description }} -->
+  <rich-rule rule='rule family="ipv4" source address="{{ port_forward.address_from }}"
+                forward-port port="{{ port_forward.ports_from }}" protocol="{{ port_forward.proto }}"
+                to-port="{{ port_forward.ports_to }}" to-addr="{{ port_forward.address_to }}"'/>
+{% endfor %}
+
+</policy>

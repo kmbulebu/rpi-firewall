@@ -35,7 +35,7 @@
     autoremove: yes
 - name: Template internal zone config
   template:
-    src: firewalld/internal.xml
+    src: firewalld/zones/internal.xml
     dest: /etc/firewalld/zones/internal.xml
     owner: root
     group: root
@@ -43,7 +43,7 @@
   notify: reload firewalld
 - name: Template external zone config
   template:
-    src: firewalld/external.xml
+    src: firewalld/zones/external.xml
     dest: /etc/firewalld/zones/external.xml
     owner: root
     group: root
@@ -51,7 +51,7 @@
   notify: reload firewalld
 - name: Template guest zone config
   template:
-    src: firewalld/guest.xml
+    src: firewalld/zones/guest.xml
     dest: /etc/firewalld/zones/guest.xml
     owner: root
     group: root

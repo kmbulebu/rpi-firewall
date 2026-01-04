@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policy>
+  <short>tailscale</short>
+  <description>Allow Tailscale traffic to internal network to improve chances of direct connections.</description>
+
+  <!-- From the WAN -->
+  <ingress-zone name="external"/>
+
+  <!-- To the internal LAN -->
+  <egress-zone name="internal"/>
+
+  <!-- Tailscale devices inside network. -->
+  <rich-rule rule='rule family="ipv4" source-port port="41641" protocol="udp" accept'/>
+  <rich-rule rule='rule family="ipv6" source-port port="41641" protocol="udp" accept'/>
+
+</policy>

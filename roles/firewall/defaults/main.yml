@@ -43,3 +43,4 @@ upgrade_reboot_time: '04:55'
 upgrade_automatic_reboot: yes
 tailscaled_listen_port: 0
 tailscale_iface: tailscale0
+port_forwards: []

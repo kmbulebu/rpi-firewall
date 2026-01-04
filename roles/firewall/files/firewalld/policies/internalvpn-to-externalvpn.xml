@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policy>
+  <short>internalvpn-to-externalvpn</short>
+  <description>Internal VPN VLAN/VRF out Wireguard with masquerade</description>
+
+  <!-- From internal_vpn zone -->
+  <ingress-zone name="internal_vpn"/>
+
+  <!-- To external_vpn zone  -->
+  <egress-zone name="external_vpn"/>
+
+  <masquerade/>
+
+</policy>
