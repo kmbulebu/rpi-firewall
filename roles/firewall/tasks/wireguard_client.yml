@@ -42,7 +42,7 @@
 ## Firewalld
 - name: Template internal VPN zone config
   template:
-    src: firewalld/internal_vpn.xml
+    src: firewalld/zones/internal_vpn.xml
     dest: /etc/firewalld/zones/internal_vpn.xml
     owner: root
     group: root
@@ -50,7 +50,7 @@
   notify: reload firewalld
 - name: Template external vpn zone config
   template:
-    src: firewalld/external_vpn.xml
+    src: firewalld/zones/external_vpn.xml
     dest: /etc/firewalld/zones/external_vpn.xml
     owner: root
     group: root
