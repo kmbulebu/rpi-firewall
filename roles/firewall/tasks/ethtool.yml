@@ -1,6 +1,5 @@
 - name: Install networkd-dispatcher
   apt:
-    update_cache: yes
     name: networkd-dispatcher
     state: latest
     install_recommends: false

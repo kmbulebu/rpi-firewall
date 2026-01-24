@@ -45,3 +45,10 @@ tailscaled_listen_port: 0
 tailscale_iface: tailscale0
 port_forwards: []
 dhcp_reservations: []
+skip_mounts: no
+unbound_cpu_affinity: ""
+force_networkd_restart: no
+unbound_enable_tls: yes
+force_resolved_restart: no
+enable_lan_vpn: no
+enable_rpi_tunings: yes

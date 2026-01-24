@@ -1,0 +1,18 @@
+#cloud-config
+hostname: router
+manage_etc_hosts: true
+ssh_pwauth: false
+users:
+  - name: firewall
+    groups: [sudo]
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - __SSH_PUB_KEY__
+    lock_passwd: true
+package_update: true
+packages:
+  - ansible
+  - rsync
+  - python3-apt
+  - dnsutils

@@ -29,6 +29,11 @@
     enabled: yes
     state: started
     masked: no
+- name: Restart systemd-resolved when forced
+  systemd:
+    name: systemd-resolved
+    state: restarted
+  when: force_resolved_restart
 - name: Install Unbound server
   apt:
     name: unbound
@@ -37,6 +42,11 @@
 - name: Install Unbound DNSSEC anchor updater
   apt:
     name: unbound-anchor
+    state: latest
+    install_recommends: false
+- name: Install DNS root trust anchors
+  apt:
+    name: dns-root-data
     state: latest
     install_recommends: false
 # We don't need or want unbound to perform local resolution.
@@ -50,7 +60,7 @@
 - name: Run unbound-anchor
   ansible.builtin.command:
     cmd: /usr/sbin/unbound-anchor -v
-#    creates: /var/lib/unbound/root.key
+    creates: /var/lib/unbound/root.key
 - name: Template a file to /etc/unbound/unbound.conf.d/server.conf
   template:
     src: unbound/server.conf
@@ -65,7 +75,7 @@
     state: directory
     mode: '0755'
 - name: Override systemd unbound settings
-  copy:
+  template:
     src: unbound/10-priority.conf
     dest: /etc/systemd/system/unbound.service.d/10-priority.conf
     owner: root
@@ -80,5 +90,5 @@
     enabled: yes
     state: started
     masked: no
-
-
+    daemon_reload: yes
+- meta: flush_handlers

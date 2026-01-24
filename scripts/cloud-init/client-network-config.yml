@@ -1,0 +1,15 @@
+version: 2
+ethernets:
+  mgmt0:
+    match:
+      macaddress: __CLIENT_MGMT_MAC__
+    set-name: mgmt0
+    dhcp4: true
+    dhcp6: false
+  lan0:
+    match:
+      macaddress: __CLIENT_LAN_MAC__
+    set-name: lan0
+    dhcp4: true
+    dhcp6: false
+    optional: true
