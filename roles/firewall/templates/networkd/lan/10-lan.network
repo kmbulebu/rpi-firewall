@@ -95,8 +95,8 @@ SendOption=119:string:{{ search.value }}
 EmitTimezone=yes
 Timezone=America/New_York
 # Low for now. Allow longer once lease persistence is allowed.
-DefaultLeaseTimeSec={{ lan_dhcp_lease_time_sec }}s
-MaxLeaseTimeSec={{ lan_dhcp_lease_time_sec }}s
+DefaultLeaseTimeSec={{ lan_dhcp_default_lease_time_sec }}s
+MaxLeaseTimeSec={{ lan_dhcp_max_lease_time_sec }}s
 
 {% for dhcp_reservation in (dhcp_reservations | default([], true))%}
 # {{ dhcp_reservation.hostname }}
