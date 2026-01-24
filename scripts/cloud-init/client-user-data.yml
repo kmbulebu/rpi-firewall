@@ -1,0 +1,17 @@
+#cloud-config
+hostname: client
+manage_etc_hosts: true
+ssh_pwauth: false
+users:
+  - name: client
+    groups: [sudo]
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - __SSH_PUB_KEY__
+    lock_passwd: true
+package_update: true
+packages:
+  - dnsutils
+  - iproute2
+  - iputils-ping

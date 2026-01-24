@@ -8,6 +8,17 @@
     path: /etc/netplan/50-cloud-init.yaml
     state: absent
   notify: netplan apply
+- name: Find generated netplan networkd files
+  find:
+    paths: /run/systemd/network
+    patterns: "10-netplan-*.network"
+  register: netplan_networkd_files
+- name: Remove generated netplan networkd files
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ netplan_networkd_files.files }}"
+  notify: restart systemd-networkd
 ## WAN Network
 - name: Configure physical wan Link
   template:
@@ -58,6 +69,11 @@
     mode: '0644'
   notify: restart systemd-networkd
 ## Guests VLAN Network
+- name: Enable 8021q module for VLANs
+  modprobe:
+    name: 8021q
+    state: present
+    persistent: present
 - name: Create lan guests netdev
   template:
     src: networkd/lan_guests/30-lan-guests.netdev
@@ -74,3 +90,12 @@
     group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
+- meta: flush_handlers
+- name: Restart systemd-networkd when forced
+  systemd:
+    name: systemd-networkd
+    state: restarted
+  when: force_networkd_restart
+- name: Wait for networkd after forced restart
+  command: /usr/lib/systemd/systemd-networkd-wait-online --any --timeout=30
+  when: force_networkd_restart
