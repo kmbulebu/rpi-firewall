@@ -78,6 +78,16 @@ PoolSize={{ lan_dhcp_pool_size }}
 EmitDNS=yes
 DNS={{ lan_address }}
 EmitRouter=yes
+SendOption=15:string:{{ domain }}
+SendOption=28:ipv4address:{{ lan_broadcast }}
+SendOption=58:uint32:{{ lan_dhcp_t1_sec }}
+SendOption=59:uint32:{{ lan_dhcp_t2_sec }}
+{% set search = namespace(value='') %}
+{% for label in domain.split('.') %}
+{% set search.value = search.value ~ '\\x' ~ ('%02x' | format(label | length)) ~ label %}
+{% endfor %}
+{% set search.value = search.value ~ '\\x00' %}
+SendOption=119:string:{{ search.value }}
 #EmitNTP=yes
 {% for ntp_server in ntp_servers %}
 #NTP={{ ntp_server }}
@@ -85,8 +95,8 @@ EmitRouter=yes
 EmitTimezone=yes
 Timezone=America/New_York
 # Low for now. Allow longer once lease persistence is allowed.
-DefaultLeaseTimeSec=1h
-MaxLeaseTimeSec=1h
+DefaultLeaseTimeSec={{ lan_dhcp_lease_time_sec }}s
+MaxLeaseTimeSec={{ lan_dhcp_lease_time_sec }}s
 
 {% for dhcp_reservation in (dhcp_reservations | default([], true))%}
 # {{ dhcp_reservation.hostname }}
@@ -95,4 +105,3 @@ MACAddress={{ dhcp_reservation.mac_address }}
 Address={{ dhcp_reservation.ip_address }}
 
 {% endfor %}
-

@@ -15,6 +15,7 @@ lan_iface_networkd_link_match: "Driver=bcmgenet"
 lan_iface: lan0
 lan_dhcp_pool_offset: 10
 lan_dhcp_pool_size: 200
+lan_dhcp_lease_time_sec: 3600
 wan_device_set_mac_address: 
 lan_guests_iface: lan_guests
 lan_guests_router_ip_address: 192.168.200.254/24

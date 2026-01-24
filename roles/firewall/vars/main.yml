@@ -5,6 +5,8 @@ lan_network: "{{ router_ip_address | ipaddr('network') }}"
 lan_cidr: "{{ router_ip_address | ipaddr('network/prefix') }}"
 lan_netmask: "{{ router_ip_address | ipaddr('netmask') }}"
 lan_broadcast: "{{ router_ip_address | ipaddr('broadcast') }}"
+lan_dhcp_t1_sec: "{{ (lan_dhcp_lease_time_sec * 0.5) | int }}"
+lan_dhcp_t2_sec: "{{ (lan_dhcp_lease_time_sec * 0.875) | int }}"
 lan_ip6_ula_cidr: 'fd5f:1047:55fc:0000::/64'
 
 lan_guests_address: "{{ lan_guests_router_ip_address | ipaddr('address') }}"
