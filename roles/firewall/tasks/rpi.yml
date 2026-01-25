@@ -21,12 +21,12 @@
     persistent: present
 
 - name: Create disable-raspi.conf in /etc/modprobe.d
-  become: yes
+  become: true
   ansible.builtin.copy:
     src: modprobe.d/disable-raspi.conf
     dest: /etc/modprobe.d/disable-raspi.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify:
     - run depmod apply
@@ -34,47 +34,47 @@
     - update initramfs
 
 - name: Ensure Bluetooth disabled in /boot/firmware/config.txt
-  become: yes
+  become: true
   ansible.builtin.lineinfile:
     path: /boot/firmware/config.txt
-    create: yes
+    create: true
     line: 'dtoverlay=disable-bt'
     regexp: '^\s*dtoverlay=disable-bt'
     insertafter: EOF
 
 - name: Ensure WiFi disabled in /boot/firmware/config.txt
-  become: yes
+  become: true
   ansible.builtin.lineinfile:
     path: /boot/firmware/config.txt
-    create: yes
+    create: true
     line: 'dtoverlay=disable-wifi'
     regexp: '^\s*dtoverlay=disable-wifi'
     insertafter: EOF
 
 - name: Ensure audio disabled in /boot/firmware/config.txt
-  become: yes
+  become: true
   ansible.builtin.lineinfile:
     path: /boot/firmware/config.txt
-    create: yes
+    create: true
     line: 'dtparam=audio=off'
     regexp: '^\s*dtparam=audio='
     insertafter: EOF
 
 # I2C is needed for hardware monitoring and the POE hat.
 - name: Ensure I2C enabled in /boot/firmware/config.txt
-  become: yes
+  become: true
   ansible.builtin.lineinfile:
     path: /boot/firmware/config.txt
-    create: yes
+    create: true
     line: 'dtparam=i2c_arm=on'
     regexp: '^\s*dtparam=i2c_arm='
     insertafter: EOF
 
 - name: Ensure SPI disabled in /boot/firmware/config.txt
-  become: yes
+  become: true
   ansible.builtin.lineinfile:
     path: /boot/firmware/config.txt
-    create: yes
+    create: true
     line: 'dtparam=spi=off'
     regexp: '^\s*dtparam=spi='
     insertafter: EOF

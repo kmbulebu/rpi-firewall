@@ -4,7 +4,7 @@
     src: journald/journald.conf
     dest: /etc/systemd/journald.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: restart systemd-journald
 - name: Remote Syslog configuration
@@ -12,7 +12,7 @@
     src: rsyslog/60-remote.conf
     dest: /etc/rsyslog.d/60-remote.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   when: rsyslog_udp_server is defined or rsyslog_tcp_server is defined
   notify: restart rsyslog
@@ -20,7 +20,7 @@
   ansible.builtin.file:
     path: rsyslog/60-remote.conf
     state: absent
-  when: 
+  when:
     - rsyslog_udp_server is not defined
     - rsyslog_tcp_server is not defined
   notify: restart rsyslog
@@ -45,7 +45,7 @@
     name: rsyslog
     state: stopped
     enabled: false
-  when: 
+  when:
     - rsyslog_udp_server is not defined
     - rsyslog_tcp_server is not defined
-  ignore_errors: yes
+  ignore_errors: true

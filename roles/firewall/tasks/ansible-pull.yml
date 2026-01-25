@@ -4,14 +4,14 @@
     src: ansible-pull/ansible-pull
     dest: /etc/default/ansible-pull
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0640'
 - name: Setup ansible-pull service
   ansible.builtin.copy:
     src: ansible-pull/ansible-pull.service
     dest: /etc/systemd/system/ansible-pull.service
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: systemctl daemon-reload
 - name: Setup ansible-pull-reconfigure service
@@ -19,7 +19,7 @@
     src: ansible-pull/ansible-pull-reconfigure.service
     dest: /etc/systemd/system/ansible-pull-reconfigure.service
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: systemctl daemon-reload
 - name: Setup ansible-pull timer
@@ -27,7 +27,7 @@
     src: ansible-pull/ansible-pull.timer
     dest: /etc/systemd/system/ansible-pull.timer
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: systemctl daemon-reload
 - name: Setup ansible-pull-reconfigure path watch
@@ -35,31 +35,31 @@
     src: ansible-pull/ansible-pull-reconfigure.path
     dest: /etc/systemd/system/ansible-pull-reconfigure.path
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: systemctl daemon-reload
 - name: systemctl daemon-reload
   ansible.builtin.systemd:
-    daemon_reload: yes
+    daemon_reload: true
 - name: Setup ansible-pull.service
   ansible.builtin.systemd:
     name: ansible-pull.service
-    enabled: no # Do not run on boot, only on timer trigger.
-    masked: no
+    enabled: false # Do not run on boot, only on timer trigger.
+    masked: false
 - name: Enable ansible-pull.timer
   ansible.builtin.systemd:
     name: ansible-pull.timer
-    enabled: yes
+    enabled: true
     state: started
-    masked: no
+    masked: false
 - name: Setup ansible-pull-reconfigure.service
   ansible.builtin.systemd:
     name: ansible-pull-reconfigure.service
-    enabled: no # Do not run on boot, only on path trigger.
-    masked: no
+    enabled: false # Do not run on boot, only on path trigger.
+    masked: false
 - name: Enable ansible-pull-reconfigure.path
   ansible.builtin.systemd:
     name: ansible-pull-reconfigure.path
-    enabled: yes
+    enabled: true
     state: started
-    masked: no
+    masked: false

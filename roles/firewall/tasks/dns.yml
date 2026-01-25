@@ -11,24 +11,32 @@
   when: prefix | int >= 24
 - name: Build multiple PTR zones when prefix < 24
   ansible.builtin.set_fact:
-    ptr_zones: "{{ ptr_zones | default([]) + [ ( (base_ip.split('.')[2] | int + item) | string ) ~ '.' ~ base_ip.split('.')[1] ~ '.' ~ base_ip.split('.')[0] ~ '.in-addr.arpa.' ] }}"
-  loop: "{{ range(0, (2 ** (24 - (prefix | int))) ) | list }}"
+    ptr_zones: >-
+      {{
+        ptr_zones | default([]) + [
+          ((base_ip.split('.')[2] | int + item) | string)
+          ~ '.' ~ base_ip.split('.')[1]
+          ~ '.' ~ base_ip.split('.')[0]
+          ~ '.in-addr.arpa.'
+        ]
+      }}
+  loop: "{{ range(0, (2 ** (24 - (prefix | int)))) | list }}"
   when: prefix | int < 24
 - name: Configure systemd-resolved
   ansible.builtin.template:
     src: resolved/resolved.conf
     dest: /etc/systemd/resolved.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: restart systemd-resolved
 - name: Enable systemd-resolved
   ignore_errors: true
   ansible.builtin.systemd:
     name: systemd-resolved
-    enabled: yes
+    enabled: true
     state: started
-    masked: no
+    masked: false
 - name: Restart systemd-resolved when forced
   ansible.builtin.systemd:
     name: systemd-resolved
@@ -54,9 +62,9 @@
 - name: Disable and mask unbound-resolvconf.service
   ansible.builtin.systemd:
     name: unbound-resolvconf.service
-    enabled: no
+    enabled: false
     state: stopped
-    masked: yes
+    masked: true
 - name: Run unbound-anchor
   ansible.builtin.command:
     cmd: /usr/sbin/unbound-anchor -v
@@ -66,7 +74,7 @@
     src: unbound/server.conf
     dest: /etc/unbound/unbound.conf.d/server.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: restart unbound
 - name: Create systemd unbound.service.d overrides directory
@@ -79,16 +87,16 @@
     src: unbound/10-priority.conf
     dest: /etc/systemd/system/unbound.service.d/10-priority.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
-  notify: 
+  notify:
     - systemctl daemon-reload
-    - restart unbound 
+    - restart unbound
 - name: Enable unbound
   ansible.builtin.systemd:
     name: unbound
-    enabled: yes
+    enabled: true
     state: started
-    masked: no
-    daemon_reload: yes
+    masked: false
+    daemon_reload: true
 - meta: flush_handlers

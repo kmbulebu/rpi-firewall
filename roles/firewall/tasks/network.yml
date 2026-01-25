@@ -25,7 +25,7 @@
     src: networkd/wan/00-wan.link
     dest: /etc/systemd/network/00-wan.link
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Configure wan network
@@ -33,7 +33,7 @@
     src: networkd/wan/10-wan.network
     dest: /etc/systemd/network/10-wan.network
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 ## LAN Network
@@ -42,7 +42,7 @@
     src: networkd/lan/00-lan.link
     dest: /etc/systemd/network/00-lan.link
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Configure lan network
@@ -50,7 +50,7 @@
     src: networkd/lan/10-lan.network
     dest: /etc/systemd/network/10-lan.network
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Setup system DNS
@@ -58,14 +58,14 @@
     src: dns/resolv.conf
     dest: /etc/resolv.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
 - name: Set network receive queue cpu assignment
   ansible.builtin.template:
     src: udev/zz-network-tunings.rules
     dest: /etc/udev/rules.d/zz-network-tunings.rules
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: restart systemd-networkd
 ## Guests VLAN Network
@@ -79,7 +79,7 @@
     src: networkd/lan_guests/30-lan-guests.netdev
     dest: /etc/systemd/network/30-lan-guests.netdev
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Configure lan guests network
@@ -87,7 +87,7 @@
     src: networkd/lan_guests/30-lan-guests.network
     dest: /etc/systemd/network/30-lan-guests.network
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - meta: flush_handlers

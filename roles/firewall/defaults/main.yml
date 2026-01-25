@@ -17,7 +17,7 @@ lan_dhcp_pool_offset: 10
 lan_dhcp_pool_size: 200
 lan_dhcp_default_lease_time_sec: 7200
 lan_dhcp_max_lease_time_sec: 21600
-wan_device_set_mac_address: 
+wan_device_set_mac_address:
 lan_guests_iface: lan_guests
 lan_guests_router_ip_address: 192.168.200.254/24
 lan_guests_vlan_id: 6
@@ -32,7 +32,7 @@ lan_vpn_wg_listen_port: 51820
 lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0
 lan_vpn_wg_peer_persistent_keep_alive: 15
 name_servers:
-  - 1.1.1.3#family.cloudflare-dns.com 
+  - 1.1.1.3#family.cloudflare-dns.com
   - 1.0.0.3#family.cloudflare-dns.com
 ntp_servers:
   - ntp.ubuntu.com

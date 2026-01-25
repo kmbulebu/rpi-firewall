@@ -11,7 +11,7 @@
     src: networkd/wireguard/00-vpn-vrf.netdev
     dest: /etc/systemd/network/00-vpn-vrf.netdev
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Configure vrf0 network
@@ -19,7 +19,7 @@
     src: networkd/wireguard/00-vpn-vrf.network
     dest: /etc/systemd/network/00-vpn-vrf.network
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 ## VPN VLAN Network
@@ -28,7 +28,7 @@
     src: networkd/lan_vpn/00-lan-vpn.netdev
     dest: /etc/systemd/network/00-lan-vpn.netdev
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Configure lan vpn network
@@ -36,7 +36,7 @@
     src: networkd/lan_vpn/20-lan-vpn.network
     dest: /etc/systemd/network/20-lan-vpn.network
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 ## Firewalld
@@ -45,7 +45,7 @@
     src: firewalld/zones/internal_vpn.xml
     dest: /etc/firewalld/zones/internal_vpn.xml
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: reload firewalld
 - name: Template external vpn zone config
@@ -53,7 +53,7 @@
     src: firewalld/zones/external_vpn.xml
     dest: /etc/firewalld/zones/external_vpn.xml
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: reload firewalld
 ## Wireguard
@@ -67,7 +67,7 @@
     src: networkd/wireguard/30-wireguard-client.netdev
     dest: "/etc/systemd/network/30-wireguard-client.netdev"
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0640'
   notify: restart systemd-networkd
 - name: Configure wireguard client network
@@ -75,6 +75,6 @@
     src: networkd/wireguard/30-wireguard-client.network
     dest: "/etc/systemd/network/30-wireguard-client.network"
     owner: root
-    ansible.builtin.group: systemd-network
+    group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd

@@ -1,7 +1,7 @@
 ---
 - name: rpi-firewall
   hosts: all
-  become: yes
+  become: true
   gather_facts: true
   roles:
     - firewall

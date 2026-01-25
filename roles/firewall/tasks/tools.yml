@@ -5,7 +5,7 @@
     src: tools/show_dhcp_leases.py
     dest: /usr/local/bin/show_dhcp_leases
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0755'
   tags:
     - tools
