@@ -6,5 +6,5 @@
     src: hostname/hosts
     dest: /etc/hosts
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'

@@ -4,7 +4,7 @@
     src: mounts/fstab
     dest: /etc/fstab
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify:
     - mount auto

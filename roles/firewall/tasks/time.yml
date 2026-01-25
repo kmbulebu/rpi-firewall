@@ -7,12 +7,12 @@
     src: timesyncd/timesyncd.conf
     dest: /etc/systemd/timesyncd.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: restart systemd-timesyncd
 - name: Enable NTP
   ansible.builtin.systemd:
     name: systemd-timesyncd.service
-    enabled: yes
+    enabled: true
     state: started
-    masked: no
+    masked: false

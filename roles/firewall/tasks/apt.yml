@@ -1,7 +1,7 @@
 ---
 - name: Apt Cache
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 86400 # 1 day
 - name: Install unattended-upgrades
   ansible.builtin.apt:
@@ -13,6 +13,5 @@
     src: apt/50unattended-upgrades
     dest: /etc/apt/apt.conf.d/50unattended-upgrades
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
-

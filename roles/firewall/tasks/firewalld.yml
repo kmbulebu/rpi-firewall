@@ -6,9 +6,9 @@
 - name: Mask ufw
   ansible.builtin.service:
     name: ufw
-    enabled: no
+    enabled: false
     state: stopped
-    masked: yes
+    masked: true
 - name: Enable nf_flow_table kernel modules
   ansible.builtin.modprobe:
     name: nf_flow_table
@@ -31,14 +31,14 @@
     install_recommends: false
 - name: Remove packages
   ansible.builtin.apt:
-    autoclean: yes
-    autoremove: yes
+    autoclean: true
+    autoremove: true
 - name: Template internal zone config
   ansible.builtin.template:
     src: firewalld/zones/internal.xml
     dest: /etc/firewalld/zones/internal.xml
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: reload firewalld
 - name: Template external zone config
@@ -46,7 +46,7 @@
     src: firewalld/zones/external.xml
     dest: /etc/firewalld/zones/external.xml
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: reload firewalld
 - name: Template guest zone config
@@ -54,7 +54,7 @@
     src: firewalld/zones/guest.xml
     dest: /etc/firewalld/zones/guest.xml
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: reload firewalld
 - name: Template lockdown whitelist
@@ -62,7 +62,7 @@
     src: firewalld/lockdown-whitelist.xml
     dest: /etc/firewalld/lockdown-whitelist.xml
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: reload firewalld
 - name: Template firewalld configuration
@@ -70,7 +70,7 @@
     src: firewalld/firewalld.conf
     dest: /etc/firewalld/firewalld.conf
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0600'
   notify: reload firewalld
 - name: Add ingress ICMPv6 policy.
@@ -78,7 +78,7 @@
     src: firewalld/policies/ipv6-icmp-ingress.xml
     dest: /etc/firewalld/policies/ipv6-icmp-ingress.xml
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: reload firewalld
 - name: Start firewalld

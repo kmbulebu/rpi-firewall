@@ -30,14 +30,14 @@
     src: tailscale/defaults
     dest: /etc/default/tailscaled
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0644'
   notify: restart tailscaled
 - name: Tailscale Status
   ignore_errors: true
   ansible.builtin.shell:
     cmd: 'tailscale status --peers=false --json | jq -e .HaveNodeKey'
-  register: tailscale_status 
+  register: tailscale_status
 - name: Tailscale Login
   when: tailscale_status.rc != 0
   ansible.builtin.command:

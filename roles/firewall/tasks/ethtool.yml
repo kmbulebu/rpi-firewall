@@ -6,14 +6,14 @@
 - name: Start networkd-dispatcher
   ansible.builtin.systemd:
     name: networkd-dispatcher.service
-    enabled: yes
+    enabled: true
     state: started
-    masked: no
+    masked: false
 - name: Template 10-ethtool script
   ansible.builtin.template:
     src: networkd-dispatcher/carrier.d/10-ethtool
     dest: /etc/networkd-dispatcher/carrier.d/10-ethtool
     owner: root
-    ansible.builtin.group: root
+    group: root
     mode: '0755'
   notify: restart networkd-dispatcher
