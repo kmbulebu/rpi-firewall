@@ -1,9 +1,11 @@
 ---
-- block:
+- name: Configure Prometheus Node Exporter
+  when: firewall_enable_prometheus_node_exporter_bool
+  block:
     - name: Install Prometheus Node Exporter
       ansible.builtin.apt:
         name: prometheus-node-exporter
-        state: latest
+        state: present
         install_recommends: false
     - name: Configure Prometheus Node Exporter
       ansible.builtin.copy:
@@ -42,11 +44,12 @@
         enabled: true
         state: started
         masked: false
-  when: firewall_enable_prometheus_node_exporter_bool
 
-- block:
+- name: Remove Prometheus Node Exporter
+  when: not firewall_enable_prometheus_node_exporter_bool
+  block:
     - name: Disable prometheus-node-exporter.service
-      ignore_errors: true # If it's already uninstalled, this will fail
+      failed_when: false
       ansible.builtin.systemd:
         name: prometheus-node-exporter.service
         enabled: false
@@ -76,4 +79,3 @@
         name: prometheus-node-exporter
         state: absent
         purge: true
-  when: not firewall_enable_prometheus_node_exporter_bool

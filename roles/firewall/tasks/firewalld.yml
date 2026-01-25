@@ -10,24 +10,24 @@
     state: stopped
     masked: true
 - name: Enable nf_flow_table kernel modules
-  ansible.builtin.modprobe:
+  community.general.modprobe:
     name: nf_flow_table
     state: present
     persistent: present
 - name: Enable nf_flow_table kernel modules
-  ansible.builtin.modprobe:
+  community.general.modprobe:
     name: nf_flow_table_inet
     state: present
     persistent: present
 - name: Install firewalld
   ansible.builtin.apt:
     name: firewalld
-    state: latest
+    state: present
     install_recommends: false
 - name: Install ipset
   ansible.builtin.apt:
     name: ipset
-    state: latest
+    state: present
     install_recommends: false
 - name: Remove packages
   ansible.builtin.apt:

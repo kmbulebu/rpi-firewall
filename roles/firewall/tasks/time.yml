@@ -1,6 +1,6 @@
 ---
 - name: Set timezone to UTC
-  ansible.builtin.timezone:
+  community.general.timezone:
     name: UTC
 - name: Update timesyncd configuration
   ansible.builtin.template:

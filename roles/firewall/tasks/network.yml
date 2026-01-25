@@ -3,6 +3,9 @@
   ansible.builtin.copy:
     content: "network: {config: disabled}"
     dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+    owner: root
+    group: root
+    mode: '0644'
 - name: Remove cloud-init netplan configuration
   ansible.builtin.file:
     path: /etc/netplan/50-cloud-init.yaml
@@ -70,7 +73,7 @@
   notify: restart systemd-networkd
 ## Guests VLAN Network
 - name: Enable 8021q module for VLANs
-  ansible.builtin.modprobe:
+  community.general.modprobe:
     name: 8021q
     state: present
     persistent: present
@@ -90,7 +93,8 @@
     group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
-- meta: flush_handlers
+- name: Flush handlers after network updates
+  ansible.builtin.meta: flush_handlers
 - name: Restart systemd-networkd when forced
   ansible.builtin.systemd:
     name: systemd-networkd
@@ -98,4 +102,5 @@
   when: firewall_force_networkd_restart
 - name: Wait for networkd after forced restart
   ansible.builtin.command: /usr/lib/systemd/systemd-networkd-wait-online --any --timeout=30
+  changed_when: false
   when: firewall_force_networkd_restart

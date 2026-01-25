@@ -127,11 +127,11 @@ To send router and firewall logs to a remote syslog server, provide
 the destination server and port. `192.168.1.10:514`
 
 ```
-rsyslog_udp_server:
+firewall_rsyslog_udp_server:
 ```
 
 ```
-rsyslog_tcp_server:
+firewall_rsyslog_tcp_server:
 ```
 
 ### Automatic Updates

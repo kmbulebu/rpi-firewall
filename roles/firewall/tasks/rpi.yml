@@ -20,6 +20,9 @@
     line: 'dtoverlay=disable-bt'
     regexp: '^\s*dtoverlay=disable-bt'
     insertafter: EOF
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Ensure WiFi disabled in /boot/firmware/config.txt
   become: true
@@ -29,6 +32,9 @@
     line: 'dtoverlay=disable-wifi'
     regexp: '^\s*dtoverlay=disable-wifi'
     insertafter: EOF
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Ensure audio disabled in /boot/firmware/config.txt
   become: true
@@ -38,6 +44,9 @@
     line: 'dtparam=audio=off'
     regexp: '^\s*dtparam=audio='
     insertafter: EOF
+    owner: root
+    group: root
+    mode: '0644'
 
 # I2C is needed for hardware monitoring and the POE hat.
 - name: Ensure I2C enabled in /boot/firmware/config.txt
@@ -48,6 +57,9 @@
     line: 'dtparam=i2c_arm=on'
     regexp: '^\s*dtparam=i2c_arm='
     insertafter: EOF
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Ensure SPI disabled in /boot/firmware/config.txt
   become: true
@@ -57,3 +69,6 @@
     line: 'dtparam=spi=off'
     regexp: '^\s*dtparam=spi='
     insertafter: EOF
+    owner: root
+    group: root
+    mode: '0644'
