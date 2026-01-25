@@ -8,16 +8,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Important: This sets up your GITHUB_WORKSPACE environment variable
-    - uses: actions/checkout@v2
+      # Important: This sets up your GITHUB_WORKSPACE environment variable
+      - uses: actions/checkout@v2
 
-    - name: Install Ansible collections
-      run: ansible-galaxy collection install -r requirements.yml
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
 
-    - name: Lint Ansible Playbook
-      # replace "master" with any valid ref
-      uses: ansible/ansible-lint@v26.1.1
-      with:
+      - name: Lint Ansible Playbook
+        # replace "master" with any valid ref
+        uses: ansible/ansible-lint@v26.1.1
+        with:
         # [required]
         # Paths to ansible files (i.e., playbooks, tasks, handlers etc..)
         # or valid Ansible directories according to the Ansible role
