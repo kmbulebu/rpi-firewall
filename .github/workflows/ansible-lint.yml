@@ -13,7 +13,7 @@ jobs:
 
     - name: Lint Ansible Playbook
       # replace "master" with any valid ref
-      uses: ansible/ansible-lint@v26.1.1
+      uses: ansible-actions/ansible-lint-action@v1.1.0
       with:
         # [required]
         # Paths to ansible files (i.e., playbooks, tasks, handlers etc..)
