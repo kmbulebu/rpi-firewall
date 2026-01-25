@@ -56,13 +56,6 @@
     group: systemd-network
     mode: '0644'
   notify: Restart systemd-networkd
-- name: Setup system DNS
-  ansible.builtin.template:
-    src: dns/resolv.conf
-    dest: /etc/resolv.conf
-    owner: root
-    group: root
-    mode: '0644'
 - name: Set network receive queue cpu assignment
   ansible.builtin.template:
     src: udev/zz-network-tunings.rules
@@ -93,14 +86,3 @@
     group: systemd-network
     mode: '0644'
   notify: Restart systemd-networkd
-- name: Flush handlers after network updates
-  ansible.builtin.meta: flush_handlers
-- name: Restart systemd-networkd when forced
-  ansible.builtin.systemd:
-    name: systemd-networkd
-    state: restarted
-  when: firewall_force_networkd_restart
-- name: Wait for networkd after forced restart
-  ansible.builtin.command: /usr/lib/systemd/systemd-networkd-wait-online --any --timeout=30
-  changed_when: false
-  when: firewall_force_networkd_restart

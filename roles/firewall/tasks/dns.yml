@@ -48,19 +48,14 @@
     owner: root
     group: root
     mode: '0644'
+    backup: true
   notify: Restart systemd-resolved
 - name: Enable systemd-resolved
-  failed_when: false
   ansible.builtin.systemd:
     name: systemd-resolved
     enabled: true
     state: started
     masked: false
-- name: Restart systemd-resolved when forced
-  ansible.builtin.systemd:
-    name: systemd-resolved
-    state: restarted
-  when: firewall_force_resolved_restart
 - name: Install Unbound server
   ansible.builtin.apt:
     name: unbound
@@ -118,5 +113,3 @@
     state: started
     masked: false
     daemon_reload: true
-- name: Flush handlers after DNS updates
-  ansible.builtin.meta: flush_handlers
