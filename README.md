@@ -188,7 +188,7 @@ Provide TLS credentials at:
 - `/etc/unbound/unbound_server.key`
 - `/etc/unbound/unbound_server.pem`
 
-The playbook does not generate these files. You can provide self-signed certs or your own CA-signed certs. DNS-over-HTTPS is not implemented.
+Ubuntu ships a self-signed Unbound certificate at these paths. DNS-over-HTTPS is not implemented.
 
 ### Enable Prometheus Node Exporter
 
