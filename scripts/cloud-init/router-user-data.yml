@@ -1,4 +1,4 @@
-#cloud-config
+# cloud-config
 hostname: router
 manage_etc_hosts: true
 ssh_pwauth: false
