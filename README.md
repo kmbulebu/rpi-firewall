@@ -275,7 +275,7 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `firewall_lan_vpn_wg_listen_port` | `51820` | WireGuard listen port on the router. |
 | `firewall_lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs routed through the WireGuard peer. |
 | `firewall_lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard keepalive interval in seconds. |
-| `firewall_name_servers` | `- 1.1.1.3#family.cloudflare-dns.com<br>- 1.0.0.3#family.cloudflare-dns.com` | Upstream DNS resolvers for Unbound. |
+| `firewall_name_servers` | `1.1.1.3#family.cloudflare-dns.com, 1.0.0.3#family.cloudflare-dns.com` | Upstream DNS resolvers for Unbound. |
 | `firewall_ntp_servers` | `- ntp.ubuntu.com` | NTP servers used to synchronize system time. |
 | `firewall_router_hostname` | `router` | Hostname applied to the router. |
 | `firewall_router_ip_address` | `192.168.1.1/24` | Router LAN IP address and prefix. |
@@ -288,8 +288,6 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `firewall_dhcp_reservations` | `[]` | Static DHCP reservation entries for LAN clients. |
 | `firewall_skip_mounts` | `false` | Skip fstab and mount management (testbench). |
 | `firewall_unbound_cpu_affinity` | `""` | CPU affinity for the Unbound service. |
-| `firewall_force_networkd_restart` | `false` | Force a systemd-networkd restart when true. |
 | `firewall_unbound_enable_tls` | `true` | Enable Unbound TLS listeners for DoT. |
-| `firewall_force_resolved_restart` | `false` | Force a systemd-resolved restart when true. |
 | `firewall_enable_lan_vpn` | `false` | Enable the VPN VLAN and WireGuard routing. |
 | `firewall_enable_rpi_tunings` | `true` | Enable Raspberry Pi-specific tuning tasks. |

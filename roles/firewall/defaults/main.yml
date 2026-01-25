@@ -49,8 +49,6 @@ firewall_port_forwards: []
 firewall_dhcp_reservations: []
 firewall_skip_mounts: false
 firewall_unbound_cpu_affinity: ""
-firewall_force_networkd_restart: false
 firewall_unbound_enable_tls: true
-firewall_force_resolved_restart: false
 firewall_enable_lan_vpn: false
 firewall_enable_rpi_tunings: true
