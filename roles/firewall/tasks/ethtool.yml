@@ -16,4 +16,4 @@
     owner: root
     group: root
     mode: '0755'
-  notify: restart networkd-dispatcher
+  notify: Restart networkd-dispatcher

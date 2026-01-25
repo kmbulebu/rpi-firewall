@@ -6,7 +6,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: restart systemd-journald
+  notify: Restart systemd-journald
 - name: Remote Syslog configuration
   ansible.builtin.template:
     src: rsyslog/60-remote.conf
@@ -15,7 +15,7 @@
     group: root
     mode: '0644'
   when: firewall_rsyslog_udp_server is defined or firewall_rsyslog_tcp_server is defined
-  notify: restart rsyslog
+  notify: Restart rsyslog
 - name: Remove Syslog configuration
   ansible.builtin.file:
     path: rsyslog/60-remote.conf
@@ -23,17 +23,17 @@
   when:
     - firewall_rsyslog_udp_server is not defined
     - firewall_rsyslog_tcp_server is not defined
-  notify: restart rsyslog
+  notify: Restart rsyslog
 - name: Remove 20-ufw.conf
   ansible.builtin.file:
     path: /etc/rsyslog.d/20-ufw.conf
     state: absent
-  notify: restart rsyslog
+  notify: Restart rsyslog
 - name: Remove 50-default.conf
   ansible.builtin.file:
     path: /etc/rsyslog.d/50-default.conf
     state: absent
-  notify: restart rsyslog
+  notify: Restart rsyslog
 - name: Enable rsyslog
   ansible.builtin.service:
     name: rsyslog

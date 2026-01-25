@@ -48,7 +48,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: restart systemd-resolved
+  notify: Restart systemd-resolved
 - name: Enable systemd-resolved
   failed_when: false
   ansible.builtin.systemd:
@@ -95,7 +95,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: restart unbound
+  notify: Restart unbound
 - name: Create systemd unbound.service.d overrides directory
   ansible.builtin.file:
     path: /etc/systemd/system/unbound.service.d/
@@ -109,8 +109,8 @@
     group: root
     mode: '0644'
   notify:
-    - systemctl daemon-reload
-    - restart unbound
+    - Systemctl daemon-reload
+    - Restart unbound
 - name: Enable unbound
   ansible.builtin.systemd:
     name: unbound

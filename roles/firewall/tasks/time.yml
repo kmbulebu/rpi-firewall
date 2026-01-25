@@ -9,7 +9,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: restart systemd-timesyncd
+  notify: Restart systemd-timesyncd
 - name: Enable NTP
   ansible.builtin.systemd:
     name: systemd-timesyncd.service

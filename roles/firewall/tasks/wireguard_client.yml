@@ -13,7 +13,7 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 - name: Configure vrf0 network
   ansible.builtin.template:
     src: networkd/wireguard/00-vpn-vrf.network
@@ -21,7 +21,7 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 ## VPN VLAN Network
 - name: Create lan vpn netdev
   ansible.builtin.template:
@@ -30,7 +30,7 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 - name: Configure lan vpn network
   ansible.builtin.template:
     src: networkd/lan_vpn/20-lan-vpn.network
@@ -38,7 +38,7 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 ## Firewalld
 - name: Template internal VPN zone config
   ansible.builtin.template:
@@ -47,7 +47,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: reload firewalld
+  notify: Reload firewalld
 - name: Template external vpn zone config
   ansible.builtin.template:
     src: firewalld/zones/external_vpn.xml
@@ -55,7 +55,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: reload firewalld
+  notify: Reload firewalld
 ## Wireguard
 - name: Install Wireguard
   ansible.builtin.apt:
@@ -69,7 +69,7 @@
     owner: root
     group: systemd-network
     mode: '0640'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 - name: Configure wireguard client network
   ansible.builtin.template:
     src: networkd/wireguard/30-wireguard-client.network
@@ -77,4 +77,4 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd

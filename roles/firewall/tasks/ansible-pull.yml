@@ -13,7 +13,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: systemctl daemon-reload
+  notify: Systemctl daemon-reload
 - name: Setup ansible-pull-reconfigure service
   ansible.builtin.copy:
     src: ansible-pull/ansible-pull-reconfigure.service
@@ -21,7 +21,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: systemctl daemon-reload
+  notify: Systemctl daemon-reload
 - name: Setup ansible-pull timer
   ansible.builtin.copy:
     src: ansible-pull/ansible-pull.timer
@@ -29,7 +29,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: systemctl daemon-reload
+  notify: Systemctl daemon-reload
 - name: Setup ansible-pull-reconfigure path watch
   ansible.builtin.template:
     src: ansible-pull/ansible-pull-reconfigure.path
@@ -37,7 +37,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: systemctl daemon-reload
+  notify: Systemctl daemon-reload
 - name: Systemctl daemon-reload
   ansible.builtin.systemd:
     daemon_reload: true

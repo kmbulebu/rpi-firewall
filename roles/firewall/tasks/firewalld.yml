@@ -40,7 +40,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: reload firewalld
+  notify: Reload firewalld
 - name: Template external zone config
   ansible.builtin.template:
     src: firewalld/zones/external.xml
@@ -48,7 +48,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: reload firewalld
+  notify: Reload firewalld
 - name: Template guest zone config
   ansible.builtin.template:
     src: firewalld/zones/guest.xml
@@ -56,7 +56,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: reload firewalld
+  notify: Reload firewalld
 - name: Template lockdown whitelist
   ansible.builtin.template:
     src: firewalld/lockdown-whitelist.xml
@@ -64,7 +64,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: reload firewalld
+  notify: Reload firewalld
 - name: Template firewalld configuration
   ansible.builtin.template:
     src: firewalld/firewalld.conf
@@ -72,7 +72,7 @@
     owner: root
     group: root
     mode: '0600'
-  notify: reload firewalld
+  notify: Reload firewalld
 - name: Add ingress ICMPv6 policy.
   ansible.builtin.copy:
     src: firewalld/policies/ipv6-icmp-ingress.xml
@@ -80,7 +80,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: reload firewalld
+  notify: Reload firewalld
 - name: Start firewalld
   ansible.builtin.service:
     name: firewalld

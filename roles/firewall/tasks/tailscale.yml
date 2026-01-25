@@ -33,7 +33,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: restart tailscaled
+  notify: Restart tailscaled
 - name: Tailscale Status
   failed_when: false
   ansible.builtin.shell:
