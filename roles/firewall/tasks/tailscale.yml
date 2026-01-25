@@ -15,16 +15,16 @@
     mode: '0644'
 - name: Install tailscale
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
     name: tailscale
     state: latest
     install_recommends: false
 - name: Start tailscaled
   ansible.builtin.systemd:
     name: tailscaled.service
-    enabled: yes
+    enabled: true
     state: started
-    masked: no
+    masked: false
 - name: Update tailscaled configuration
   ansible.builtin.template:
     src: tailscale/defaults
@@ -34,7 +34,7 @@
     mode: '0644'
   notify: restart tailscaled
 - name: Tailscale Status
-  ignore_errors: True
+  ignore_errors: true
   ansible.builtin.shell:
     cmd: 'tailscale status --peers=false --json | jq -e .HaveNodeKey'
   register: tailscale_status 
