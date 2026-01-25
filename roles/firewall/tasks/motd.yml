@@ -4,7 +4,7 @@
     src: motd/60-wan-status
     dest: /etc/update-motd.d/60-wan-status
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0755'
 
 - name: Install MOTD systemd health script
@@ -12,7 +12,7 @@
     src: motd/70-systemd-health
     dest: /etc/update-motd.d/70-systemd-health
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0755'
 
 - name: Install MOTD DHCP leases script
@@ -20,14 +20,14 @@
     src: motd/75-dhcp-leases
     dest: /etc/update-motd.d/75-dhcp-leases
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0755'
 
 - name: Ensure non-executable MOTD files have correct permissions
   ansible.builtin.file:
     path: "{{ item }}"
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   loop:
     - /etc/update-motd.d/10-help-text
@@ -35,14 +35,14 @@
     - /etc/update-motd.d/91-contract-ua-esm-status
 
 - name: Disable MOTD news service
-  systemd:
+  ansible.builtin.systemd:
     name: motd-news.service
     enabled: no
     state: stopped
     masked: yes
 
 - name: Disable MOTD news service timer
-  systemd:
+  ansible.builtin.systemd:
     name: motd-news.timer
     enabled: no
     state: stopped

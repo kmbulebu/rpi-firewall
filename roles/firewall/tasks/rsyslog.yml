@@ -1,23 +1,23 @@
 ---
 - name: Copy journald.conf
-  copy:
+  ansible.builtin.copy:
     src: journald/journald.conf
     dest: /etc/systemd/journald.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify: restart systemd-journald
 - name: Remote Syslog configuration
-  template:
+  ansible.builtin.template:
     src: rsyslog/60-remote.conf
     dest: /etc/rsyslog.d/60-remote.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   when: rsyslog_udp_server is defined or rsyslog_tcp_server is defined
   notify: restart rsyslog
 - name: Remove Syslog configuration
-  file:
+  ansible.builtin.file:
     path: rsyslog/60-remote.conf
     state: absent
   when: 
@@ -25,23 +25,23 @@
     - rsyslog_tcp_server is not defined
   notify: restart rsyslog
 - name: Remove 20-ufw.conf
-  file:
+  ansible.builtin.file:
     path: /etc/rsyslog.d/20-ufw.conf
     state: absent
   notify: restart rsyslog
 - name: Remove 50-default.conf
-  file:
+  ansible.builtin.file:
     path: /etc/rsyslog.d/50-default.conf
     state: absent
   notify: restart rsyslog
 - name: enable rsyslog
-  service:
+  ansible.builtin.service:
     name: rsyslog
     state: started
     enabled: true
   when: rsyslog_udp_server is defined or rsyslog_tcp_server is defined
 - name: disable rsyslog
-  service:
+  ansible.builtin.service:
     name: rsyslog
     state: stopped
     enabled: false

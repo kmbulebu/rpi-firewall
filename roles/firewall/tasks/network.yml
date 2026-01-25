@@ -1,101 +1,101 @@
 ---
 - name: Disable cloud-init network configuration
-  copy:
+  ansible.builtin.copy:
     content: "network: {config: disabled}"
     dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
 - name: Remove cloud-init netplan configuration
-  file:
+  ansible.builtin.file:
     path: /etc/netplan/50-cloud-init.yaml
     state: absent
   notify: netplan apply
 - name: Find generated netplan networkd files
-  find:
+  ansible.builtin.find:
     paths: /run/systemd/network
     patterns: "10-netplan-*.network"
   register: netplan_networkd_files
 - name: Remove generated netplan networkd files
-  file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
   loop: "{{ netplan_networkd_files.files }}"
   notify: restart systemd-networkd
 ## WAN Network
 - name: Configure physical wan Link
-  template:
+  ansible.builtin.template:
     src: networkd/wan/00-wan.link
     dest: /etc/systemd/network/00-wan.link
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Configure wan network
-  template:
+  ansible.builtin.template:
     src: networkd/wan/10-wan.network
     dest: /etc/systemd/network/10-wan.network
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 ## LAN Network
 - name: Configure lan link
-  template:
+  ansible.builtin.template:
     src: networkd/lan/00-lan.link
     dest: /etc/systemd/network/00-lan.link
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Configure lan network
-  template:
+  ansible.builtin.template:
     src: networkd/lan/10-lan.network
     dest: /etc/systemd/network/10-lan.network
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Setup system DNS
-  template:
+  ansible.builtin.template:
     src: dns/resolv.conf
     dest: /etc/resolv.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
 - name: Set network receive queue cpu assignment
-  template:
+  ansible.builtin.template:
     src: udev/zz-network-tunings.rules
     dest: /etc/udev/rules.d/zz-network-tunings.rules
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify: restart systemd-networkd
 ## Guests VLAN Network
 - name: Enable 8021q module for VLANs
-  modprobe:
+  ansible.builtin.modprobe:
     name: 8021q
     state: present
     persistent: present
 - name: Create lan guests netdev
-  template:
+  ansible.builtin.template:
     src: networkd/lan_guests/30-lan-guests.netdev
     dest: /etc/systemd/network/30-lan-guests.netdev
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Configure lan guests network
-  template:
+  ansible.builtin.template:
     src: networkd/lan_guests/30-lan-guests.network
     dest: /etc/systemd/network/30-lan-guests.network
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - meta: flush_handlers
 - name: Restart systemd-networkd when forced
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-networkd
     state: restarted
   when: force_networkd_restart
 - name: Wait for networkd after forced restart
-  command: /usr/lib/systemd/systemd-networkd-wait-online --any --timeout=30
+  ansible.builtin.command: /usr/lib/systemd/systemd-networkd-wait-online --any --timeout=30
   when: force_networkd_restart

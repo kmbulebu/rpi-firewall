@@ -7,74 +7,74 @@
 #     state: latest
 #     install_recommends: false
 - name: Create vpn vrf netdev
-  template:
+  ansible.builtin.template:
     src: networkd/wireguard/00-vpn-vrf.netdev
     dest: /etc/systemd/network/00-vpn-vrf.netdev
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Configure vrf0 network
-  template:
+  ansible.builtin.template:
     src: networkd/wireguard/00-vpn-vrf.network
     dest: /etc/systemd/network/00-vpn-vrf.network
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 ## VPN VLAN Network
 - name: Create lan vpn netdev
-  template:
+  ansible.builtin.template:
     src: networkd/lan_vpn/00-lan-vpn.netdev
     dest: /etc/systemd/network/00-lan-vpn.netdev
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 - name: Configure lan vpn network
-  template:
+  ansible.builtin.template:
     src: networkd/lan_vpn/20-lan-vpn.network
     dest: /etc/systemd/network/20-lan-vpn.network
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
 ## Firewalld
 - name: Template internal VPN zone config
-  template:
+  ansible.builtin.template:
     src: firewalld/zones/internal_vpn.xml
     dest: /etc/firewalld/zones/internal_vpn.xml
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify: reload firewalld
 - name: Template external vpn zone config
-  template:
+  ansible.builtin.template:
     src: firewalld/zones/external_vpn.xml
     dest: /etc/firewalld/zones/external_vpn.xml
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify: reload firewalld
 ## Wireguard
 - name: Install Wireguard
-  apt:
+  ansible.builtin.apt:
     name: wireguard
     state: latest
 ## Wireguard Network
 - name: Create wireguard client network
-  template:
+  ansible.builtin.template:
     src: networkd/wireguard/30-wireguard-client.netdev
     dest: "/etc/systemd/network/30-wireguard-client.netdev"
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0640'
   notify: restart systemd-networkd
 - name: Configure wireguard client network
-  template:
+  ansible.builtin.template:
     src: networkd/wireguard/30-wireguard-client.network
     dest: "/etc/systemd/network/30-wireguard-client.network"
     owner: root
-    group: systemd-network
+    ansible.builtin.group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
