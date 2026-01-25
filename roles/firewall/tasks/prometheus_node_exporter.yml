@@ -14,7 +14,7 @@
         owner: root
         group: root
         mode: '0644'
-      notify: restart systemd-journald
+      notify: Restart systemd-journald
     - name: Create systemd prometheus-node-exporter.service.d overrides directory
       ansible.builtin.file:
         path: /etc/systemd/system/prometheus-node-exporter.service.d/
@@ -28,8 +28,8 @@
         group: root
         mode: '0644'
       notify:
-        - systemctl daemon-reload
-        - restart prometheus-node-exporter
+        - Systemctl daemon-reload
+        - Restart prometheus-node-exporter
     - name: Firewalld Prometheus Node Exporter Service
       ansible.builtin.copy:
         src: node-exporter/prometheus-node-exporter.xml
@@ -37,7 +37,7 @@
         owner: root
         group: root
         mode: '0644'
-      notify: reload firewalld
+      notify: Reload firewalld
     - name: Enable prometheus-node-exporter.service
       ansible.builtin.systemd:
         name: prometheus-node-exporter.service
@@ -59,12 +59,12 @@
       ansible.builtin.file:
         path: /etc/systemd/system/prometheus-node-exporter.service.d/10-priority.conf
         state: absent
-      notify: systemctl daemon-reload
+      notify: Systemctl daemon-reload
     - name: Remove prometheus-node-exporter.service.d directory
       ansible.builtin.file:
         path: /etc/systemd/system/prometheus-node-exporter.service.d/
         state: absent
-      notify: systemctl daemon-reload
+      notify: Systemctl daemon-reload
     - name: Remove Prometheus Node Exporter defaults
       ansible.builtin.file:
         path: /etc/default/prometheus-node-exporter
@@ -73,7 +73,7 @@
       ansible.builtin.file:
         path: /etc/firewalld/services/prometheus-node-exporter.xml
         state: absent
-      notify: reload firewalld
+      notify: Reload firewalld
     - name: Uninstall Prometheus Node Exporter
       ansible.builtin.apt:
         name: prometheus-node-exporter

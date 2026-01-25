@@ -15,4 +15,4 @@
     owner: root
     group: root
     mode: '0644'
-  notify: systemctl daemon-reload
+  notify: Systemctl daemon-reload

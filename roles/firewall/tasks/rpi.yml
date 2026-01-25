@@ -29,9 +29,9 @@
     group: root
     mode: '0644'
   notify:
-    - run depmod apply
-    - restart systemd-udevd
-    - update initramfs
+    - Run depmod apply
+    - Restart systemd-udevd
+    - Update initramfs
 
 - name: Ensure Bluetooth disabled in /boot/firmware/config.txt
   become: true

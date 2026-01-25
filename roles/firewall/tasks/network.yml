@@ -10,7 +10,7 @@
   ansible.builtin.file:
     path: /etc/netplan/50-cloud-init.yaml
     state: absent
-  notify: netplan apply
+  notify: Netplan apply
 - name: Find generated netplan networkd files
   ansible.builtin.find:
     paths: /run/systemd/network
@@ -21,7 +21,7 @@
     path: "{{ item.path }}"
     state: absent
   loop: "{{ firewall_netplan_networkd_files.files }}"
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 ## WAN Network
 - name: Configure physical wan Link
   ansible.builtin.template:
@@ -30,7 +30,7 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 - name: Configure wan network
   ansible.builtin.template:
     src: networkd/wan/10-wan.network
@@ -38,7 +38,7 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 ## LAN Network
 - name: Configure lan link
   ansible.builtin.template:
@@ -47,7 +47,7 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 - name: Configure lan network
   ansible.builtin.template:
     src: networkd/lan/10-lan.network
@@ -55,7 +55,7 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 - name: Setup system DNS
   ansible.builtin.template:
     src: dns/resolv.conf
@@ -70,7 +70,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 ## Guests VLAN Network
 - name: Enable 8021q module for VLANs
   community.general.modprobe:
@@ -84,7 +84,7 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 - name: Configure lan guests network
   ansible.builtin.template:
     src: networkd/lan_guests/30-lan-guests.network
@@ -92,7 +92,7 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify: Restart systemd-networkd
 - name: Flush handlers after network updates
   ansible.builtin.meta: flush_handlers
 - name: Restart systemd-networkd when forced
