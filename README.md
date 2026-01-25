@@ -245,51 +245,51 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 
 | Variable | Default | Description |
 |---|---|---|
-| `firewall_ansible_playbook_git_url` | `https://github.com/kmbulebu/rpi-firewall.git` | Git repository URL for the playbook. |
-| `firewall_ansible_playbook_git_ref` | `master` | Git ref/branch to check out. |
-| `firewall_ansible_playbook_filename` | `playbook.yml` | Playbook filename in the repository. |
-| `firewall_ansible_inventory` | `/boot/firmware/inventory.yml` | Path to inventory file on the target system. |
-| `firewall_admin_user_password_hash` | `'$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'` | Shadow-format password hash for the `firewall` admin user. |
-| `firewall_domain` | `my.home` | Local domain name for LAN devices. |
-| `firewall_dns_private_domains` | `[]` | List of private domains to allow DNS resolution to local IP addresses. |
-| `firewall_enable_prometheus_node_exporter` | `false` | Enable Prometheus node exporter and listen on LAN interface. |
-| `firewall_wan_iface_networkd_link_match` | `Property=ID_BUS=usb` | systemd-networkd match string for WAN link. |
-| `firewall_wan_iface` | `wan0` | Desired WAN interface name. |
-| `firewall_lan_iface_networkd_link_match` | `Driver=bcmgenet` | systemd-networkd match string for LAN link. |
-| `firewall_lan_iface` | `lan0` | Desired LAN interface name. |
-| `firewall_lan_dhcp_pool_offset` | `10` | Offset from router IP to start the LAN DHCP pool. |
-| `firewall_lan_dhcp_pool_size` | `200` | Number of DHCP addresses in the LAN pool. |
+| `firewall_ansible_playbook_git_url` | `https://github.com/kmbulebu/rpi-firewall.git` | Repository URL used by ansible-pull for updates. |
+| `firewall_ansible_playbook_git_ref` | `master` | Branch, tag, or ref to check out on updates. |
+| `firewall_ansible_playbook_filename` | `playbook.yml` | Playbook filename executed by ansible-pull. |
+| `firewall_ansible_inventory` | `/boot/firmware/inventory.yml` | Inventory path on the target device. |
+| `firewall_admin_user_password_hash` | `'$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'` | Shadow password hash for the `firewall` admin user. |
+| `firewall_domain` | `my.home` | Base DNS domain advertised to LAN clients. |
+| `firewall_dns_private_domains` | `[]` | Private DNS zones that should resolve to local IPs. |
+| `firewall_enable_prometheus_node_exporter` | `false` | Enable Prometheus node exporter on the router. |
+| `firewall_wan_iface_networkd_link_match` | `Property=ID_BUS=usb` | Match rule for binding the WAN interface. |
+| `firewall_wan_iface` | `wan0` | Logical name assigned to the WAN interface. |
+| `firewall_lan_iface_networkd_link_match` | `Driver=bcmgenet` | Match rule for binding the LAN interface. |
+| `firewall_lan_iface` | `lan0` | Logical name assigned to the LAN interface. |
+| `firewall_lan_dhcp_pool_offset` | `10` | Offset from router IP for the first LAN DHCP lease. |
+| `firewall_lan_dhcp_pool_size` | `200` | Number of DHCP leases available on the LAN. |
 | `firewall_lan_dhcp_default_lease_time_sec` | `7200` | Default DHCP lease time in seconds. |
-| `firewall_lan_dhcp_max_lease_time_sec` | `21600` | Max DHCP lease time in seconds. |
-| `firewall_wan_device_set_mac_address` | `` | Optional MAC address to set on WAN device. |
-| `firewall_lan_guests_iface` | `lan_guests` | Interface name for LAN guests network. |
-| `firewall_lan_guests_router_ip_address` | `192.168.200.254/24` | Router IP/prefix for the guests network. |
-| `firewall_lan_guests_vlan_id` | `6` | VLAN ID for the guests network. |
-| `firewall_lan_guests_dhcp_pool_offset` | `10` | DHCP pool offset for guests network. |
-| `firewall_lan_guests_dhcp_pool_size` | `200` | DHCP pool size for guests network. |
+| `firewall_lan_dhcp_max_lease_time_sec` | `21600` | Maximum DHCP lease time in seconds. |
+| `firewall_wan_device_set_mac_address` | `` | Optional MAC address override for the WAN NIC. |
+| `firewall_lan_guests_iface` | `lan_guests` | Interface name for the guest VLAN. |
+| `firewall_lan_guests_router_ip_address` | `192.168.200.254/24` | Router IP/prefix for the guest VLAN. |
+| `firewall_lan_guests_vlan_id` | `6` | VLAN ID used for the guest network. |
+| `firewall_lan_guests_dhcp_pool_offset` | `10` | Offset from router IP for guest DHCP leases. |
+| `firewall_lan_guests_dhcp_pool_size` | `200` | Number of DHCP leases in the guest VLAN pool. |
 | `firewall_vpn_client_iface` | `wg0` | WireGuard client interface name. |
-| `firewall_vpn_vrf_iface` | `vpn_vrf0` | VRF interface name for VPN routing. |
-| `firewall_lan_vpn_iface` | `lan_vpn` | Interface name for the LAN VPN VLAN. |
-| `firewall_lan_vpn_router_ip_address` | `192.168.254.1/24` | Router IP/prefix for the LAN VPN network. |
-| `firewall_lan_vpn_vlan_id` | `2` | VLAN ID for the LAN VPN network. |
-| `firewall_lan_vpn_wg_listen_port` | `51820` | WireGuard listen port for the VPN interface. |
-| `firewall_lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs for the WireGuard peer (routes through VPN). |
-| `firewall_lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard persistent keepalive interval in seconds. |
-| `firewall_name_servers` | `- 1.1.1.3#family.cloudflare-dns.com<br>- 1.0.0.3#family.cloudflare-dns.com` | List of upstream name servers. |
-| `firewall_ntp_servers` | `- ntp.ubuntu.com` | List of NTP servers used to sync system time. |
-| `firewall_router_hostname` | `router` | Hostname for the router. |
-| `firewall_router_ip_address` | `192.168.1.1/24` | Router LAN IP and prefix. |
-| `firewall_motd_dhcp_leases_limit` | `5` | Number of DHCP leases shown in the MOTD per interface. |
-| `firewall_upgrade_reboot_time` | `'04:55'` | Time (UTC) to schedule automatic reboots after upgrades. |
-| `firewall_upgrade_automatic_reboot` | `true` | Whether to automatically reboot after upgrades when needed. |
-| `firewall_tailscaled_listen_port` | `0` | Listening port for tailscaled (0 = default/no specific port). |
-| `firewall_tailscale_iface` | `tailscale0` | Interface name for Tailscale. |
-| `firewall_port_forwards` | `[]` | List of port forwarding rules. |
-| `firewall_dhcp_reservations` | `[]` | DHCP reservations for LAN clients. |
-| `firewall_skip_mounts` | `false` | Skip mount management (testbench). |
-| `firewall_unbound_cpu_affinity` | `""` | CPU affinity list for Unbound service. |
-| `firewall_force_networkd_restart` | `false` | Force restart of systemd-networkd (testbench). |
-| `firewall_unbound_enable_tls` | `true` | Enable Unbound TLS listeners. |
-| `firewall_force_resolved_restart` | `false` | Force restart of systemd-resolved (testbench). |
-| `firewall_enable_lan_vpn` | `false` | Enable the LAN VPN VLAN. |
-| `firewall_enable_rpi_tunings` | `true` | Enable Raspberry Pi-specific tunings. |
+| `firewall_vpn_vrf_iface` | `vpn_vrf0` | VRF interface name used for VPN routing. |
+| `firewall_lan_vpn_iface` | `lan_vpn` | Interface name for the VPN VLAN. |
+| `firewall_lan_vpn_router_ip_address` | `192.168.254.1/24` | Router IP/prefix for the VPN VLAN. |
+| `firewall_lan_vpn_vlan_id` | `2` | VLAN ID used for the VPN network. |
+| `firewall_lan_vpn_wg_listen_port` | `51820` | WireGuard listen port on the router. |
+| `firewall_lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs routed through the WireGuard peer. |
+| `firewall_lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard keepalive interval in seconds. |
+| `firewall_name_servers` | `- 1.1.1.3#family.cloudflare-dns.com<br>- 1.0.0.3#family.cloudflare-dns.com` | Upstream DNS resolvers for Unbound. |
+| `firewall_ntp_servers` | `- ntp.ubuntu.com` | NTP servers used to synchronize system time. |
+| `firewall_router_hostname` | `router` | Hostname applied to the router. |
+| `firewall_router_ip_address` | `192.168.1.1/24` | Router LAN IP address and prefix. |
+| `firewall_motd_dhcp_leases_limit` | `5` | Max DHCP leases shown in the MOTD display. |
+| `firewall_upgrade_reboot_time` | `'04:55'` | UTC time for unattended upgrade reboots. |
+| `firewall_upgrade_automatic_reboot` | `true` | Allow automatic reboot after unattended upgrades. |
+| `firewall_tailscaled_listen_port` | `0` | Tailscale daemon listen port (0 for default). |
+| `firewall_tailscale_iface` | `tailscale0` | Interface name for Tailscale traffic. |
+| `firewall_port_forwards` | `[]` | List of WAN-to-LAN port forwarding rules. |
+| `firewall_dhcp_reservations` | `[]` | Static DHCP reservation entries for LAN clients. |
+| `firewall_skip_mounts` | `false` | Skip fstab and mount management (testbench). |
+| `firewall_unbound_cpu_affinity` | `""` | CPU affinity for the Unbound service. |
+| `firewall_force_networkd_restart` | `false` | Force a systemd-networkd restart when true. |
+| `firewall_unbound_enable_tls` | `true` | Enable Unbound TLS listeners for DoT. |
+| `firewall_force_resolved_restart` | `false` | Force a systemd-resolved restart when true. |
+| `firewall_enable_lan_vpn` | `false` | Enable the VPN VLAN and WireGuard routing. |
+| `firewall_enable_rpi_tunings` | `true` | Enable Raspberry Pi-specific tuning tasks. |
