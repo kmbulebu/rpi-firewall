@@ -45,17 +45,19 @@ I also wanted to prove a Raspberry Pi 4 could achieve gigabit ethernet line rate
 
 ## Features
 
-- DHCP server and DHCP reservations.
-- Local DNS resolution for LAN devices (unbound and systemd-resolved).
-- IPv6 support (ULA prefixes and IPv6-capable settings).
-- WireGuard client support and an optional LAN routed through VPN.
-- VLAN support for guest and VPN LANs.
-- Prometheus Node Exporter support (optional).
-- Tailscale integration (optional).
-- Systemd-networkd configuration templates and udev rules for predictable interface naming.
-- Automated package upgrades with scheduled reboots.
-- Remote syslog (rsyslog) support configuration.
-- Tools to inspect DHCP leases and simple MOTD information for quick diagnostics.
+- DHCP server with reservations for LAN devices.
+- Local DNS resolution for LAN clients.
+- Encrypted DNS (DNS-over-TLS) optional for LAN clients.
+- IPv6 support (requires ISP prefix delegation; includes ULA addressing).
+- Guest network VLAN with isolated DHCP/DNS.
+- VPN VLAN where all traffic is routed through WireGuard.
+- WireGuard VPN client support.
+- Tailscale support (optional).
+- Port forwarding from WAN to LAN services.
+- Automated updates with scheduled reboots.
+- Monitoring via Prometheus Node Exporter (optional).
+- Remote syslog output (optional).
+- Startup diagnostics (DHCP lease viewer / quick status).
 
 ## How do I?
 
@@ -109,6 +111,32 @@ firewall_dhcp_reservations:
     mac_address: F9:E8:D7:C6:B5:A4
 ```
 
+### Configure the guest VLAN
+
+Enable and configure the guest VLAN for isolated DHCP/DNS:
+
+```yaml
+firewall_lan_guests_vlan_id: 6
+firewall_lan_guests_router_ip_address: 192.168.200.254/24
+firewall_lan_guests_dhcp_pool_offset: 10
+firewall_lan_guests_dhcp_pool_size: 200
+```
+
+### Configure the VPN VLAN (all traffic through WireGuard)
+
+Enable the VPN VLAN and provide WireGuard peer settings. All traffic from this VLAN is routed through the WireGuard interface.
+
+```yaml
+firewall_enable_lan_vpn: true
+firewall_lan_vpn_vlan_id: 2
+firewall_lan_vpn_router_ip_address: 192.168.254.1/24
+firewall_lan_vpn_wg_listen_port: 51820
+firewall_lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0
+firewall_lan_vpn_wg_private_key: "<private-key>"
+firewall_lan_vpn_wg_peer_public_key: "<peer-public-key>"
+firewall_lan_vpn_wg_peer_endpoint: "vpn.example.com:51820"
+```
+
 ### Add a port forward (expose a service)
 
 Port forwarding opens a port on the WAN interface and forwards traffic to a LAN host:
@@ -125,12 +153,26 @@ firewall_port_forwards:
 
 `ports_from` is the WAN port to open on the router. `ports_to` is the destination port on the LAN host at `address_to`.
 
+### Configure IPv6 (prefix delegation)
+
+IPv6 routing depends on your ISP providing prefix delegation. If your ISP does not provide PD, global IPv6 routing will not work. ULA addressing is still configured for internal use.
+
 ### Enable Tailscale
 
 Provide an auth key in inventory to enable Tailscale provisioning:
 
 ```yaml
 firewall_tailscale_auth_key: "tskey-..."
+```
+
+### Configure local DNS private domains
+
+Add private domains that should resolve to local IPs:
+
+```yaml
+firewall_dns_private_domains:
+  - my.home
+  - internal.my.home
 ```
 
 ### Enable encrypted DNS (DNS-over-TLS)
@@ -147,6 +189,28 @@ Provide TLS credentials at:
 - `/etc/unbound/unbound_server.pem`
 
 The playbook does not generate these files. You can provide self-signed certs or your own CA-signed certs. DNS-over-HTTPS is not implemented.
+
+### Enable Prometheus Node Exporter
+
+```yaml
+firewall_enable_prometheus_node_exporter: true
+```
+
+The exporter listens on the LAN interface on port 9100.
+
+### Configure remote syslog
+
+```yaml
+firewall_rsyslog_udp_server: 192.168.1.10:514
+firewall_rsyslog_tcp_server: 192.168.1.10:514
+```
+
+### Configure automatic updates
+
+```yaml
+firewall_upgrade_automatic_reboot: true
+firewall_upgrade_reboot_time: '04:55'
+```
 
 ### Disable Raspberry Pi tunings on non-Pi hardware
 
@@ -211,8 +275,7 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `firewall_lan_vpn_wg_listen_port` | `51820` | WireGuard listen port for the VPN interface. |
 | `firewall_lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs for the WireGuard peer (routes through VPN). |
 | `firewall_lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard persistent keepalive interval in seconds. |
-| `firewall_name_servers` | `- 1.1.1.3#family.cloudflare-dns.com
-- 1.0.0.3#family.cloudflare-dns.com` | List of upstream name servers. |
+| `firewall_name_servers` | `- 1.1.1.3#family.cloudflare-dns.com<br>- 1.0.0.3#family.cloudflare-dns.com` | List of upstream name servers. |
 | `firewall_ntp_servers` | `- ntp.ubuntu.com` | List of NTP servers used to sync system time. |
 | `firewall_router_hostname` | `router` | Hostname for the router. |
 | `firewall_router_ip_address` | `192.168.1.1/24` | Router LAN IP and prefix. |
