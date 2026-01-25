@@ -1,67 +1,67 @@
 - name: netplan apply
-  command: netplan apply
+  ansible.builtin.command: netplan apply
   become: yes
 - name: mount auto
-  command: mount -a
+  ansible.builtin.command: mount -a
   become: yes
 - name: restart systemd-networkd
-  service:
+  ansible.builtin.service:
     name: systemd-networkd
     state: restarted
 - name: restart systemd-udevd
-  service:
+  ansible.builtin.service:
     name: systemd-udevd
     state: restarted
 - name: restart systemd-timesyncd
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-timesyncd.service
     state: restarted
 - name: restart rsyslog
-  service:
+  ansible.builtin.service:
     name: rsyslog
     state: restarted
 - name: restart systemd-journald
-  service:
+  ansible.builtin.service:
     name: systemd-journald
     state: restarted
 - name: restart systemd-resolved
-  service:
+  ansible.builtin.service:
     name: systemd-resolved
     state: restarted
 - name: systemctl daemon-reload
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: yes
 - name: restart unbound
-  service:
+  ansible.builtin.service:
     name: unbound
     state: restarted
 - name: reload unbound
-  service:
+  ansible.builtin.service:
     name: unbound
     state: reloaded
 - name: reload firewalld
-  service:
+  ansible.builtin.service:
     name: firewalld
     state: reloaded
 - name: restart prometheus-node-exporter
-  systemd:
+  ansible.builtin.systemd:
     name: prometheus-node-exporter.service
     state: restarted
 - name: restart tailscaled
-  service:
+  ansible.builtin.service:
     name: tailscaled
     state: restarted
 - name: restart networkd-dispatcher
-  service:
+  ansible.builtin.service:
     name: networkd-dispatcher
     state: restarted
 - name: run depmod apply
-  command: /sbin/depmod -a
+  ansible.builtin.command: /sbin/depmod -a
   become: yes
 - name: reload apparmor
-  service:
+  ansible.builtin.service:
     name: apparmor
     state: reloaded
 - name: update initramfs
-  command: update-initramfs -u
+  ansible.builtin.command: update-initramfs -u
   become: yes

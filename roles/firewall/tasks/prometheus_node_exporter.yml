@@ -1,43 +1,43 @@
 ---
 - block:
     - name: Install Prometheus Node Exporter
-      apt:
+      ansible.builtin.apt:
         name: prometheus-node-exporter
         state: latest
         install_recommends: false
     - name: Configure Prometheus Node Exporter
-      copy:
+      ansible.builtin.copy:
         src: node-exporter/prometheus-node-exporter
         dest: /etc/default/prometheus-node-exporter
         owner: root
-        group: root
+        ansible.builtin.group: root
         mode: '0644'
       notify: restart systemd-journald
     - name: Create systemd prometheus-node-exporter.service.d overrides directory
-      file:
+      ansible.builtin.file:
         path: /etc/systemd/system/prometheus-node-exporter.service.d/
         state: directory
         mode: '0755'
     - name: Override systemd settings
-      copy:
+      ansible.builtin.copy:
         src: node-exporter/10-priority.conf
         dest: /etc/systemd/system/prometheus-node-exporter.service.d/10-priority.conf
         owner: root
-        group: root
+        ansible.builtin.group: root
         mode: '0644'
       notify:
         - systemctl daemon-reload
         - restart prometheus-node-exporter
     - name: Firewalld Prometheus Node Exporter Service
-      copy:
+      ansible.builtin.copy:
         src: node-exporter/prometheus-node-exporter.xml
         dest: /etc/firewalld/services/prometheus-node-exporter.xml
         owner: root
-        group: root
+        ansible.builtin.group: root
         mode: '0644'
       notify: reload firewalld
     - name: Enable prometheus-node-exporter.service
-      systemd:
+      ansible.builtin.systemd:
         name: prometheus-node-exporter.service
         enabled: yes
         state: started
@@ -47,32 +47,32 @@
 - block:
     - name: Disable prometheus-node-exporter.service
       ignore_errors: yes # If it's already uninstalled, this will fail
-      systemd:
+      ansible.builtin.systemd:
         name: prometheus-node-exporter.service
         enabled: no
         state: stopped
         masked: no
     - name: Remove systemd overrides for prometheus-node-exporter
-      file:
+      ansible.builtin.file:
         path: /etc/systemd/system/prometheus-node-exporter.service.d/10-priority.conf
         state: absent
       notify: systemctl daemon-reload
     - name: Remove prometheus-node-exporter.service.d directory
-      file:
+      ansible.builtin.file:
         path: /etc/systemd/system/prometheus-node-exporter.service.d/
         state: absent
       notify: systemctl daemon-reload
     - name: Remove Prometheus Node Exporter defaults
-      file:
+      ansible.builtin.file:
         path: /etc/default/prometheus-node-exporter
         state: absent
     - name: Remove firewalld Prometheus Node Exporter service
-      file:
+      ansible.builtin.file:
         path: /etc/firewalld/services/prometheus-node-exporter.xml
         state: absent
       notify: reload firewalld
     - name: Uninstall Prometheus Node Exporter
-      apt:
+      ansible.builtin.apt:
         name: prometheus-node-exporter
         state: absent
         purge: yes

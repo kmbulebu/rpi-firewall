@@ -6,13 +6,13 @@
     state: directory
     mode: '0755'
     owner: root
-    group: root
+    ansible.builtin.group: root
 
 - name: Install systemd watchdog configuration
   ansible.builtin.copy:
     src: systemd/watchdog.conf
     dest: /etc/systemd/system.conf.d/watchdog.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify: systemctl daemon-reload

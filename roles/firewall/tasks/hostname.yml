@@ -2,9 +2,9 @@
 - hostname:
     name: "{{ router_hostname }}"
 - name: Setup /etc/hosts
-  template:
+  ansible.builtin.template:
     src: hostname/hosts
     dest: /etc/hosts
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'

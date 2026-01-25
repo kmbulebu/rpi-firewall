@@ -2,57 +2,57 @@
 # Note: systemd-networkd is adding support for DNS resolution through resolved of DHCP server leases in v259.
 # https://github.com/systemd/systemd/commit/a7fa29b1b52210e33f4e43efc1a2f06b7c7233c0
 - name: Compute PTR /24 zones for LAN (set ptr_zones)
-  set_fact:
+  ansible.builtin.set_fact:
     base_ip: "{{ (lan_network | default(router_ip_address | ipaddr('network'))).split('/')[0] }}"
     prefix: "{{ (lan_cidr | default(router_ip_address | ipaddr('network/prefix'))).split('/')[-1] | int }}"
 - name: Build single PTR zone when prefix >= 24
-  set_fact:
+  ansible.builtin.set_fact:
     ptr_zones: "{{ [ (base_ip.split('.')[2] ~ '.' ~ base_ip.split('.')[1] ~ '.' ~ base_ip.split('.')[0] ~ '.in-addr.arpa.') ] }}"
   when: prefix | int >= 24
 - name: Build multiple PTR zones when prefix < 24
-  set_fact:
+  ansible.builtin.set_fact:
     ptr_zones: "{{ ptr_zones | default([]) + [ ( (base_ip.split('.')[2] | int + item) | string ) ~ '.' ~ base_ip.split('.')[1] ~ '.' ~ base_ip.split('.')[0] ~ '.in-addr.arpa.' ] }}"
   loop: "{{ range(0, (2 ** (24 - (prefix | int))) ) | list }}"
   when: prefix | int < 24
 - name: Configure systemd-resolved
-  template:
+  ansible.builtin.template:
     src: resolved/resolved.conf
     dest: /etc/systemd/resolved.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify: restart systemd-resolved
 - name: Enable systemd-resolved
   ignore_errors: true
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-resolved
     enabled: yes
     state: started
     masked: no
 - name: Restart systemd-resolved when forced
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-resolved
     state: restarted
   when: force_resolved_restart
 - name: Install Unbound server
-  apt:
+  ansible.builtin.apt:
     name: unbound
     state: latest
     install_recommends: false
 - name: Install Unbound DNSSEC anchor updater
-  apt:
+  ansible.builtin.apt:
     name: unbound-anchor
     state: latest
     install_recommends: false
 - name: Install DNS root trust anchors
-  apt:
+  ansible.builtin.apt:
     name: dns-root-data
     state: latest
     install_recommends: false
 # We don't need or want unbound to perform local resolution.
 # systemd-resolved is fine for that.
 - name: Disable and mask unbound-resolvconf.service
-  systemd:
+  ansible.builtin.systemd:
     name: unbound-resolvconf.service
     enabled: no
     state: stopped
@@ -62,30 +62,30 @@
     cmd: /usr/sbin/unbound-anchor -v
     creates: /var/lib/unbound/root.key
 - name: Template a file to /etc/unbound/unbound.conf.d/server.conf
-  template:
+  ansible.builtin.template:
     src: unbound/server.conf
     dest: /etc/unbound/unbound.conf.d/server.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify: restart unbound
 - name: Create systemd unbound.service.d overrides directory
-  file:
+  ansible.builtin.file:
     path: /etc/systemd/system/unbound.service.d/
     state: directory
     mode: '0755'
 - name: Override systemd unbound settings
-  template:
+  ansible.builtin.template:
     src: unbound/10-priority.conf
     dest: /etc/systemd/system/unbound.service.d/10-priority.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify: 
     - systemctl daemon-reload
     - restart unbound 
 - name: Enable unbound
-  systemd:
+  ansible.builtin.systemd:
     name: unbound
     enabled: yes
     state: started

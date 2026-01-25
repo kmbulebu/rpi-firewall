@@ -14,40 +14,40 @@
     dest: /etc/apt/sources.list.d/tailscale.list
     mode: '0644'
 - name: Install tailscale
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
     name: tailscale
     state: latest
     install_recommends: false
 - name: Start tailscaled
-  systemd:
+  ansible.builtin.systemd:
     name: tailscaled.service
     enabled: yes
     state: started
     masked: no
 - name: Update tailscaled configuration
-  template:
+  ansible.builtin.template:
     src: tailscale/defaults
     dest: /etc/default/tailscaled
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify: restart tailscaled
 - name: Tailscale Status
   ignore_errors: True
-  shell:
+  ansible.builtin.shell:
     cmd: 'tailscale status --peers=false --json | jq -e .HaveNodeKey'
   register: tailscale_status 
 - name: Tailscale Login
   when: tailscale_status.rc != 0
-  command:
+  ansible.builtin.command:
     argv:
       - tailscale
       - login
       - --auth-key
       - "{{ tailscale_auth_key }}"
 - name: Tailscale Configure
-  command:
+  ansible.builtin.command:
     argv:
       - tailscale
       - set

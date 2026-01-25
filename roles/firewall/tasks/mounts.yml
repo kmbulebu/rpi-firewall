@@ -1,10 +1,10 @@
 ---
 - name: Setup mounts
-  copy:
+  ansible.builtin.copy:
     src: mounts/fstab
     dest: /etc/fstab
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify:
     - mount auto

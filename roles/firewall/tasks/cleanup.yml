@@ -2,7 +2,7 @@
 
 # Remove packages we don't need.
 - name: Apt Unused Packages
-  apt:
+  ansible.builtin.apt:
     name:
       - snapd
       - multipath-tools

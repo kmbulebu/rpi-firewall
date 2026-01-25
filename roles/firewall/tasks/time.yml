@@ -1,17 +1,17 @@
 ---
 - name: Set timezone to UTC
-  timezone:
+  ansible.builtin.timezone:
     name: UTC
 - name: Update timesyncd configuration
-  template:
+  ansible.builtin.template:
     src: timesyncd/timesyncd.conf
     dest: /etc/systemd/timesyncd.conf
     owner: root
-    group: root
+    ansible.builtin.group: root
     mode: '0644'
   notify: restart systemd-timesyncd
 - name: Enable NTP
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-timesyncd.service
     enabled: yes
     state: started
