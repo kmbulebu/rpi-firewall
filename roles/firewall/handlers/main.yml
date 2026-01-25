@@ -1,67 +1,67 @@
-- name: netplan apply
+- name: Netplan apply
   ansible.builtin.command: netplan apply
   become: true
-- name: mount auto
+- name: Mount auto
   ansible.builtin.command: mount -a
   become: true
-- name: restart systemd-networkd
+- name: Restart systemd-networkd
   ansible.builtin.service:
     name: systemd-networkd
     state: restarted
-- name: restart systemd-udevd
+- name: Restart systemd-udevd
   ansible.builtin.service:
     name: systemd-udevd
     state: restarted
-- name: restart systemd-timesyncd
+- name: Restart systemd-timesyncd
   ansible.builtin.systemd:
     name: systemd-timesyncd.service
     state: restarted
-- name: restart rsyslog
+- name: Restart rsyslog
   ansible.builtin.service:
     name: rsyslog
     state: restarted
-- name: restart systemd-journald
+- name: Restart systemd-journald
   ansible.builtin.service:
     name: systemd-journald
     state: restarted
-- name: restart systemd-resolved
+- name: Restart systemd-resolved
   ansible.builtin.service:
     name: systemd-resolved
     state: restarted
-- name: systemctl daemon-reload
+- name: Systemctl daemon-reload
   ansible.builtin.systemd:
     daemon_reload: true
-- name: restart unbound
+- name: Restart unbound
   ansible.builtin.service:
     name: unbound
     state: restarted
-- name: reload unbound
+- name: Reload unbound
   ansible.builtin.service:
     name: unbound
     state: reloaded
-- name: reload firewalld
+- name: Reload firewalld
   ansible.builtin.service:
     name: firewalld
     state: reloaded
-- name: restart prometheus-node-exporter
+- name: Restart prometheus-node-exporter
   ansible.builtin.systemd:
     name: prometheus-node-exporter.service
     state: restarted
-- name: restart tailscaled
+- name: Restart tailscaled
   ansible.builtin.service:
     name: tailscaled
     state: restarted
-- name: restart networkd-dispatcher
+- name: Restart networkd-dispatcher
   ansible.builtin.service:
     name: networkd-dispatcher
     state: restarted
-- name: run depmod apply
+- name: Run depmod apply
   ansible.builtin.command: /sbin/depmod -a
   become: true
-- name: reload apparmor
+- name: Reload apparmor
   ansible.builtin.service:
     name: apparmor
     state: reloaded
-- name: update initramfs
+- name: Update initramfs
   ansible.builtin.command: update-initramfs -u
   become: true
