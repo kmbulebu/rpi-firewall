@@ -50,7 +50,7 @@
     mode: '0644'
   notify: restart systemd-resolved
 - name: Enable systemd-resolved
-  ignore_errors: true
+  failed_when: false
   ansible.builtin.systemd:
     name: systemd-resolved
     enabled: true
@@ -64,17 +64,17 @@
 - name: Install Unbound server
   ansible.builtin.apt:
     name: unbound
-    state: latest
+    state: present
     install_recommends: false
 - name: Install Unbound DNSSEC anchor updater
   ansible.builtin.apt:
     name: unbound-anchor
-    state: latest
+    state: present
     install_recommends: false
 - name: Install DNS root trust anchors
   ansible.builtin.apt:
     name: dns-root-data
-    state: latest
+    state: present
     install_recommends: false
 # We don't need or want unbound to perform local resolution.
 # systemd-resolved is fine for that.
@@ -118,4 +118,5 @@
     state: started
     masked: false
     daemon_reload: true
-- meta: flush_handlers
+- name: Flush handlers after DNS updates
+  ansible.builtin.meta: flush_handlers

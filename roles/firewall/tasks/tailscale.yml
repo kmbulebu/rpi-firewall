@@ -3,6 +3,7 @@
   ansible.builtin.command:
     cmd: lsb_release -cs
   register: firewall_ubuntu_release_name
+  changed_when: false
 - name: Add Tailscale GPG key
   ansible.builtin.get_url:
     url: "https://pkgs.tailscale.com/stable/ubuntu/{{ firewall_ubuntu_release_name.stdout }}.noarmor.gpg"
@@ -17,7 +18,7 @@
   ansible.builtin.apt:
     update_cache: true
     name: tailscale
-    state: latest
+    state: present
     install_recommends: false
 - name: Start tailscaled
   ansible.builtin.systemd:
@@ -34,10 +35,12 @@
     mode: '0644'
   notify: restart tailscaled
 - name: Tailscale Status
-  ignore_errors: true
+  failed_when: false
   ansible.builtin.shell:
-    cmd: 'tailscale status --peers=false --json | jq -e .HaveNodeKey'
+    cmd: 'set -o pipefail && tailscale status --peers=false --json | jq -e .HaveNodeKey'
+    executable: /bin/bash
   register: firewall_tailscale_status
+  changed_when: false
 - name: Tailscale Login
   when: firewall_tailscale_status.rc != 0
   ansible.builtin.command:
@@ -45,7 +48,8 @@
       - tailscale
       - login
       - --auth-key
-      - "{{ tailscale_auth_key }}"
+      - "{{ firewall_tailscale_auth_key }}"
+  changed_when: true
 - name: Tailscale Configure
   ansible.builtin.command:
     argv:
@@ -55,3 +59,4 @@
       - --advertise-exit-node
       - --accept-routes=false
       - --accept-dns=false
+  changed_when: true

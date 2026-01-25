@@ -1,7 +1,7 @@
 - name: Install networkd-dispatcher
   ansible.builtin.apt:
     name: networkd-dispatcher
-    state: latest
+    state: present
     install_recommends: false
 - name: Start networkd-dispatcher
   ansible.builtin.systemd:

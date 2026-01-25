@@ -1,26 +1,48 @@
 ---
-- include_tasks: time.yml
-- include_tasks: hostname.yml
-- include_tasks: user.yml
-- include_tasks: motd.yml
-- include_tasks: mounts.yml
-- include_tasks: rsyslog.yml
-- include_tasks: apt.yml
-- include_tasks: ansible-pull.yml
-- include_tasks: tools.yml
-- include_tasks: network.yml
-- include_tasks: ethtool.yml
-- include_tasks: dns.yml
-- include_tasks: tailscale.yml
-  when: tailscale_auth_key is defined
-- include_tasks: firewalld.yml
-- include_tasks: forwarding.yml
-- include_tasks: wireguard_client.yml
+- name: Include time tasks
+  ansible.builtin.include_tasks: time.yml
+- name: Include hostname tasks
+  ansible.builtin.include_tasks: hostname.yml
+- name: Include user tasks
+  ansible.builtin.include_tasks: user.yml
+- name: Include motd tasks
+  ansible.builtin.include_tasks: motd.yml
+- name: Include mounts tasks
+  ansible.builtin.include_tasks: mounts.yml
+- name: Include rsyslog tasks
+  ansible.builtin.include_tasks: rsyslog.yml
+- name: Include apt tasks
+  ansible.builtin.include_tasks: apt.yml
+- name: Include ansible-pull tasks
+  ansible.builtin.include_tasks: ansible-pull.yml
+- name: Include tools tasks
+  ansible.builtin.include_tasks: tools.yml
+- name: Include network tasks
+  ansible.builtin.include_tasks: network.yml
+- name: Include ethtool tasks
+  ansible.builtin.include_tasks: ethtool.yml
+- name: Include dns tasks
+  ansible.builtin.include_tasks: dns.yml
+- name: Include tailscale tasks
+  ansible.builtin.include_tasks: tailscale.yml
+  when: firewall_tailscale_auth_key is defined
+- name: Include firewalld tasks
+  ansible.builtin.include_tasks: firewalld.yml
+- name: Include forwarding tasks
+  ansible.builtin.include_tasks: forwarding.yml
+- name: Include wireguard client tasks
+  ansible.builtin.include_tasks: wireguard_client.yml
   when: firewall_enable_lan_vpn | default(false)
-- include_tasks: prometheus_node_exporter.yml
-- include_tasks: rpi.yml
+- name: Include prometheus node exporter tasks
+  ansible.builtin.include_tasks: prometheus_node_exporter.yml
+- name: Include rpi tasks
+  ansible.builtin.include_tasks: rpi.yml
   when: firewall_enable_rpi_tunings | default(true)
-- include_tasks: apparmor.yml
-- include_tasks: cleanup.yml
-- include_tasks: watchdog.yml
-- meta: clear_facts
+- name: Include apparmor tasks
+  ansible.builtin.include_tasks: apparmor.yml
+- name: Include cleanup tasks
+  ansible.builtin.include_tasks: cleanup.yml
+- name: Include watchdog tasks
+  ansible.builtin.include_tasks: watchdog.yml
+- name: Clear facts after role
+  ansible.builtin.meta: clear_facts

@@ -127,11 +127,11 @@ To send router and firewall logs to a remote syslog server, provide
 the destination server and port. `192.168.1.10:514`
 
 ```
-rsyslog_udp_server:
+firewall_rsyslog_udp_server:
 ```
 
 ```
-rsyslog_tcp_server:
+firewall_rsyslog_tcp_server:
 ```
 
 ### Automatic Updates
@@ -370,4 +370,3 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `wan_device_set_mac_address` | `` | Optional MAC address to set on WAN device (empty by default). |
 | `wan_iface` | `wan0` | Desired WAN interface name. |
 | `wan_iface_networkd_link_match` | `"Property=ID_BUS=usb"` | `systemd-networkd` match string for WAN link. |
-

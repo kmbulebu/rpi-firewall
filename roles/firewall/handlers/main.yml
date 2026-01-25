@@ -1,8 +1,10 @@
 - name: Netplan apply
   ansible.builtin.command: netplan apply
+  changed_when: false
   become: true
 - name: Mount auto
-  ansible.builtin.command: mount -a
+  ansible.builtin.command: mount -a  # noqa command-instead-of-module
+  changed_when: false
   become: true
 - name: Restart systemd-networkd
   ansible.builtin.service:
@@ -57,6 +59,7 @@
     state: restarted
 - name: Run depmod apply
   ansible.builtin.command: /sbin/depmod -a
+  changed_when: false
   become: true
 - name: Reload apparmor
   ansible.builtin.service:
@@ -64,4 +67,5 @@
     state: reloaded
 - name: Update initramfs
   ansible.builtin.command: update-initramfs -u
+  changed_when: false
   become: true
