@@ -2,7 +2,7 @@
 <zone target="default">
   <short>Guest</short>
   <description>For use on guest networks.</description>
-  <interface name="{{ lan_guests_iface }}"/>
+  <interface name="{{ firewall_lan_guests_iface }}"/>
   <!-- Allow list ICMP instead of deny list -->
   <icmp-block-inversion/>
   <icmp-block name="echo-request"/>

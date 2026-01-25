@@ -1,5 +1,5 @@
 [Match]
-Name={{ wan_iface }}
+Name={{ firewall_wan_iface }}
 
 [Link]
 RequiredForOnline=no
@@ -56,7 +56,7 @@ IPv6Preference=high
 
 [Route]
 Type=blackhole
-Destination={{ ip6_ula_cidr }}
+Destination={{ firewall_ip6_ula_cidr }}
 
 [Route]
 Type=blackhole

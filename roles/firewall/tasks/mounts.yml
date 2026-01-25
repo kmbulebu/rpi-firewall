@@ -9,4 +9,4 @@
   notify:
     - mount auto
     - restart rsyslog
-  when: not skip_mounts
+  when: not firewall_skip_mounts

@@ -2,15 +2,15 @@
 - name: Get Ubuntu OS release name
   ansible.builtin.command:
     cmd: lsb_release -cs
-  register: ubuntu_release_name
+  register: firewall_ubuntu_release_name
 - name: Add Tailscale GPG key
   ansible.builtin.get_url:
-    url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ubuntu_release_name.stdout }}.noarmor.gpg"
+    url: "https://pkgs.tailscale.com/stable/ubuntu/{{ firewall_ubuntu_release_name.stdout }}.noarmor.gpg"
     dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
     mode: '0644'
 - name: Add Tailscale repository list
   ansible.builtin.get_url:
-    url: https://pkgs.tailscale.com/stable/ubuntu/{{ ubuntu_release_name.stdout }}.tailscale-keyring.list
+    url: https://pkgs.tailscale.com/stable/ubuntu/{{ firewall_ubuntu_release_name.stdout }}.tailscale-keyring.list
     dest: /etc/apt/sources.list.d/tailscale.list
     mode: '0644'
 - name: Install tailscale
@@ -37,9 +37,9 @@
   ignore_errors: true
   ansible.builtin.shell:
     cmd: 'tailscale status --peers=false --json | jq -e .HaveNodeKey'
-  register: tailscale_status
+  register: firewall_tailscale_status
 - name: Tailscale Login
-  when: tailscale_status.rc != 0
+  when: firewall_tailscale_status.rc != 0
   ansible.builtin.command:
     argv:
       - tailscale

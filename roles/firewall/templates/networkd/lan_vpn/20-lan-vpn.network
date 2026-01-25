@@ -1,16 +1,16 @@
 [Match]
-Name={{ lan_vpn_iface }}
+Name={{ firewall_lan_vpn_iface }}
 
 [Link]
 RequiredForOnline=no
 MTUBytes=1292
 
 [Network]
-VRF={{ vpn_vrf_iface }}
+VRF={{ firewall_vpn_vrf_iface }}
 ConfigureWithoutCarrier=yes
 IPv6AcceptRA=no
 LinkLocalAddressing=no
-Address={{ lan_vpn_router_ip_address }}
+Address={{ firewall_lan_vpn_router_ip_address }}
 DHCPServer=yes
 BindCarrier=wg0
 LLDP=false

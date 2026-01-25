@@ -2,7 +2,7 @@
 <zone target="DROP">
   <short>External</short>
   <description>For use on external networks. You do not trust the other computers on networks to not harm your computer. Only selected incoming connections are accepted.</description>
-  <interface name="{{ wan_iface }}"/>
+  <interface name="{{ firewall_wan_iface }}"/>
   <masquerade/>
   <!-- Allow list ICMP instead of deny list -->
   <icmp-block-inversion/>
@@ -29,7 +29,7 @@
   <icmp-block name="failed-policy"/>
   <icmp-block name="fragmentation-needed"/>
   <service name="dhcpv6-client" />
-  {% for port_forward in (port_forwards | default([], true)) %}
+  {% for port_forward in (firewall_port_forwards | default([], true)) %}
   <!-- {{ port_forward.description }} -->
   <rule family="ipv4">
     <source address="{{ port_forward.address_from }}"/>
@@ -47,7 +47,7 @@
   </rule>
   <!-- Wireguard -->
   <rule family="ipv4">
-    <source-port port="{{ lan_vpn_wg_listen_port }}" protocol="udp"/>
+    <source-port port="{{ firewall_lan_vpn_wg_listen_port }}" protocol="udp"/>
     <accept/>
   </rule>
   <!-- NAT internet traffic from our ULA range. -->

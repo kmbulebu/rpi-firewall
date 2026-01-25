@@ -9,7 +9,7 @@
   <!-- To the internal LAN -->
   <egress-zone name="internal"/>
 
-{% for port_forward in (port_forwards | default([], true)) %}
+{% for port_forward in (firewall_port_forwards | default([], true)) %}
   <!-- {{ port_forward.description }} -->
   <rich-rule rule='rule family="ipv4" source address="{{ port_forward.address_from }}"
                 forward-port port="{{ port_forward.ports_from }}" protocol="{{ port_forward.proto }}"

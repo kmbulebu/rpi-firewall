@@ -1,5 +1,5 @@
 [NetDev]
-Name={{ vpn_vrf_iface }}
+Name={{ firewall_vpn_vrf_iface }}
 Kind=vrf
 MTUBytes=1292
 

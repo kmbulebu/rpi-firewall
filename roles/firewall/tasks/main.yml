@@ -16,10 +16,10 @@
 - include_tasks: firewalld.yml
 - include_tasks: forwarding.yml
 - include_tasks: wireguard_client.yml
-  when: enable_lan_vpn | default(false)
+  when: firewall_enable_lan_vpn | default(false)
 - include_tasks: prometheus_node_exporter.yml
 - include_tasks: rpi.yml
-  when: enable_rpi_tunings | default(true)
+  when: firewall_enable_rpi_tunings | default(true)
 - include_tasks: apparmor.yml
 - include_tasks: cleanup.yml
 - include_tasks: watchdog.yml
