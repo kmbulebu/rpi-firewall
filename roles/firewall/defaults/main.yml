@@ -31,9 +31,16 @@ firewall_lan_vpn_vlan_id: 2
 firewall_lan_vpn_wg_listen_port: 51820
 firewall_lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0
 firewall_lan_vpn_wg_peer_persistent_keep_alive: 15
-firewall_name_servers:
+firewall_upstream_name_servers:
   - 1.1.1.3#family.cloudflare-dns.com
   - 1.0.0.3#family.cloudflare-dns.com
+# Deprecated: use firewall_upstream_name_servers.
+firewall_name_servers: "{{ firewall_upstream_name_servers }}"
+firewall_resolved_fallback_name_servers:
+  - 1.1.1.3#family.cloudflare-dns.com
+  - 2606:4700:4700::1113#family.cloudflare-dns.com
+  - 8.8.4.4#dns.google
+  - 2001:4860:4860::8844#dns.google
 firewall_ntp_servers:
   - ntp.ubuntu.com
 firewall_router_hostname: router

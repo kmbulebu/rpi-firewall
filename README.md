@@ -190,6 +190,9 @@ Provide TLS credentials at:
 
 Ubuntu ships a self-signed Unbound certificate at these paths. DNS-over-HTTPS is not implemented.
 
+Upstream and fallback DNS server entries use the DNS-over-TLS format `IP#hostname`. The hostname
+must match the provider TLS certificate for verification.
+
 ### Enable Prometheus Node Exporter
 
 ```yaml
@@ -275,7 +278,8 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `firewall_lan_vpn_wg_listen_port` | `51820` | WireGuard listen port on the router. |
 | `firewall_lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs routed through the WireGuard peer. |
 | `firewall_lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard keepalive interval in seconds. |
-| `firewall_name_servers` | `1.1.1.3#family.cloudflare-dns.com, 1.0.0.3#family.cloudflare-dns.com` | Upstream DNS resolvers for Unbound. |
+| `firewall_upstream_name_servers` | `1.1.1.3#family.cloudflare-dns.com, 1.0.0.3#family.cloudflare-dns.com` | Upstream DNS resolvers for Unbound and systemd-resolved. |
+| `firewall_resolved_fallback_name_servers` | `1.1.1.3#family.cloudflare-dns.com, 2606:4700:4700::1113#family.cloudflare-dns.com, 8.8.4.4#dns.google, 2001:4860:4860::8844#dns.google` | Router-only fallback resolvers for systemd-resolved, used only if upstream DNS fails (recommended to use different providers). |
 | `firewall_ntp_servers` | `- ntp.ubuntu.com` | NTP servers used to synchronize system time. |
 | `firewall_router_hostname` | `router` | Hostname applied to the router. |
 | `firewall_router_ip_address` | `192.168.1.1/24` | Router LAN IP address and prefix. |
@@ -291,3 +295,5 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `firewall_unbound_enable_tls` | `true` | Enable Unbound TLS listeners for DoT. |
 | `firewall_enable_lan_vpn` | `false` | Enable the VPN VLAN and WireGuard routing. |
 | `firewall_enable_rpi_tunings` | `true` | Enable Raspberry Pi-specific tuning tasks. |
+
+`firewall_name_servers` is a deprecated alias for `firewall_upstream_name_servers`.
