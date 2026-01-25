@@ -38,7 +38,7 @@
     group: root
     mode: '0644'
   notify: systemctl daemon-reload
-- name: systemctl daemon-reload
+- name: Systemctl daemon-reload
   ansible.builtin.systemd:
     daemon_reload: true
 - name: Setup ansible-pull.service

@@ -34,13 +34,13 @@
     path: /etc/rsyslog.d/50-default.conf
     state: absent
   notify: restart rsyslog
-- name: enable rsyslog
+- name: Enable rsyslog
   ansible.builtin.service:
     name: rsyslog
     state: started
     enabled: true
   when: rsyslog_udp_server is defined or rsyslog_tcp_server is defined
-- name: disable rsyslog
+- name: Disable rsyslog
   ansible.builtin.service:
     name: rsyslog
     state: stopped
