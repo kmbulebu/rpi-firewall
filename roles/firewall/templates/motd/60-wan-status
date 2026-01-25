@@ -1,7 +1,7 @@
 #!/bin/bash
 # Simple WAN status check for MOTD
 
-IFACE="{{ wan_iface }}"
+IFACE="{{ firewall_wan_iface }}"
 
 GREEN="\033[0;32m"
 RED="\033[0;31m"

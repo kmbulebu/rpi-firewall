@@ -3,13 +3,13 @@ all:
     localhost:
       ansible_connection: local
   vars:
-    wan_iface: wan0
-    lan_iface: lan0
-    wan_iface_networkd_link_match: "MACAddress=__ROUTER_WAN_MAC__"
-    lan_iface_networkd_link_match: "MACAddress=__ROUTER_LAN_MAC__"
-    wan_device_set_mac_address: "__ROUTER_WAN_MAC__"
-    skip_mounts: yes
-    force_networkd_restart: yes
-    unbound_enable_tls: no
-    force_resolved_restart: yes
-    enable_rpi_tunings: no
+    firewall_wan_iface: wan0
+    firewall_lan_iface: lan0
+    firewall_wan_iface_networkd_link_match: "MACAddress=__ROUTER_WAN_MAC__"
+    firewall_lan_iface_networkd_link_match: "MACAddress=__ROUTER_LAN_MAC__"
+    firewall_wan_device_set_mac_address: "__ROUTER_WAN_MAC__"
+    firewall_skip_mounts: true
+    firewall_force_networkd_restart: true
+    firewall_unbound_enable_tls: false
+    firewall_force_resolved_restart: true
+    firewall_enable_rpi_tunings: false

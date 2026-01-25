@@ -12,12 +12,12 @@
   ansible.builtin.find:
     paths: /run/systemd/network
     patterns: "10-netplan-*.network"
-  register: netplan_networkd_files
+  register: firewall_netplan_networkd_files
 - name: Remove generated netplan networkd files
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
-  loop: "{{ netplan_networkd_files.files }}"
+  loop: "{{ firewall_netplan_networkd_files.files }}"
   notify: restart systemd-networkd
 ## WAN Network
 - name: Configure physical wan Link
@@ -95,7 +95,7 @@
   ansible.builtin.systemd:
     name: systemd-networkd
     state: restarted
-  when: force_networkd_restart
+  when: firewall_force_networkd_restart
 - name: Wait for networkd after forced restart
   ansible.builtin.command: /usr/lib/systemd/systemd-networkd-wait-online --any --timeout=30
-  when: force_networkd_restart
+  when: firewall_force_networkd_restart

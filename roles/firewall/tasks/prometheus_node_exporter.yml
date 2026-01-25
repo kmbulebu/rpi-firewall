@@ -42,7 +42,7 @@
         enabled: true
         state: started
         masked: false
-  when: enable_prometheus_node_exporter_bool
+  when: firewall_enable_prometheus_node_exporter_bool
 
 - block:
     - name: Disable prometheus-node-exporter.service
@@ -76,4 +76,4 @@
         name: prometheus-node-exporter
         state: absent
         purge: true
-  when: not enable_prometheus_node_exporter_bool
+  when: not firewall_enable_prometheus_node_exporter_bool

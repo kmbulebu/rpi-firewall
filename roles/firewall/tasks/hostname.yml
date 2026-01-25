@@ -1,6 +1,6 @@
 ---
 - hostname:
-    name: "{{ router_hostname }}"
+    name: "{{ firewall_router_hostname }}"
 - name: Setup /etc/hosts
   ansible.builtin.template:
     src: hostname/hosts

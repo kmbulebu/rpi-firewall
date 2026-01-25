@@ -1,56 +1,56 @@
 ---
 # Default password: MyPasswordIsMyVoice
 # https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
-ansible_playbook_git_url: https://github.com/kmbulebu/rpi-firewall.git
-ansible_playbook_git_ref: master
-ansible_playbook_filename: playbook.yml
-ansible_inventory: /boot/firmware/inventory.yml
-admin_user_password_hash: '$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'
-domain: my.home
-dns_private_domains: []
-enable_prometheus_node_exporter: false
-wan_iface_networkd_link_match: "Property=ID_BUS=usb"
-wan_iface: wan0
-lan_iface_networkd_link_match: "Driver=bcmgenet"
-lan_iface: lan0
-lan_dhcp_pool_offset: 10
-lan_dhcp_pool_size: 200
-lan_dhcp_default_lease_time_sec: 7200
-lan_dhcp_max_lease_time_sec: 21600
-wan_device_set_mac_address:
-lan_guests_iface: lan_guests
-lan_guests_router_ip_address: 192.168.200.254/24
-lan_guests_vlan_id: 6
-lan_guests_dhcp_pool_offset: 10
-lan_guests_dhcp_pool_size: 200
-vpn_client_iface: wg0
-vpn_vrf_iface: vpn_vrf0
-lan_vpn_iface: lan_vpn
-lan_vpn_router_ip_address: 192.168.254.1/24
-lan_vpn_vlan_id: 2
-lan_vpn_wg_listen_port: 51820
-lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0
-lan_vpn_wg_peer_persistent_keep_alive: 15
-name_servers:
+firewall_ansible_playbook_git_url: https://github.com/kmbulebu/rpi-firewall.git
+firewall_ansible_playbook_git_ref: master
+firewall_ansible_playbook_filename: playbook.yml
+firewall_ansible_inventory: /boot/firmware/inventory.yml
+firewall_admin_user_password_hash: '$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'
+firewall_domain: my.home
+firewall_dns_private_domains: []
+firewall_enable_prometheus_node_exporter: false
+firewall_wan_iface_networkd_link_match: "Property=ID_BUS=usb"
+firewall_wan_iface: wan0
+firewall_lan_iface_networkd_link_match: "Driver=bcmgenet"
+firewall_lan_iface: lan0
+firewall_lan_dhcp_pool_offset: 10
+firewall_lan_dhcp_pool_size: 200
+firewall_lan_dhcp_default_lease_time_sec: 7200
+firewall_lan_dhcp_max_lease_time_sec: 21600
+firewall_wan_device_set_mac_address:
+firewall_lan_guests_iface: lan_guests
+firewall_lan_guests_router_ip_address: 192.168.200.254/24
+firewall_lan_guests_vlan_id: 6
+firewall_lan_guests_dhcp_pool_offset: 10
+firewall_lan_guests_dhcp_pool_size: 200
+firewall_vpn_client_iface: wg0
+firewall_vpn_vrf_iface: vpn_vrf0
+firewall_lan_vpn_iface: lan_vpn
+firewall_lan_vpn_router_ip_address: 192.168.254.1/24
+firewall_lan_vpn_vlan_id: 2
+firewall_lan_vpn_wg_listen_port: 51820
+firewall_lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0
+firewall_lan_vpn_wg_peer_persistent_keep_alive: 15
+firewall_name_servers:
   - 1.1.1.3#family.cloudflare-dns.com
   - 1.0.0.3#family.cloudflare-dns.com
-ntp_servers:
+firewall_ntp_servers:
   - ntp.ubuntu.com
-router_hostname: router
-router_ip_address: 192.168.1.1/24
+firewall_router_hostname: router
+firewall_router_ip_address: 192.168.1.1/24
 # MOTD: how many DHCP leases to show per-interface
-motd_dhcp_leases_limit: 5
+firewall_motd_dhcp_leases_limit: 5
 # UTC
-upgrade_reboot_time: '04:55'
-upgrade_automatic_reboot: true
-tailscaled_listen_port: 0
-tailscale_iface: tailscale0
-port_forwards: []
-dhcp_reservations: []
-skip_mounts: false
-unbound_cpu_affinity: ""
-force_networkd_restart: false
-unbound_enable_tls: true
-force_resolved_restart: false
-enable_lan_vpn: false
-enable_rpi_tunings: true
+firewall_upgrade_reboot_time: '04:55'
+firewall_upgrade_automatic_reboot: true
+firewall_tailscaled_listen_port: 0
+firewall_tailscale_iface: tailscale0
+firewall_port_forwards: []
+firewall_dhcp_reservations: []
+firewall_skip_mounts: false
+firewall_unbound_cpu_affinity: ""
+firewall_force_networkd_restart: false
+firewall_unbound_enable_tls: true
+firewall_force_resolved_restart: false
+firewall_enable_lan_vpn: false
+firewall_enable_rpi_tunings: true

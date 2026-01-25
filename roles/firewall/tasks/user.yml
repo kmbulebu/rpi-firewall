@@ -5,7 +5,7 @@
     groups: adm,sudo
     expires: -1
     create_home: true
-    password: "{{ admin_user_password_hash }}"
+    password: "{{ firewall_admin_user_password_hash }}"
     ansible.builtin.shell: /bin/bash
     append: true
 - name: Set authorized key for admin user

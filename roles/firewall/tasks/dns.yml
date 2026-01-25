@@ -3,25 +3,44 @@
 # https://github.com/systemd/systemd/commit/a7fa29b1b52210e33f4e43efc1a2f06b7c7233c0
 - name: Compute PTR /24 zones for LAN (set ptr_zones)
   ansible.builtin.set_fact:
-    base_ip: "{{ (lan_network | default(router_ip_address | ipaddr('network'))).split('/')[0] }}"
-    prefix: "{{ (lan_cidr | default(router_ip_address | ipaddr('network/prefix'))).split('/')[-1] | int }}"
+    firewall_base_ip: >-
+      {{
+        (firewall_lan_network | default(firewall_router_ip_address | ipaddr('network')))
+        .split('/')[0]
+      }}
+    firewall_prefix: >-
+      {{
+        (firewall_lan_cidr | default(firewall_router_ip_address | ipaddr('network/prefix')))
+        .split('/')[-1]
+        | int
+      }}
 - name: Build single PTR zone when prefix >= 24
   ansible.builtin.set_fact:
-    ptr_zones: "{{ [ (base_ip.split('.')[2] ~ '.' ~ base_ip.split('.')[1] ~ '.' ~ base_ip.split('.')[0] ~ '.in-addr.arpa.') ] }}"
-  when: prefix | int >= 24
+    firewall_ptr_zones: >-
+      {{
+        [
+          (
+            firewall_base_ip.split('.')[2]
+            ~ '.' ~ firewall_base_ip.split('.')[1]
+            ~ '.' ~ firewall_base_ip.split('.')[0]
+            ~ '.in-addr.arpa.'
+          )
+        ]
+      }}
+  when: firewall_prefix | int >= 24
 - name: Build multiple PTR zones when prefix < 24
   ansible.builtin.set_fact:
-    ptr_zones: >-
+    firewall_ptr_zones: >-
       {{
-        ptr_zones | default([]) + [
-          ((base_ip.split('.')[2] | int + item) | string)
-          ~ '.' ~ base_ip.split('.')[1]
-          ~ '.' ~ base_ip.split('.')[0]
+        firewall_ptr_zones | default([]) + [
+          ((firewall_base_ip.split('.')[2] | int + item) | string)
+          ~ '.' ~ firewall_base_ip.split('.')[1]
+          ~ '.' ~ firewall_base_ip.split('.')[0]
           ~ '.in-addr.arpa.'
         ]
       }}
-  loop: "{{ range(0, (2 ** (24 - (prefix | int)))) | list }}"
-  when: prefix | int < 24
+  loop: "{{ range(0, (2 ** (24 - (firewall_prefix | int)))) | list }}"
+  when: firewall_prefix | int < 24
 - name: Configure systemd-resolved
   ansible.builtin.template:
     src: resolved/resolved.conf
@@ -41,7 +60,7 @@
   ansible.builtin.systemd:
     name: systemd-resolved
     state: restarted
-  when: force_resolved_restart
+  when: firewall_force_resolved_restart
 - name: Install Unbound server
   ansible.builtin.apt:
     name: unbound

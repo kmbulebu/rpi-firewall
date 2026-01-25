@@ -1,5 +1,5 @@
 127.0.0.1 localhost
-{{ lan_address }} {{ router_hostname }}.{{ domain }} {{ router_hostname }}
+{{ firewall_lan_address }} {{ firewall_router_hostname }}.{{ firewall_domain }} {{ firewall_router_hostname }}
 
 # The following lines are desirable for IPv6 capable hosts
 ::1 ip6-localhost ip6-loopback

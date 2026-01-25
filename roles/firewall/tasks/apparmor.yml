@@ -6,7 +6,7 @@
     mode: '0755'
 
 - name: Disable AppArmor profiles if present
-  loop: "{{ apparmor_disable_profiles }}"
+  loop: "{{ firewall_apparmor_disable_profiles }}"
   vars:
     profile_path: "/etc/apparmor.d/{{ item | lower }}"
   ansible.builtin.file:
