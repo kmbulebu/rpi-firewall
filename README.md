@@ -1,184 +1,106 @@
 ## Introduction
 
-The Raspberry Pi 4B is the first Raspberry Pi device with true gigabit ethernet and USB 3 ports, making it capable of performing as a gigabit ethernet router and firewall. This project transforms a standard installation of Ubuntu Server on a Raspberry Pi into an Internet firewall and router.
+rpi-firewall turns an Ubuntu Server installation on a Raspberry Pi into a configurable router and firewall. It uses Ansible-based configuration-as-code to provision networking (systemd-networkd), DHCP/DNS, firewall rules, optional WireGuard VPN routing, Tailscale, and monitoring services such as Prometheus Node Exporter.
 
-## Prerequisites
+## Getting started
 
-- A Raspberry Pi 4B or newer
-- A USB gigabit ethernet adapter
-- Ubuntu Server 24.04 LTS (Noble)
+### Prerequisites
+- A Raspberry Pi 4B or newer (or other device supported by Ubuntu Server).
+- A USB gigabit ethernet adapter (recommended for true gigabit WAN + LAN split).
+- Ubuntu Server 24.04 (or similar supported release) installed on the Pi's SD card.
+- Basic familiarity with Ansible and editing YAML inventory files.
+
+### Installation steps (quick)
+1. Flash Ubuntu Server to an SD card following the Ubuntu Pi instructions.
+2. Copy or create an `inventory.yml` for your device (see `rpi/inventory.yml` as an example).
+3. Replace the `network-config` and `user-data` files on the SD card with the files from `rpi/` in this repo.
+4. Boot the Pi connected to your ISP (WAN) and your LAN switch (LAN) using the USB ethernet adapter.
+5. Once booted, cloud-init on the device will start `ansible-pull` automatically (first boot). Wait for that process to finish before attempting further changes.
+
+## Configuring
+
+On first boot cloud-init runs `ansible-pull` automatically to apply the configured playbook. Modifying (or `touch`ing) the `inventory.yml` on the device triggers `ansible-pull` to re-run; wait for that run to complete before making other changes.
+
+**Note about first-boot playbook URL/ref**
+
+The playbook Git URL and ref used during the initial (first boot) `ansible-pull` are taken from the cloud-init `user-data` you place on the SD card (see the `rpi/` files). If you need to change which repository or ref is used for first-boot provisioning, edit the `user-data` on the SD card before booting the device. After first boot, `ansible-pull` runs use the `inventory.yml` on the device to control subsequent pulls.
+
+## Why I wrote this (motivation)
+
+### Declarative configuration
+
+I wanted a declarative approach to configuring and maintaining my router and firewall. I previously ran OpenWRT and similar firmwares and had to configure it through a web UI. I could backup NVRAM, but those backups were often not transferable between firmware versions. With dozens of DHCP leases and firewall rules, manual reconfiguration was too tedious.
+
+### Just use Linux
+
+I wanted a fully featured home router and firewall with Linux and available packages and wanted to prove I could.
+
+### Systemd is good enough
+
+Other solutions and tutorials often ignore that systemd and popular Linux distributions already ship most router features. Additional software is not always necessary. For example, systemd-networkd has a DHCP server and IPv6 router advertisements. My aim is to minimize software and leverage systemd where possible.
+
+### Raspberry Pi line rate
+
+I also wanted to prove a Raspberry Pi 4 could achieve gigabit ethernet line rate.
 
 ## Features
 
-- Configuration as code. No Web Interface
-- DHCP and DNS server
-- IPv6 Support
-- Wireguard VPN client
+- DHCP server and DHCP reservations.
+- Local DNS resolution for LAN devices (unbound and systemd-resolved).
+- IPv6 support (ULA prefixes and IPv6-capable settings).
+- WireGuard client support and an optional LAN routed through VPN.
+- VLAN support for guest and VPN LANs.
+- Prometheus Node Exporter support (optional).
+- Tailscale integration (optional).
+- Systemd-networkd configuration templates and udev rules for predictable interface naming.
+- Automated package upgrades with scheduled reboots.
+- Remote syslog (rsyslog) support configuration.
+- Tools to inspect DHCP leases and simple MOTD information for quick diagnostics.
 
-## Installation
+## How do I?
 
-1. Prepare an SD card following the [Ubuntu tutorial.](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi#2-prepare-the-sd-card)
+### Set admin password or SSH authorized key
 
-2. Create an [inventory.yml](./rpi/inventory.yml) file, using the [./rpi/inventory.yml](./rpi/inventory.yml) as a start and this README as a guide.
+To set the admin password, provide an encrypted shadow-format password string in your inventory as `firewall_admin_user_password_hash`.
 
-3. Copy the `inventory.yml` file to the root directory of the SD card.
+Example:
 
-4. Replace the `network-config` and `user-data` files in the root of the SD card with those found [here](./rpi/).
-
-5. Plug the Raspberry Pi ethernet port into your ISP connection. Plug the USB ethernet adapter into the Raspberry PI and your LAN switch.
-
-6. Boot the Raspberry Pi with the SD card.
-
-## Sample `inventory.yml` configuration
-
-Coming Soon...
-
-## Configuration Reference
-
-### Admin user
-
-Username: `firewall`
-Password: `MyVoiceIsMyPassword`
-
-### Password
-
-To change the `firewall` user password, provide a valid shadow password hash. The password is required for SSH authentication and sudo.
-
-See: https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
-
-```
-admin_user_password_hash: '$6$.PKuLy7JxcwGR8$GeHpj./OiBfpMgWkEaI0yLkZ9jLHoTrwlMgbLRV2rf81FAk5CKeQRcoZLg4Z70YvII7MkFDv6BlgcfgAWlYsA/'
+```yaml
+firewall_admin_user_password_hash: '$6$examplehash...'
 ```
 
-### SSH Authorized Key
+You can generate a suitable hash locally using tools such as `mkpasswd --method=SHA-512` (from `whois`) or a `python` snippet that uses `crypt`.
 
+To set an SSH authorized key, set `firewall_admin_user_authorized_key` to the public key string in the inventory.
 
+### Match WAN/LAN NICs on systems with multiple adapters
 
-```
-admin_user_authorized_key=
-```
+Use `firewall_wan_iface_networkd_link_match` and `firewall_lan_iface_networkd_link_match` to match the physical NICs that should be assigned WAN and LAN roles. This is useful when `eth0/eth1` ordering is not stable across reboots or hardware changes. The values are passed to systemd-networkd link match rules.
 
-### WAN Interface (Internet Side)
+Example:
 
-### LAN Interface
-
-#### Router hostname
-
-Set the router hostname.
-
-```
-router_hostname: router
+```yaml
+firewall_wan_iface_networkd_link_match: "Property=ID_BUS=usb"
+firewall_lan_iface_networkd_link_match: "Driver=bcmgenet"
 ```
 
-#### LAN Ethernet Device
+### Configure the DHCP server
 
-The ethernet device to use for the local area network. The first attached USB
-ethernet device is `eth1`.
+DHCP is enabled for the LAN interface. Configure the pool size and lease times with:
 
-```
-lan_iface: eth1
-```
-
-#### Router LAN IP Address
-
-The IP address and prefix to assign to the LAN side of the router. This address and prefix will determine the IP address range for the local area network. For example, a setting of `192.168.1.1/24` will assign the router an IP address of `192.168.1.1`, and the network will have an IP address range of `192.168.1.1` to `192.168.1.255` with `192.168.1.255` as the broadcast address.
-
-```
-router_ip_address: 192.168.1.1/24
+```yaml
+firewall_lan_dhcp_pool_offset: 10
+firewall_lan_dhcp_pool_size: 200
+firewall_lan_dhcp_default_lease_time_sec: 7200
+firewall_lan_dhcp_max_lease_time_sec: 21600
 ```
 
-### DNS
+### Set static DHCP reservations
 
-#### Domain Name
+Use `firewall_dhcp_reservations` to assign fixed IPs by MAC address:
 
-The domain name to assign to local network devices.
-
-```
-domain: my.home
-```
-
-#### Name Servers
-
-A list of name servers to use for DNS resolution.
-
-```
-name_servers:
-  - 2606:4700:4700::1113
-  - 2606:4700:4700::1003
-  - 1.1.1.3
-  - 1.0.0.3
-```
-
-### NTP Servers
-
-To customize the automatic setting of the system clock, provide a list of NTP servers.
-
-> Note: The Raspbery Pi does not have a real time clock. The clock must be set on
-every boot from an NTP server.
-
-```
-ntp_servers:
-  - ntp.ubuntu.com
-```
-
-### Remote Syslog
-
-To send router and firewall logs to a remote syslog server, provide
-the destination server and port. `192.168.1.10:514`
-
-```
-firewall_rsyslog_udp_server:
-```
-
-```
-firewall_rsyslog_tcp_server:
-```
-
-### Automatic Updates
-
-To ensure the router remains patched and current, packages updates are installed
-automatically. Specify a time when reboots, if needed, are scheduled. The time
-zone is in Coordinated Universal Time (UTC).
-
-```
-upgrade_reboot_time: '07:00'
-```
-
-### Prometheus Node Exporter
-
-Enable the prometheus node exporter on the LAN interface, TCP port 9100.
-
-```
-enable_prometheus_node_exporter: no
-```
-
-### DHCP
-
-#### DHCP Lease Length
-
-The length of time devices may use an IP addressed assigned by the router.
-
-```
-dhcp_lease_seconds: 86400
-```
-
-#### DHCP Address Allocation Range
-
-The start and stop of an IP address range from which to assign IP addresses to devices on the network. This is useful for setting aside IP addresses for devices that do not use DHCP.
-
-```
-dhcp_ip_address_range_start: 192.168.1.2
-```
-```
-dhcp_ip_address_range_stop: 192.168.1.254
-```
-
-#### DHCP Reservations
-
-A list of DHCP reservations to ensure devices have a static IP address assignment. For each, specify the desired hostname and IP address to assign to the device with the specified MAC address.
-
-```
-dhcp_reservations:
+```yaml
+firewall_dhcp_reservations:
   - hostname: nas
     ip_address: 192.168.1.5
     mac_address: A0:B1:C2:D3:E4:F5
@@ -187,186 +109,124 @@ dhcp_reservations:
     mac_address: F9:E8:D7:C6:B5:A4
 ```
 
-### Port Forwarding
+### Add a port forward (expose a service)
 
-Port forwarding opens a port on the WAN interface, and forwards incoming traffic to that port to a device on the LAN.
+Port forwarding opens a port on the WAN interface and forwards traffic to a LAN host:
 
-#### Port Forwards
-
-A list of ports to forward to network devices.
-
-`description`: A human readable description of what the port forward enables.
-
-`address_from`: The source IP address(es) in CIDR notation that will be allowed to connect to the open port.
-
-`proto`: The type of layer 4 port, `tcp` or `udp`.
-
-`ports_from`: The port number the WAN interface should open for connections.
-
-`address_to`: The IP address of the LAN device to receive the forwarded traffic.
-
-`ports_to`: The tcp or udp port number on the LAN device to receive the forwarded traffic.
-
-Example:
-```
-port_forwards:
-  - description: "Web Site"
+```yaml
+firewall_port_forwards:
+  - description: "Web App"
     address_from: 0.0.0.0/0
-    ports_from: 80
-    ports_to: 8080
+    ports_from: 443
+    ports_to: 8443
     proto: tcp
     address_to: 192.168.1.10
 ```
 
-### LAN VPN Interface
+`ports_from` is the WAN port to open on the router. `ports_to` is the destination port on the LAN host at `address_to`.
 
-#### Enabling
+### Enable Tailscale
 
-The VPN client and associated LAN is disabled by default. Set to true to enable.
+Provide an auth key in inventory to enable Tailscale provisioning:
 
-```
-enable_lan_vpn: false
-```
-
-#### VLAN ID
-
-The VLAN ID to use for the LAN privacy network. All outbound traffic on this network will route through a Wireguard VPN.
-
-```
-lan_vpn_vlan_id: 2
+```yaml
+firewall_tailscale_auth_key: "tskey-..."
 ```
 
-#### LAN VPN Interface Name
+### Enable encrypted DNS (DNS-over-TLS)
 
-The desired name of the VLAN network interface.
+Unbound can listen on TLS ports (853/443) when TLS is enabled. Set:
 
-```
-lan_vpn_iface: lan_vpn
-```
-
-#### LAN VPN IP Address
-
-The IP address and prefix to assign to the VPN LAN side of the router. This address and prefix will determine the IP address range for the plocal area network attached to the VPN. For example, a setting of `192.168.254.1/24` will assign the router an IP address of `192.168.254.1`, and the network will have an IP address range of `192.168.254.1` to `192.168.254.255` with `192.168.254.255` as the broadcast address.
-
-```
-lan_vpn_router_ip_address: 192.168.254.1/24
+```yaml
+firewall_unbound_enable_tls: true
 ```
 
-#### DHCP Address Allocation Range
+Provide TLS credentials at:
 
-The start and stop of an IP address range from which to assign IP addresses to devices on the VPN LAN network. This is useful for setting aside IP addresses for devices that do not use DHCP.
+- `/etc/unbound/unbound_server.key`
+- `/etc/unbound/unbound_server.pem`
 
-```
-lan_vpn_dhcp_ip_address_range_start: 192.168.254.2
-```
-```
-lan_vpn_dhcp_ip_address_range_stop: 192.168.254.254
-```
+The playbook does not generate these files. You can provide self-signed certs or your own CA-signed certs. DNS-over-HTTPS is not implemented.
 
-#### Wireguard Interface Name
+### Disable Raspberry Pi tunings on non-Pi hardware
 
-The desired name of the wireguard network interface.
-
-```
-vpn_client_iface: wg0
+```yaml
+firewall_enable_rpi_tunings: false
 ```
 
-#### Wireguard Private Key
+### Update the playbook ref after first boot (stable version)
 
-Set to the Wireguard private key. In a Wireguard configuration file, this is found under the `[Interface]` section, named `PrivateKey`.
+To pin to a stable tag or branch after the initial boot, set:
 
-```
-lan_vpn_wg_private_key:
-```
-
-#### Wireguard Listen Port
-
-Set to the Wireguard listening port. In a Wireguard configuration file, this is found under the `[Interface]` section, named `ListenPort`.
-
-```
-lan_vpn_wg_listen_port: 51820
+```yaml
+firewall_ansible_playbook_git_ref: 'v1.2.3'
+firewall_ansible_playbook_git_url: 'https://github.com/kmbulebu/rpi-firewall.git'
 ```
 
-#### Wireguard Address
+First-boot uses the `user-data` on the SD card; later runs use `inventory.yml`.
 
-Set to the Wireguard IP address and prefix. In a Wireguard configuration file, this is found under the `[Interface]` section, named `Address`.
+### View DHCP server leases
 
-```
-lan_vpn_wg_address:
-```
+A helper script is included in the repo at `roles/firewall/files/tools/show_dhcp_leases.py` to present DHCP leases neatly.
 
-#### Wireguard Peer Public Key
+Example usage (from repo root):
 
-Set to the Wireguard peer public key. In a Wireguard configuration file, this is found under the `[Peer]` section, named `PublicKey`. Typically, this is the public key of a VPN service provider.
-
-```
-lan_vpn_wg_peer_public_key:
+```bash
+sudo python3 roles/firewall/files/tools/show_dhcp_leases.py
 ```
 
-#### Wireguard Peer Endpoint
-
-Set to the Wireguard Internet accessible peer IP address and network port. In a Wireguard configuration file, this found under the `[Peer]` section, named `Endpoint`. Typically, this is the IP address and port, separated by a colon, of a VPN service provider.
-
-```
-lan_vpn_wg_peer_endpoint:
-```
-
-#### Wireguard Peer Allowed IPs
-
-All traffic matching this IP address range will be sent through the VPN. All other traffic will be dropped. In a Wireguard configuration file, this found under the `[Peer]` section, named `AllowedIPs`. In most cases, this should be `0.0.0.0/0` to route all of the LAN VPN traffic through the Wireguard VPN.
-
-```
-lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0
-```
-
-#### Wireguard Peer Persistent Keepalive
-
-How often, in seconds, to send a keepalive packet to the peer to ensure a network address translated (NAT) connection remains alive. In a Wireguard configuration file, this found under the `[Peer]` section, named `PersistentKeepalive`.
-
-```
-lan_vpn_wg_peer_persistent_keep_alive: 15
-```
-
-**Variables**
+## Variables
 
 The table below lists role variables defined in `roles/firewall/defaults/main.yml` and their default values. Variables that are derived from other variables (found in `roles/firewall/vars/main.yml`) are omitted.
 
 | Variable | Default | Description |
 |---|---|---|
-| `admin_user_password_hash` | `'$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'` | Shadow-format password hash for the `firewall` admin user. |
-| `ansible_inventory` | `/boot/firmware/inventory.yml` | Path to inventory file on the target system. |
-| `ansible_playbook_filename` | `playbook.yml` | Playbook filename in the repository. |
-| `ansible_playbook_git_ref` | `master` | Git ref/branch to check out. |
-| `ansible_playbook_git_url` | `https://github.com/kmbulebu/rpi-firewall.git` | Git repository URL for the playbook. |
-| `domain` | `my.home` | Local domain name for LAN devices. |
-| `dns_private_domains` | `[]` | List of private domains to allow DNS resolution to local IP addresses. |
-| `enable_prometheus_node_exporter` | `no` | Enable Prometheus node exporter and listen on LAN interface. |
-| `lan_dhcp_pool_offset` | `10` | Offset from router IP to start DHCP pool. |
-| `lan_dhcp_pool_size` | `200` | Number of DHCP addresses in the LAN pool. |
-| `lan_iface` | `lan0` | Desired LAN interface name. |
-| `lan_iface_networkd_link_match` | `"Driver=bcmgenet"` | `systemd-networkd` match string for LAN link. |
-| `lan_guests_dhcp_pool_offset` | `10` | DHCP pool offset for guests network. |
-| `lan_guests_dhcp_pool_size` | `200` | DHCP pool size for guests network. |
-| `lan_guests_iface` | `lan_guests` | Interface name for LAN guests network. |
-| `lan_guests_router_ip_address` | `192.168.200.254/24` | Router IP/prefix for the guests network. |
-| `lan_guests_vlan_id` | `6` | VLAN id for the guests network. |
-| `lan_vpn_iface` | `lan_vpn` | Desired interface name for the LAN VPN VLAN. |
-| `lan_vpn_router_ip_address` | `192.168.254.1/24` | Router IP/prefix for the LAN VPN network. |
-| `lan_vpn_vlan_id` | `2` | VLAN id for the LAN VPN network. |
-| `lan_vpn_wg_listen_port` | `51820` | WireGuard listen port for the VPN interface. |
-| `lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs for the WireGuard peer (routes through VPN). |
-| `lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard persistent keepalive interval in seconds. |
-| `motd_dhcp_leases_limit` | `5` | Number of DHCP leases shown in the MOTD per interface. |
-| `name_servers` | `- 1.1.1.3#family.cloudflare-dns.com\n- 1.0.0.3#family.cloudflare-dns.com` | List of upstream name servers (default uses Cloudflare Family DNS). |
-| `ntp_servers` | `- ntp.ubuntu.com` | List of NTP servers used to sync system time. |
-| `router_hostname` | `router` | Hostname for the router. |
-| `router_ip_address` | `192.168.1.1/24` | Router LAN IP and prefix. |
-| `tailscale_iface` | `tailscale0` | Interface name for Tailscale. |
-| `tailscaled_listen_port` | `0` | Listening port for tailscaled (0 = default/no specific port). |
-| `upgrade_automatic_reboot` | `yes` | Whether to automatically reboot after upgrades when needed. |
-| `upgrade_reboot_time` | `'04:55'` | Time (UTC) to schedule automatic reboots after upgrades. |
-| `vpn_client_iface` | `wg0` | Desired WireGuard client interface name. |
-| `vpn_vrf_iface` | `vpn_vrf0` | VRF interface name for VPN routing. |
-| `wan_device_set_mac_address` | `` | Optional MAC address to set on WAN device (empty by default). |
-| `wan_iface` | `wan0` | Desired WAN interface name. |
-| `wan_iface_networkd_link_match` | `"Property=ID_BUS=usb"` | `systemd-networkd` match string for WAN link. |
+| `firewall_ansible_playbook_git_url` | `https://github.com/kmbulebu/rpi-firewall.git` | Git repository URL for the playbook. |
+| `firewall_ansible_playbook_git_ref` | `master` | Git ref/branch to check out. |
+| `firewall_ansible_playbook_filename` | `playbook.yml` | Playbook filename in the repository. |
+| `firewall_ansible_inventory` | `/boot/firmware/inventory.yml` | Path to inventory file on the target system. |
+| `firewall_admin_user_password_hash` | `'$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'` | Shadow-format password hash for the `firewall` admin user. |
+| `firewall_domain` | `my.home` | Local domain name for LAN devices. |
+| `firewall_dns_private_domains` | `[]` | List of private domains to allow DNS resolution to local IP addresses. |
+| `firewall_enable_prometheus_node_exporter` | `false` | Enable Prometheus node exporter and listen on LAN interface. |
+| `firewall_wan_iface_networkd_link_match` | `Property=ID_BUS=usb` | systemd-networkd match string for WAN link. |
+| `firewall_wan_iface` | `wan0` | Desired WAN interface name. |
+| `firewall_lan_iface_networkd_link_match` | `Driver=bcmgenet` | systemd-networkd match string for LAN link. |
+| `firewall_lan_iface` | `lan0` | Desired LAN interface name. |
+| `firewall_lan_dhcp_pool_offset` | `10` | Offset from router IP to start the LAN DHCP pool. |
+| `firewall_lan_dhcp_pool_size` | `200` | Number of DHCP addresses in the LAN pool. |
+| `firewall_lan_dhcp_default_lease_time_sec` | `7200` | Default DHCP lease time in seconds. |
+| `firewall_lan_dhcp_max_lease_time_sec` | `21600` | Max DHCP lease time in seconds. |
+| `firewall_wan_device_set_mac_address` | `` | Optional MAC address to set on WAN device. |
+| `firewall_lan_guests_iface` | `lan_guests` | Interface name for LAN guests network. |
+| `firewall_lan_guests_router_ip_address` | `192.168.200.254/24` | Router IP/prefix for the guests network. |
+| `firewall_lan_guests_vlan_id` | `6` | VLAN ID for the guests network. |
+| `firewall_lan_guests_dhcp_pool_offset` | `10` | DHCP pool offset for guests network. |
+| `firewall_lan_guests_dhcp_pool_size` | `200` | DHCP pool size for guests network. |
+| `firewall_vpn_client_iface` | `wg0` | WireGuard client interface name. |
+| `firewall_vpn_vrf_iface` | `vpn_vrf0` | VRF interface name for VPN routing. |
+| `firewall_lan_vpn_iface` | `lan_vpn` | Interface name for the LAN VPN VLAN. |
+| `firewall_lan_vpn_router_ip_address` | `192.168.254.1/24` | Router IP/prefix for the LAN VPN network. |
+| `firewall_lan_vpn_vlan_id` | `2` | VLAN ID for the LAN VPN network. |
+| `firewall_lan_vpn_wg_listen_port` | `51820` | WireGuard listen port for the VPN interface. |
+| `firewall_lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs for the WireGuard peer (routes through VPN). |
+| `firewall_lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard persistent keepalive interval in seconds. |
+| `firewall_name_servers` | `- 1.1.1.3#family.cloudflare-dns.com
+- 1.0.0.3#family.cloudflare-dns.com` | List of upstream name servers. |
+| `firewall_ntp_servers` | `- ntp.ubuntu.com` | List of NTP servers used to sync system time. |
+| `firewall_router_hostname` | `router` | Hostname for the router. |
+| `firewall_router_ip_address` | `192.168.1.1/24` | Router LAN IP and prefix. |
+| `firewall_motd_dhcp_leases_limit` | `5` | Number of DHCP leases shown in the MOTD per interface. |
+| `firewall_upgrade_reboot_time` | `'04:55'` | Time (UTC) to schedule automatic reboots after upgrades. |
+| `firewall_upgrade_automatic_reboot` | `true` | Whether to automatically reboot after upgrades when needed. |
+| `firewall_tailscaled_listen_port` | `0` | Listening port for tailscaled (0 = default/no specific port). |
+| `firewall_tailscale_iface` | `tailscale0` | Interface name for Tailscale. |
+| `firewall_port_forwards` | `[]` | List of port forwarding rules. |
+| `firewall_dhcp_reservations` | `[]` | DHCP reservations for LAN clients. |
+| `firewall_skip_mounts` | `false` | Skip mount management (testbench). |
+| `firewall_unbound_cpu_affinity` | `""` | CPU affinity list for Unbound service. |
+| `firewall_force_networkd_restart` | `false` | Force restart of systemd-networkd (testbench). |
+| `firewall_unbound_enable_tls` | `true` | Enable Unbound TLS listeners. |
+| `firewall_force_resolved_restart` | `false` | Force restart of systemd-resolved (testbench). |
+| `firewall_enable_lan_vpn` | `false` | Enable the LAN VPN VLAN. |
+| `firewall_enable_rpi_tunings` | `true` | Enable Raspberry Pi-specific tunings. |
