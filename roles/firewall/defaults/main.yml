@@ -1,11 +1,11 @@
 ---
-# Default password: MyPasswordIsMyVoice
+# Default password: MyVoiceIsMyPassword
 # https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
 firewall_ansible_playbook_git_url: https://github.com/kmbulebu/rpi-firewall.git
 firewall_ansible_playbook_git_ref: master
 firewall_ansible_playbook_filename: playbook.yml
 firewall_ansible_inventory: /boot/firmware/inventory.yml
-firewall_admin_user_password_hash: '$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'
+firewall_admin_user_password_hash: '$6$.PKuLy7JxcwGR8$0F1jN3ZwOMRkgNM1Csi7Tlhd.EEFbRQ0oqeySuaFHbOE7x3ceux/Uv1mtmVWUc4/c/wjkMO5JuzlnKdVfmrWo/'
 firewall_domain: my.home
 firewall_dns_private_domains: []
 firewall_enable_prometheus_node_exporter: false

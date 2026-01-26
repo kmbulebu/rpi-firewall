@@ -43,4 +43,34 @@ Stop the VMs:
 scripts/testbench.sh stop
 ```
 
-Use `scripts/testbench.sh status` to see SSH connection details.
+Use `scripts/testbench.sh status` to see QGA/serial connection details.
+
+The testbench uses a static resolver during cloud-init (via bootcmd) to avoid
+early DNS failures while packages install.
+
+The testbench uses QEMU guest agent (QGA) sockets for sync/run/verify, so SSH is
+not required for automation.
+
+QGA sockets:
+
+```bash
+scripts/state/router-qga.sock
+scripts/state/client-qga.sock
+```
+
+Sync includes local uncommitted changes (the tarball excludes `.git`).
+
+### Testbench console access
+
+If SSH is unavailable, use the serial console sockets:
+
+```bash
+nc -U scripts/state/router-serial.sock
+nc -U scripts/state/client-serial.sock
+```
+
+Console login credentials (testbench only):
+
+- Router user: `firewall`
+- Client user: `client`
+- Password: `MyVoiceIsMyPassword` (hash in cloud-init)

@@ -6,6 +6,7 @@ STATE_DIR="${ROOT_DIR}/scripts/state"
 CLOUD_INIT_DIR="${ROOT_DIR}/scripts/cloud-init"
 INVENTORY_TEMPLATE="${ROOT_DIR}/scripts/testbench-inventory.template.yml"
 INVENTORY_PATH="${STATE_DIR}/testbench-inventory.yml"
+QGA_HELPER="${ROOT_DIR}/scripts/qga.py"
 
 ROUTER_NAME="router"
 CLIENT_NAME="client"
@@ -31,6 +32,8 @@ CLIENT_DISK_SIZE=${CLIENT_DISK_SIZE:-"8G"}
 SSH_KEY_PATH=${SSH_KEY_PATH:-"$HOME/.ssh/id_ed25519.pub"}
 SSH_RETRY_COUNT=${SSH_RETRY_COUNT:-30}
 SSH_RETRY_DELAY=${SSH_RETRY_DELAY:-5}
+QGA_RETRY_COUNT=${QGA_RETRY_COUNT:-$SSH_RETRY_COUNT}
+QGA_RETRY_DELAY=${QGA_RETRY_DELAY:-$SSH_RETRY_DELAY}
 
 ensure_command() {
   local cmd=$1
@@ -44,8 +47,8 @@ ensure_requirements() {
   ensure_command qemu-system-x86_64
   ensure_command qemu-img
   ensure_command curl
-  ensure_command ssh
-  ensure_command rsync
+  ensure_command python3
+  ensure_command tar
   if ! command -v cloud-localds >/dev/null 2>&1; then
     if ! command -v hdiutil >/dev/null 2>&1; then
       echo "Missing required command: cloud-localds or hdiutil" >&2
@@ -85,42 +88,39 @@ render_template() {
     "$src" > "$dst"
 }
 
-wait_for_ssh() {
-  local user=$1
-  local port=$2
-  local host=$3
-  local attempt=1
-  local ssh_opts
-  ssh_opts="-p ${port} -o StrictHostKeyChecking=no -o UserKnownHostsFile=${STATE_DIR}/known_hosts -o ConnectTimeout=5"
-  while (( attempt <= SSH_RETRY_COUNT )); do
-    if ssh $ssh_opts "${user}@${host}" "echo ready" >/dev/null 2>&1; then
-      return
-    fi
-    echo "Waiting for SSH on ${host}:${port} (attempt ${attempt}/${SSH_RETRY_COUNT})..." >&2
-    sleep "$SSH_RETRY_DELAY"
-    attempt=$((attempt + 1))
-  done
-  echo "SSH not available on ${host}:${port} after ${SSH_RETRY_COUNT} attempts." >&2
-  exit 1
+qga_exec() {
+  local socket=$1
+  shift
+  python3 "$QGA_HELPER" --socket "$socket" exec "$@"
 }
 
-wait_for_remote_command() {
-  local user=$1
-  local port=$2
-  local host=$3
-  local command=$4
+qga_exec_timeout() {
+  local socket=$1
+  local timeout=$2
+  shift 2
+  python3 "$QGA_HELPER" --socket "$socket" exec --timeout "$timeout" "$@"
+}
+
+qga_push() {
+  local socket=$1
+  local src=$2
+  local dest=$3
+  python3 "$QGA_HELPER" --socket "$socket" push --src "$src" --dest "$dest"
+}
+
+wait_for_qga() {
+  local name=$1
+  local socket=$2
   local attempt=1
-  local ssh_opts
-  ssh_opts="-p ${port} -o StrictHostKeyChecking=no -o UserKnownHostsFile=${STATE_DIR}/known_hosts -o ConnectTimeout=5"
-  while (( attempt <= SSH_RETRY_COUNT )); do
-    if ssh $ssh_opts "${user}@${host}" "$command" >/dev/null 2>&1; then
+  while (( attempt <= QGA_RETRY_COUNT )); do
+    if python3 "$QGA_HELPER" --socket "$socket" exec "true" >/dev/null 2>&1; then
       return
     fi
-    echo "Waiting for '${command}' on ${host}:${port} (attempt ${attempt}/${SSH_RETRY_COUNT})..." >&2
-    sleep "$SSH_RETRY_DELAY"
+    echo "Waiting for QGA on ${name} (attempt ${attempt}/${QGA_RETRY_COUNT})..." >&2
+    sleep "$QGA_RETRY_DELAY"
     attempt=$((attempt + 1))
   done
-  echo "Command '${command}' not available on ${host}:${port} after ${SSH_RETRY_COUNT} attempts." >&2
+  echo "QGA not available on ${name} after ${QGA_RETRY_COUNT} attempts." >&2
   exit 1
 }
 
@@ -236,8 +236,17 @@ start_vms() {
 
   local router_seed="${STATE_DIR}/router-seed.iso"
   local client_seed="${STATE_DIR}/client-seed.iso"
+  local router_serial_socket="${STATE_DIR}/router-serial.sock"
+  local client_serial_socket="${STATE_DIR}/client-serial.sock"
+  local router_monitor_socket="${STATE_DIR}/router-monitor.sock"
+  local client_monitor_socket="${STATE_DIR}/client-monitor.sock"
+  local router_qga_socket="${STATE_DIR}/router-qga.sock"
+  local client_qga_socket="${STATE_DIR}/client-qga.sock"
   create_seed "$router_user_data" "$router_meta_data" "$router_network_config" "$router_seed"
   create_seed "$client_user_data" "$client_meta_data" "$client_network_config" "$client_seed"
+
+  rm -f "$router_serial_socket" "$client_serial_socket" "$router_monitor_socket" "$client_monitor_socket" \
+    "$router_qga_socket" "$client_qga_socket"
 
   write_inventory
 
@@ -252,9 +261,12 @@ start_vms() {
     -device virtio-net-pci,netdev=wan,mac=${ROUTER_WAN_MAC} \
     -netdev socket,id=lan,listen=:${LAN_SOCKET_PORT} \
     -device virtio-net-pci,netdev=lan,mac=${ROUTER_LAN_MAC} \
+    -device virtio-serial \
+    -chardev socket,id=router_qga,path=${router_qga_socket},server=on,wait=off \
+    -device virtserialport,chardev=router_qga,name=org.qemu.guest_agent.0 \
     -display none \
-    -serial none \
-    -monitor none \
+    -serial unix:${router_serial_socket},server,nowait \
+    -monitor unix:${router_monitor_socket},server,nowait \
     -pidfile "${STATE_DIR}/router.pid" \
     -daemonize
 
@@ -269,14 +281,21 @@ start_vms() {
     -device virtio-net-pci,netdev=mgmt,mac=${CLIENT_MGMT_MAC} \
     -netdev socket,id=lan,connect=127.0.0.1:${LAN_SOCKET_PORT} \
     -device virtio-net-pci,netdev=lan,mac=${CLIENT_LAN_MAC} \
+    -device virtio-serial \
+    -chardev socket,id=client_qga,path=${client_qga_socket},server=on,wait=off \
+    -device virtserialport,chardev=client_qga,name=org.qemu.guest_agent.0 \
     -display none \
-    -serial none \
-    -monitor none \
+    -serial unix:${client_serial_socket},server,nowait \
+    -monitor unix:${client_monitor_socket},server,nowait \
     -pidfile "${STATE_DIR}/client.pid" \
     -daemonize
 
-  echo "Router SSH: ssh -p ${ROUTER_SSH_PORT} ${ROUTER_USER}@127.0.0.1"
-  echo "Client SSH: ssh -p ${CLIENT_SSH_PORT} ${CLIENT_USER}@127.0.0.1"
+  echo "Router QGA: ${router_qga_socket}"
+  echo "Client QGA: ${client_qga_socket}"
+  echo "Router serial (backup): nc -U ${router_serial_socket}"
+  echo "Client serial (backup): nc -U ${client_serial_socket}"
+  echo "Router monitor (backup): nc -U ${router_monitor_socket}"
+  echo "Client monitor (backup): nc -U ${client_monitor_socket}"
 }
 
 sync_repo() {
@@ -287,42 +306,37 @@ sync_repo() {
     exit 1
   fi
 
-  local ssh_opts
-  ssh_opts="-p ${ROUTER_SSH_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=${STATE_DIR}/known_hosts"
-  wait_for_ssh "$ROUTER_USER" "$ROUTER_SSH_PORT" "127.0.0.1"
-  ssh $ssh_opts "${ROUTER_USER}@127.0.0.1" "mkdir -p /home/${ROUTER_USER}/rpi-firewall"
-  rsync -az --delete \
-    --exclude ".git" \
-    --exclude "scripts/state" \
-    -e "ssh ${ssh_opts}" \
-    "${ROOT_DIR}/" "${ROUTER_USER}@127.0.0.1:/home/${ROUTER_USER}/rpi-firewall/"
-  ssh $ssh_opts "${ROUTER_USER}@127.0.0.1" "mkdir -p /home/${ROUTER_USER}/rpi-firewall/scripts/state"
-  scp -P "${ROUTER_SSH_PORT}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=${STATE_DIR}/known_hosts \
-    "$INVENTORY_PATH" "${ROUTER_USER}@127.0.0.1:/home/${ROUTER_USER}/rpi-firewall/scripts/state/testbench-inventory.yml"
+  local router_qga_socket="${STATE_DIR}/router-qga.sock"
+  local archive_path="${STATE_DIR}/rpi-firewall.tar.gz"
+
+  wait_for_qga "router" "$router_qga_socket"
+  COPYFILE_DISABLE=1 tar --no-xattrs --no-acls --exclude='.git' --exclude='scripts/state' -czf "$archive_path" -C "$ROOT_DIR" .
+  qga_exec "$router_qga_socket" "mkdir -p /home/${ROUTER_USER}/rpi-firewall"
+  qga_push "$router_qga_socket" "$archive_path" "/tmp/rpi-firewall.tar.gz"
+  qga_exec "$router_qga_socket" "tar -xzf /tmp/rpi-firewall.tar.gz -C /home/${ROUTER_USER}/rpi-firewall"
+  qga_exec "$router_qga_socket" "mkdir -p /home/${ROUTER_USER}/rpi-firewall/scripts/state"
+  qga_push "$router_qga_socket" "$INVENTORY_PATH" "/home/${ROUTER_USER}/rpi-firewall/scripts/state/testbench-inventory.yml"
+  qga_exec "$router_qga_socket" "chown -R ${ROUTER_USER}:${ROUTER_USER} /home/${ROUTER_USER}/rpi-firewall"
+  qga_exec "$router_qga_socket" "rm -f /tmp/rpi-firewall.tar.gz"
 }
 
 run_playbook() {
   ensure_state_dir
-  local ssh_opts
-  ssh_opts="-p ${ROUTER_SSH_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=${STATE_DIR}/known_hosts"
-  wait_for_ssh "$ROUTER_USER" "$ROUTER_SSH_PORT" "127.0.0.1"
-  if ssh $ssh_opts "${ROUTER_USER}@127.0.0.1" "command -v cloud-init" >/dev/null 2>&1; then
-    ssh $ssh_opts "${ROUTER_USER}@127.0.0.1" "cloud-init status --wait" >/dev/null
-  fi
-  wait_for_remote_command "$ROUTER_USER" "$ROUTER_SSH_PORT" "127.0.0.1" "command -v ansible-playbook"
-  ssh $ssh_opts "${ROUTER_USER}@127.0.0.1" \
-    "cd /home/${ROUTER_USER}/rpi-firewall && ansible-playbook -i scripts/state/testbench-inventory.yml playbook.yml"
+  local router_qga_socket="${STATE_DIR}/router-qga.sock"
+  wait_for_qga "router" "$router_qga_socket"
+  qga_exec "$router_qga_socket" "command -v cloud-init >/dev/null 2>&1 && cloud-init status --wait || true"
+  qga_exec "$router_qga_socket" "command -v ansible-playbook"
+  qga_exec_timeout "$router_qga_socket" 1800 "cd /home/${ROUTER_USER}/rpi-firewall && sudo -u ${ROUTER_USER} ansible-playbook -i scripts/state/testbench-inventory.yml playbook.yml"
 }
 
 verify_client() {
   ensure_state_dir
-  local ssh_opts
-  ssh_opts="-p ${CLIENT_SSH_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=${STATE_DIR}/known_hosts"
-  wait_for_ssh "$CLIENT_USER" "$CLIENT_SSH_PORT" "127.0.0.1"
-  ssh $ssh_opts "${CLIENT_USER}@127.0.0.1" "ip -4 addr show lan0"
-  ssh $ssh_opts "${CLIENT_USER}@127.0.0.1" "resolvectl status lan0 || true"
-  ssh $ssh_opts "${CLIENT_USER}@127.0.0.1" "dig +short example.com"
-  ssh $ssh_opts "${CLIENT_USER}@127.0.0.1" "ping -c 1 1.1.1.1"
+  local client_qga_socket="${STATE_DIR}/client-qga.sock"
+  wait_for_qga "client" "$client_qga_socket"
+  qga_exec "$client_qga_socket" "ip -4 addr show lan0"
+  qga_exec "$client_qga_socket" "resolvectl status lan0 || true"
+  qga_exec "$client_qga_socket" "dig +short example.com"
+  qga_exec "$client_qga_socket" "ping -c 1 1.1.1.1"
 }
 
 stop_vms() {
@@ -354,8 +368,12 @@ status_vms() {
       echo "${pid_file##*/}: not running"
     fi
   done
-  echo "Router SSH: ssh -p ${ROUTER_SSH_PORT} ${ROUTER_USER}@127.0.0.1"
-  echo "Client SSH: ssh -p ${CLIENT_SSH_PORT} ${CLIENT_USER}@127.0.0.1"
+  echo "Router QGA: ${STATE_DIR}/router-qga.sock"
+  echo "Client QGA: ${STATE_DIR}/client-qga.sock"
+  echo "Router serial (backup): nc -U ${STATE_DIR}/router-serial.sock"
+  echo "Client serial (backup): nc -U ${STATE_DIR}/client-serial.sock"
+  echo "Router monitor (backup): nc -U ${STATE_DIR}/router-monitor.sock"
+  echo "Client monitor (backup): nc -U ${STATE_DIR}/client-monitor.sock"
 }
 
 usage() {
@@ -368,10 +386,21 @@ Commands:
   run     Run ansible-playbook inside the router VM
   verify  Verify DHCP/DNS/routing from the client VM
   stop    Stop running VMs
-  status  Show VM status and SSH commands
+  status  Show VM status and QGA commands
+
+Backup console access:
+  Router serial:  nc -U scripts/state/router-serial.sock
+  Client serial:  nc -U scripts/state/client-serial.sock
+  Router monitor: nc -U scripts/state/router-monitor.sock
+  Client monitor: nc -U scripts/state/client-monitor.sock
+
+QGA sockets:
+  Router QGA: scripts/state/router-qga.sock
+  Client QGA: scripts/state/client-qga.sock
 
 Environment overrides:
   ROUTER_SSH_PORT, CLIENT_SSH_PORT, LAN_SOCKET_PORT, SSH_KEY_PATH
+  QGA_RETRY_COUNT, QGA_RETRY_DELAY
 EOF
 }
 

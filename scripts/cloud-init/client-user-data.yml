@@ -2,6 +2,9 @@
 hostname: client
 manage_etc_hosts: true
 ssh_pwauth: false
+bootcmd:
+  - [sh, -c, 'rm -f /etc/resolv.conf']
+  - [sh, -c, 'printf "nameserver 1.1.1.1\nnameserver 8.8.8.8\n" > /etc/resolv.conf']
 users:
   - name: client
     groups: [sudo]
@@ -9,9 +12,13 @@ users:
     shell: /bin/bash
     ssh_authorized_keys:
       - __SSH_PUB_KEY__
-    lock_passwd: true
+    lock_passwd: false
+    passwd: '$6$.PKuLy7JxcwGR8$0F1jN3ZwOMRkgNM1Csi7Tlhd.EEFbRQ0oqeySuaFHbOE7x3ceux/Uv1mtmVWUc4/c/wjkMO5JuzlnKdVfmrWo/'
 package_update: true
 packages:
   - dnsutils
   - iproute2
   - iputils-ping
+  - qemu-guest-agent
+runcmd:
+  - [systemctl, enable, --now, qemu-guest-agent]

@@ -22,6 +22,7 @@
   ansible.builtin.service:
     name: rsyslog
     state: restarted
+  when: firewall_rsyslog_udp_server is defined or firewall_rsyslog_tcp_server is defined
 - name: Restart systemd-journald
   ansible.builtin.service:
     name: systemd-journald

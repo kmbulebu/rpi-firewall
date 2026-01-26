@@ -68,7 +68,7 @@ To set the admin password, provide an encrypted shadow-format password string in
 Example:
 
 ```yaml
-firewall_admin_user_password_hash: '$6$examplehash...'
+firewall_admin_user_password_hash: '$6$.PKuLy7JxcwGR8$0F1jN3ZwOMRkgNM1Csi7Tlhd.EEFbRQ0oqeySuaFHbOE7x3ceux/Uv1mtmVWUc4/c/wjkMO5JuzlnKdVfmrWo/'
 ```
 
 You can generate a suitable hash locally using tools such as `mkpasswd --method=SHA-512` (from `whois`) or a `python` snippet that uses `crypt`.
@@ -252,7 +252,7 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `firewall_ansible_playbook_git_ref` | `master` | Branch, tag, or ref to check out on updates. |
 | `firewall_ansible_playbook_filename` | `playbook.yml` | Playbook filename executed by ansible-pull. |
 | `firewall_ansible_inventory` | `/boot/firmware/inventory.yml` | Inventory path on the target device. |
-| `firewall_admin_user_password_hash` | `'$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'` | Shadow password hash for the `firewall` admin user. |
+| `firewall_admin_user_password_hash` | `'$6$.PKuLy7JxcwGR8$0F1jN3ZwOMRkgNM1Csi7Tlhd.EEFbRQ0oqeySuaFHbOE7x3ceux/Uv1mtmVWUc4/c/wjkMO5JuzlnKdVfmrWo/'` | Shadow password hash for the `firewall` admin user. |
 | `firewall_domain` | `my.home` | Base DNS domain advertised to LAN clients. |
 | `firewall_dns_private_domains` | `[]` | Private DNS zones that should resolve to local IPs. |
 | `firewall_enable_prometheus_node_exporter` | `false` | Enable Prometheus node exporter on the router. |
