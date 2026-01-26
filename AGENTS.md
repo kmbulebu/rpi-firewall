@@ -125,3 +125,20 @@ Follow existing Ansible and Python conventions used in the repo.
 - Use `ansible-lint` for style and rule compliance.
 - Use `ansible-playbook --check --diff` for verification runs.
 - There are no automated unit tests in this repo currently.
+
+## Testbench Console Access
+When the QEMU testbench VMs fail to expose SSH, use the serial console and monitor
+socket as a backup:
+
+- Router serial: `nc -U scripts/state/router-serial.sock`
+- Client serial: `nc -U scripts/state/client-serial.sock`
+- Router monitor: `nc -U scripts/state/router-monitor.sock`
+- Client monitor: `nc -U scripts/state/client-monitor.sock`
+
+QEMU guest agent (QGA) sockets are used for automated sync/run/verify:
+
+- Router QGA: `scripts/state/router-qga.sock`
+- Client QGA: `scripts/state/client-qga.sock`
+
+Cloud-init on the testbench uses a static resolver (via bootcmd) during package
+install to avoid early DNS failures.

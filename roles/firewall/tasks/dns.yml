@@ -56,6 +56,12 @@
     enabled: true
     state: started
     masked: false
+- name: Ensure resolv.conf uses systemd-resolved stub
+  ansible.builtin.file:
+    src: /run/systemd/resolve/stub-resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+    force: true
 - name: Install Unbound server
   ansible.builtin.apt:
     name: unbound

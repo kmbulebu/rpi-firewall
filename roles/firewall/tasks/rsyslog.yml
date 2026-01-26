@@ -18,7 +18,7 @@
   notify: Restart rsyslog
 - name: Remove Syslog configuration
   ansible.builtin.file:
-    path: rsyslog/60-remote.conf
+    path: /etc/rsyslog.d/60-remote.conf
     state: absent
   when:
     - firewall_rsyslog_udp_server is not defined
