@@ -1,51 +1,51 @@
 ---
 - name: Copy journald.conf
-  copy:
+  ansible.builtin.copy:
     src: journald/journald.conf
     dest: /etc/systemd/journald.conf
     owner: root
     group: root
     mode: '0644'
-  notify: restart systemd-journald
+  notify: Restart systemd-journald
 - name: Remote Syslog configuration
-  template:
+  ansible.builtin.template:
     src: rsyslog/60-remote.conf
     dest: /etc/rsyslog.d/60-remote.conf
     owner: root
     group: root
     mode: '0644'
-  when: rsyslog_udp_server is defined or rsyslog_tcp_server is defined
-  notify: restart rsyslog
+  when: firewall_rsyslog_udp_server is defined or firewall_rsyslog_tcp_server is defined
+  notify: Restart rsyslog
 - name: Remove Syslog configuration
-  file:
-    path: rsyslog/60-remote.conf
+  ansible.builtin.file:
+    path: /etc/rsyslog.d/60-remote.conf
     state: absent
-  when: 
-    - rsyslog_udp_server is not defined
-    - rsyslog_tcp_server is not defined
-  notify: restart rsyslog
+  when:
+    - firewall_rsyslog_udp_server is not defined
+    - firewall_rsyslog_tcp_server is not defined
+  notify: Restart rsyslog
 - name: Remove 20-ufw.conf
-  file:
+  ansible.builtin.file:
     path: /etc/rsyslog.d/20-ufw.conf
     state: absent
-  notify: restart rsyslog
+  notify: Restart rsyslog
 - name: Remove 50-default.conf
-  file:
+  ansible.builtin.file:
     path: /etc/rsyslog.d/50-default.conf
     state: absent
-  notify: restart rsyslog
-- name: enable rsyslog
-  service:
+  notify: Restart rsyslog
+- name: Enable rsyslog
+  ansible.builtin.service:
     name: rsyslog
     state: started
     enabled: true
-  when: rsyslog_udp_server is defined or rsyslog_tcp_server is defined
-- name: disable rsyslog
-  service:
+  when: firewall_rsyslog_udp_server is defined or firewall_rsyslog_tcp_server is defined
+- name: Disable rsyslog
+  ansible.builtin.service:
     name: rsyslog
     state: stopped
     enabled: false
-  when: 
-    - rsyslog_udp_server is not defined
-    - rsyslog_tcp_server is not defined
-  ignore_errors: yes
+  when:
+    - firewall_rsyslog_udp_server is not defined
+    - firewall_rsyslog_tcp_server is not defined
+  failed_when: false

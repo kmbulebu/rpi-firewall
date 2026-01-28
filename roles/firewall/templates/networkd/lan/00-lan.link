@@ -1,7 +1,7 @@
 [Match]
-{{ lan_iface_networkd_link_match }}
+{{ firewall_lan_iface_networkd_link_match }}
 
 [Link]
 Description="LAN (Periphereal Network Adapter))"
 NamePolicy=
-Name={{ lan_iface }}
+Name={{ firewall_lan_iface }}

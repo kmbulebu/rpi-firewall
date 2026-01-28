@@ -2,52 +2,56 @@
 - name: Get Ubuntu OS release name
   ansible.builtin.command:
     cmd: lsb_release -cs
-  register: ubuntu_release_name
+  register: firewall_ubuntu_release_name
+  changed_when: false
 - name: Add Tailscale GPG key
   ansible.builtin.get_url:
-    url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ubuntu_release_name.stdout }}.noarmor.gpg"
+    url: "https://pkgs.tailscale.com/stable/ubuntu/{{ firewall_ubuntu_release_name.stdout }}.noarmor.gpg"
     dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
     mode: '0644'
 - name: Add Tailscale repository list
   ansible.builtin.get_url:
-    url: https://pkgs.tailscale.com/stable/ubuntu/{{ ubuntu_release_name.stdout }}.tailscale-keyring.list
+    url: https://pkgs.tailscale.com/stable/ubuntu/{{ firewall_ubuntu_release_name.stdout }}.tailscale-keyring.list
     dest: /etc/apt/sources.list.d/tailscale.list
     mode: '0644'
 - name: Install tailscale
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
+    update_cache: true
     name: tailscale
-    state: latest
+    state: present
     install_recommends: false
 - name: Start tailscaled
-  systemd:
+  ansible.builtin.systemd:
     name: tailscaled.service
-    enabled: yes
+    enabled: true
     state: started
-    masked: no
+    masked: false
 - name: Update tailscaled configuration
-  template:
+  ansible.builtin.template:
     src: tailscale/defaults
     dest: /etc/default/tailscaled
     owner: root
     group: root
     mode: '0644'
-  notify: restart tailscaled
+  notify: Restart tailscaled
 - name: Tailscale Status
-  ignore_errors: True
-  shell:
-    cmd: 'tailscale status --peers=false --json | jq -e .HaveNodeKey'
-  register: tailscale_status 
+  failed_when: false
+  ansible.builtin.shell:
+    cmd: 'set -o pipefail && tailscale status --peers=false --json | jq -e .HaveNodeKey'
+    executable: /bin/bash
+  register: firewall_tailscale_status
+  changed_when: false
 - name: Tailscale Login
-  when: tailscale_status.rc != 0
-  command:
+  when: firewall_tailscale_status.rc != 0
+  ansible.builtin.command:
     argv:
       - tailscale
       - login
       - --auth-key
-      - "{{ tailscale_auth_key }}"
+      - "{{ firewall_tailscale_auth_key }}"
+  changed_when: true
 - name: Tailscale Configure
-  command:
+  ansible.builtin.command:
     argv:
       - tailscale
       - set
@@ -55,3 +59,4 @@
       - --advertise-exit-node
       - --accept-routes=false
       - --accept-dns=false
+  changed_when: true

@@ -1,18 +1,18 @@
 ---
 - name: Ensure disable directory exists
-  file:
+  ansible.builtin.file:
     path: /etc/apparmor.d/disable
     state: directory
     mode: '0755'
 
 - name: Disable AppArmor profiles if present
-  loop: "{{ apparmor_disable_profiles }}"
+  loop: "{{ firewall_apparmor_disable_profiles }}"
   vars:
     profile_path: "/etc/apparmor.d/{{ item | lower }}"
-  file:
+  ansible.builtin.file:
     src: "{{ profile_path }}"
     dest: "/etc/apparmor.d/disable/{{ item }}"
     state: link
   when: profile_path is file
   notify:
-    - reload apparmor
+    - Reload apparmor

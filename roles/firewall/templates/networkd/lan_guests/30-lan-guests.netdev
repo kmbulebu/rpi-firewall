@@ -1,7 +1,7 @@
 [NetDev]
-Name={{ lan_guests_iface }}
+Name={{ firewall_lan_guests_iface }}
 Kind=vlan
 MTUBytes=1500
 
 [VLAN]
-Id={{ lan_guests_vlan_id }}
+Id={{ firewall_lan_guests_vlan_id }}

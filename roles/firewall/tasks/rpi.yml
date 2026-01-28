@@ -1,80 +1,95 @@
 ---
 # Not sure this improves performance on rpi
 - name: Enable arm64 accelerated aes kernel module
-  modprobe:
+  community.general.modprobe:
     name: aes-arm64
     state: present
     persistent: present
 
 # Not sure this improves performance on rpi
 - name: Enable arm64 accelerated sha256 kernel module
-  modprobe:
+  community.general.modprobe:
     name: sha256-arm64
     state: present
     persistent: present
 
 # Not sure this improves performance on rpi
 - name: Enable arm64 accelerated sha512 kernel module
-  modprobe:
+  community.general.modprobe:
     name: sha512-arm64
     state: present
     persistent: present
 
 - name: Create disable-raspi.conf in /etc/modprobe.d
-  become: yes
-  copy:
+  become: true
+  ansible.builtin.copy:
     src: modprobe.d/disable-raspi.conf
     dest: /etc/modprobe.d/disable-raspi.conf
     owner: root
     group: root
     mode: '0644'
   notify:
-    - run depmod apply
-    - restart systemd-udevd
-    - update initramfs
+    - Run depmod apply
+    - Restart systemd-udevd
+    - Update initramfs
 
 - name: Ensure Bluetooth disabled in /boot/firmware/config.txt
-  become: yes
-  lineinfile:
+  become: true
+  ansible.builtin.lineinfile:
     path: /boot/firmware/config.txt
-    create: yes
+    create: true
     line: 'dtoverlay=disable-bt'
     regexp: '^\s*dtoverlay=disable-bt'
     insertafter: EOF
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Ensure WiFi disabled in /boot/firmware/config.txt
-  become: yes
-  lineinfile:
+  become: true
+  ansible.builtin.lineinfile:
     path: /boot/firmware/config.txt
-    create: yes
+    create: true
     line: 'dtoverlay=disable-wifi'
     regexp: '^\s*dtoverlay=disable-wifi'
     insertafter: EOF
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Ensure audio disabled in /boot/firmware/config.txt
-  become: yes
-  lineinfile:
+  become: true
+  ansible.builtin.lineinfile:
     path: /boot/firmware/config.txt
-    create: yes
+    create: true
     line: 'dtparam=audio=off'
     regexp: '^\s*dtparam=audio='
     insertafter: EOF
+    owner: root
+    group: root
+    mode: '0644'
 
 # I2C is needed for hardware monitoring and the POE hat.
 - name: Ensure I2C enabled in /boot/firmware/config.txt
-  become: yes
-  lineinfile:
+  become: true
+  ansible.builtin.lineinfile:
     path: /boot/firmware/config.txt
-    create: yes
+    create: true
     line: 'dtparam=i2c_arm=on'
     regexp: '^\s*dtparam=i2c_arm='
     insertafter: EOF
+    owner: root
+    group: root
+    mode: '0644'
 
 - name: Ensure SPI disabled in /boot/firmware/config.txt
-  become: yes
-  lineinfile:
+  become: true
+  ansible.builtin.lineinfile:
     path: /boot/firmware/config.txt
-    create: yes
+    create: true
     line: 'dtparam=spi=off'
     regexp: '^\s*dtparam=spi='
     insertafter: EOF
+    owner: root
+    group: root
+    mode: '0644'

@@ -35,15 +35,15 @@
     - /etc/update-motd.d/91-contract-ua-esm-status
 
 - name: Disable MOTD news service
-  systemd:
+  ansible.builtin.systemd:
     name: motd-news.service
-    enabled: no
+    enabled: false
     state: stopped
-    masked: yes
+    masked: true
 
 - name: Disable MOTD news service timer
-  systemd:
+  ansible.builtin.systemd:
     name: motd-news.timer
-    enabled: no
+    enabled: false
     state: stopped
-    masked: yes
+    masked: true

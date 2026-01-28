@@ -1,0 +1,15 @@
+version: 2
+ethernets:
+  wan0:
+    match:
+      macaddress: __ROUTER_WAN_MAC__
+    set-name: wan0
+    dhcp4: true
+    dhcp6: false
+  lan0:
+    match:
+      macaddress: __ROUTER_LAN_MAC__
+    set-name: lan0
+    dhcp4: false
+    dhcp6: false
+    optional: true

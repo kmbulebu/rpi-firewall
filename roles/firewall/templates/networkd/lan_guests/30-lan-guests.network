@@ -1,12 +1,12 @@
 [Match]
-Name={{ lan_guests_iface }}
+Name={{ firewall_lan_guests_iface }}
 
 [Link]
 RequiredForOnline=no
 
 [Network]
 ConfigureWithoutCarrier=yes
-Address={{ lan_guests_router_ip_address }}
+Address={{ firewall_lan_guests_router_ip_address }}
 DHCPPrefixDelegation=yes
 LinkLocalAddressing=ipv6
 IPv6LinkLocalAddressGenerationMode=eui64
@@ -20,7 +20,7 @@ DHCPServer=true
 IPForward=true
 
 [DHCPPrefixDelegation]
-UplinkInterface={{ wan_iface }}
+UplinkInterface={{ firewall_wan_iface }}
 Assign=true
 Announce=true
 Token=::1
@@ -28,13 +28,13 @@ SubnetId=5
 
 [DHCPServer]
 EmitDNS=yes
-PoolOffset={{ lan_guests_dhcp_pool_offset }}
-PoolSize={{ lan_guests_dhcp_pool_size }}
+PoolOffset={{ firewall_lan_guests_dhcp_pool_offset }}
+PoolSize={{ firewall_lan_guests_dhcp_pool_size }}
 # todo: Do not use internal DNS server for guests
-DNS={{ lan_guests_address }}
+DNS={{ firewall_lan_guests_address }}
 EmitRouter=yes
 #EmitNTP=yes
-{% for ntp_server in ntp_servers %}
+{% for ntp_server in firewall_ntp_servers %}
 #NTP={{ ntp_server }}
 {% endfor %}
 EmitTimezone=yes
@@ -50,7 +50,7 @@ EmitDomains=false
 
 [Route]
 Type=blackhole
-Destination={{ ip6_ula_cidr }}
+Destination={{ firewall_ip6_ula_cidr }}
 
 [Route]
 Type=blackhole

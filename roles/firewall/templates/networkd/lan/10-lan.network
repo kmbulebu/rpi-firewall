@@ -1,14 +1,14 @@
 [Match]
-Name={{ lan_iface }}
+Name={{ firewall_lan_iface }}
 
 [Link]
 RequiredForOnline=yes
 
 [Network]
 ConfigureWithoutCarrier=yes
-Address={{ router_ip_address }}
-VLAN={{ lan_vpn_iface }}
-VLAN={{ lan_guests_iface }}
+Address={{ firewall_router_ip_address }}
+VLAN={{ firewall_lan_vpn_iface }}
+VLAN={{ firewall_lan_guests_iface }}
 DHCPPrefixDelegation=yes
 LinkLocalAddressing=ipv6
 IPv6LinkLocalAddressGenerationMode=eui64
@@ -22,7 +22,7 @@ DHCPServer=yes
 IPForward=true
 
 [DHCPPrefixDelegation]
-UplinkInterface={{ wan_iface }}
+UplinkInterface={{ firewall_wan_iface }}
 Assign=true
 Announce=true
 SubnetId=1
@@ -42,17 +42,17 @@ DNSLifetimeSec=3600
 EmitDNS=true
 DNS=_link_local
 EmitDomains=true
-Domains={{ domain }}
+Domains={{ firewall_domain }}
 
 # Unique Local Address
 [IPv6Prefix]
-Prefix={{ lan_ip6_ula_cidr }}
+Prefix={{ firewall_lan_ip6_ula_cidr }}
 PreferredLifetimeSec=86400
 ValidLifetimeSec=604800
 Assign=true
 
 [IPv6RoutePrefix]
-Route={{ ip6_ula_cidr }}
+Route={{ firewall_ip6_ula_cidr }}
 LifetimeSec=120
 
 # Announce a route to any ULA address
@@ -65,34 +65,43 @@ LifetimeSec=120
 [Route]
 # Help ensure our non VPN traffic is separate
 Type=prohibit
-Destination={{ lan_vpn_cidr }}
+Destination={{ firewall_lan_vpn_cidr }}
 
 #[Route]
 # Help ensure our guest traffic is separate
 #Type=prohibit
-#Destination={{ lan_guests_cidr }}
+#Destination={{ firewall_lan_guests_cidr }}
 
 [DHCPServer]
-PoolOffset={{ lan_dhcp_pool_offset }}
-PoolSize={{ lan_dhcp_pool_size }}
+PoolOffset={{ firewall_lan_dhcp_pool_offset }}
+PoolSize={{ firewall_lan_dhcp_pool_size }}
 EmitDNS=yes
-DNS={{ lan_address }}
+DNS={{ firewall_lan_address }}
 EmitRouter=yes
+SendOption=15:string:{{ firewall_domain }}
+SendOption=28:ipv4address:{{ firewall_lan_broadcast }}
+SendOption=58:uint32:{{ firewall_lan_dhcp_t1_sec }}
+SendOption=59:uint32:{{ firewall_lan_dhcp_t2_sec }}
+{% set search = namespace(value='') %}
+{% for label in firewall_domain.split('.') %}
+{% set search.value = search.value ~ '\\x' ~ ('%02x' | format(label | length)) ~ label %}
+{% endfor %}
+{% set search.value = search.value ~ '\\x00' %}
+SendOption=119:string:{{ search.value }}
 #EmitNTP=yes
-{% for ntp_server in ntp_servers %}
+{% for ntp_server in firewall_ntp_servers %}
 #NTP={{ ntp_server }}
 {% endfor %}
 EmitTimezone=yes
 Timezone=America/New_York
 # Low for now. Allow longer once lease persistence is allowed.
-DefaultLeaseTimeSec=1h
-MaxLeaseTimeSec=1h
+DefaultLeaseTimeSec={{ firewall_lan_dhcp_default_lease_time_sec }}s
+MaxLeaseTimeSec={{ firewall_lan_dhcp_max_lease_time_sec }}s
 
-{% for dhcp_reservation in (dhcp_reservations | default([], true))%}
+{% for dhcp_reservation in (firewall_dhcp_reservations | default([], true))%}
 # {{ dhcp_reservation.hostname }}
 [DHCPServerStaticLease]
 MACAddress={{ dhcp_reservation.mac_address }}
 Address={{ dhcp_reservation.ip_address }}
 
 {% endfor %}
-

@@ -1,8 +1,8 @@
-# Disable services we don't need. 
+# Disable services we don't need.
 
 # Remove packages we don't need.
 - name: Apt Unused Packages
-  apt:
+  ansible.builtin.apt:
     name:
       - snapd
       - multipath-tools
@@ -16,11 +16,11 @@
       - lvm2 # Not using LVM
       - udisks2 # Not using disk automount
       - fwupd # Not needed on raspberry pi
-      - lxd-agent-loader 
+      - lxd-agent-loader
       - modemmanager
       - sosreport
       - motd-news-config # Disabled motd-news
     state: absent
-    purge: yes
-    autoclean: yes
-    autoremove: yes
+    purge: true
+    autoclean: true
+    autoremove: true

@@ -1,20 +1,19 @@
 - name: Install networkd-dispatcher
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
     name: networkd-dispatcher
-    state: latest
+    state: present
     install_recommends: false
 - name: Start networkd-dispatcher
-  systemd:
+  ansible.builtin.systemd:
     name: networkd-dispatcher.service
-    enabled: yes
+    enabled: true
     state: started
-    masked: no
+    masked: false
 - name: Template 10-ethtool script
-  template:
+  ansible.builtin.template:
     src: networkd-dispatcher/carrier.d/10-ethtool
     dest: /etc/networkd-dispatcher/carrier.d/10-ethtool
     owner: root
     group: root
     mode: '0755'
-  notify: restart networkd-dispatcher
+  notify: Restart networkd-dispatcher

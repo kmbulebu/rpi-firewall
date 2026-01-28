@@ -1,12 +1,12 @@
 [Match]
-Name={{ vpn_client_iface }}
+Name={{ firewall_vpn_client_iface }}
 
 [Link]
 RequiredForOnline=no
 MTUBytes=1292
 
 [Network]
-VRF={{ vpn_vrf_iface }}
+VRF={{ firewall_vpn_vrf_iface }}
 DefaultRouteOnDevice=yes
 ConfigureWithoutCarrier=no
 IPv6AcceptRA=no
