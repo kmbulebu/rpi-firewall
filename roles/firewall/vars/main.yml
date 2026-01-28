@@ -1,25 +1,25 @@
 firewall_ip6_ula_cidr: 'fd5f:1047:55fc::/48'
 
-firewall_lan_address: "{{ firewall_router_ip_address | ipaddr('address') }}"
-firewall_lan_network: "{{ firewall_router_ip_address | ipaddr('network') }}"
-firewall_lan_cidr: "{{ firewall_router_ip_address | ipaddr('network/prefix') }}"
-firewall_lan_netmask: "{{ firewall_router_ip_address | ipaddr('netmask') }}"
-firewall_lan_broadcast: "{{ firewall_router_ip_address | ipaddr('broadcast') }}"
+firewall_lan_address: "{{ firewall_router_ip_address | ansible.utils.ipaddr('address') }}"
+firewall_lan_network: "{{ firewall_router_ip_address | ansible.utils.ipaddr('network') }}"
+firewall_lan_cidr: "{{ firewall_router_ip_address | ansible.utils.ipaddr('network/prefix') }}"
+firewall_lan_netmask: "{{ firewall_router_ip_address | ansible.utils.ipaddr('netmask') }}"
+firewall_lan_broadcast: "{{ firewall_router_ip_address | ansible.utils.ipaddr('broadcast') }}"
 firewall_lan_dhcp_t1_sec: "{{ (firewall_lan_dhcp_default_lease_time_sec * 0.5) | int }}"
 firewall_lan_dhcp_t2_sec: "{{ (firewall_lan_dhcp_default_lease_time_sec * 0.875) | int }}"
 firewall_lan_ip6_ula_cidr: 'fd5f:1047:55fc:0000::/64'
 
-firewall_lan_guests_address: "{{ firewall_lan_guests_router_ip_address | ipaddr('address') }}"
-firewall_lan_guests_network: "{{ firewall_lan_guests_router_ip_address | ipaddr('network') }}"
-firewall_lan_guests_cidr: "{{ firewall_lan_guests_router_ip_address | ipaddr('network/prefix') }}"
-firewall_lan_guests_netmask: "{{ firewall_lan_guests_router_ip_address | ipaddr('netmask') }}"
-firewall_lan_guests_broadcast: "{{ firewall_lan_guests_router_ip_address | ipaddr('broadcast') }}"
+firewall_lan_guests_address: "{{ firewall_lan_guests_router_ip_address | ansible.utils.ipaddr('address') }}"
+firewall_lan_guests_network: "{{ firewall_lan_guests_router_ip_address | ansible.utils.ipaddr('network') }}"
+firewall_lan_guests_cidr: "{{ firewall_lan_guests_router_ip_address | ansible.utils.ipaddr('network/prefix') }}"
+firewall_lan_guests_netmask: "{{ firewall_lan_guests_router_ip_address | ansible.utils.ipaddr('netmask') }}"
+firewall_lan_guests_broadcast: "{{ firewall_lan_guests_router_ip_address | ansible.utils.ipaddr('broadcast') }}"
 
-firewall_lan_vpn_address: "{{ firewall_lan_vpn_router_ip_address | ipaddr('address') }}"
-firewall_lan_vpn_network: "{{ firewall_lan_vpn_router_ip_address | ipaddr('network') }}"
-firewall_lan_vpn_cidr: "{{ firewall_lan_vpn_router_ip_address | ipaddr('network/prefix') }}"
-firewall_lan_vpn_netmask: "{{ firewall_lan_vpn_router_ip_address | ipaddr('netmask') }}"
-firewall_lan_vpn_broadcast: "{{ firewall_lan_vpn_router_ip_address | ipaddr('broadcast') }}"
+firewall_lan_vpn_address: "{{ firewall_lan_vpn_router_ip_address | ansible.utils.ipaddr('address') }}"
+firewall_lan_vpn_network: "{{ firewall_lan_vpn_router_ip_address | ansible.utils.ipaddr('network') }}"
+firewall_lan_vpn_cidr: "{{ firewall_lan_vpn_router_ip_address | ansible.utils.ipaddr('network/prefix') }}"
+firewall_lan_vpn_netmask: "{{ firewall_lan_vpn_router_ip_address | ansible.utils.ipaddr('netmask') }}"
+firewall_lan_vpn_broadcast: "{{ firewall_lan_vpn_router_ip_address | ansible.utils.ipaddr('broadcast') }}"
 firewall_enable_prometheus_node_exporter_bool: "{{ firewall_enable_prometheus_node_exporter | bool }}"
 
 firewall_apparmor_disable_profiles:

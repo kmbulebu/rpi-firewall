@@ -5,12 +5,12 @@
   ansible.builtin.set_fact:
     firewall_base_ip: >-
       {{
-        (firewall_lan_network | default(firewall_router_ip_address | ipaddr('network')))
+        (firewall_lan_network | default(firewall_router_ip_address | ansible.utils.ipaddr('network')))
         .split('/')[0]
       }}
     firewall_prefix: >-
       {{
-        (firewall_lan_cidr | default(firewall_router_ip_address | ipaddr('network/prefix')))
+        (firewall_lan_cidr | default(firewall_router_ip_address | ansible.utils.ipaddr('network/prefix')))
         .split('/')[-1]
         | int
       }}

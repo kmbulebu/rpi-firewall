@@ -19,7 +19,7 @@ rpi-firewall turns an Ubuntu Server installation on a Raspberry Pi into a config
 
 ## Configuring
 
-On first boot cloud-init runs `ansible-pull` automatically to apply the configured playbook. Modifying (or `touch`ing) the `inventory.yml` on the device triggers `ansible-pull` to re-run; wait for that run to complete before making other changes.
+On first boot cloud-init runs `ansible-pull` automatically to apply the configured playbook. Each `ansible-pull` run executes `bootstrap.yml` first to install pinned collections, then runs `playbook.yml`. Modifying (or `touch`ing) the `inventory.yml` on the device triggers `ansible-pull` to re-run; wait for that run to complete before making other changes.
 
 **Note about first-boot playbook URL/ref**
 
@@ -55,6 +55,7 @@ I also wanted to prove a Raspberry Pi 4 could achieve gigabit ethernet line rate
 - Tailscale support (optional).
 - Port forwarding from WAN to LAN services.
 - Automated updates with scheduled reboots.
+- NTP managed by systemd-timesyncd.
 - Monitoring via Prometheus Node Exporter (optional).
 - Remote syslog output (optional).
 - Startup diagnostics (DHCP lease viewer / quick status).
