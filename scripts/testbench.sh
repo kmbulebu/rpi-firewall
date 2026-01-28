@@ -25,6 +25,8 @@ CLIENT_LAN_MAC="52:54:00:aa:00:04"
 UBUNTU_RELEASE_PRIMARY="26.04"
 UBUNTU_RELEASE_FALLBACK="24.04"
 UBUNTU_ARCH="amd64"
+UBUNTU_IMAGE_CHANNEL=${UBUNTU_IMAGE_CHANNEL:-"release"}
+IMAGE_CACHE_DIR=${IMAGE_CACHE_DIR:-""}
 
 ROUTER_DISK_SIZE=${ROUTER_DISK_SIZE:-"20G"}
 CLIENT_DISK_SIZE=${CLIENT_DISK_SIZE:-"8G"}
@@ -49,6 +51,11 @@ ensure_requirements() {
   ensure_command curl
   ensure_command python3
   ensure_command tar
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    QEMU_ACCEL_ARGS=("-machine" "accel=hvf")
+  else
+    QEMU_ACCEL_ARGS=("-enable-kvm" "-machine" "accel=kvm")
+  fi
   if ! command -v cloud-localds >/dev/null 2>&1; then
     if ! command -v hdiutil >/dev/null 2>&1; then
       echo "Missing required command: cloud-localds or hdiutil" >&2
@@ -125,6 +132,11 @@ wait_for_qga() {
 }
 
 resolve_ubuntu_release() {
+  if [[ "$UBUNTU_IMAGE_CHANNEL" == "daily" ]]; then
+    echo "resolute"
+    return
+  fi
+
   local primary_url
   primary_url="https://cloud-images.ubuntu.com/releases/${UBUNTU_RELEASE_PRIMARY}/release/ubuntu-${UBUNTU_RELEASE_PRIMARY}-server-cloudimg-${UBUNTU_ARCH}.img"
   if curl -fsI "$primary_url" >/dev/null 2>&1; then
@@ -136,16 +148,35 @@ resolve_ubuntu_release() {
 
 download_image() {
   local release=$1
-  local image_name="ubuntu-${release}-server-cloudimg-${UBUNTU_ARCH}.img"
-  local image_url="https://cloud-images.ubuntu.com/releases/${release}/release/${image_name}"
+  local image_name
+  local image_url
+  if [[ "$UBUNTU_IMAGE_CHANNEL" == "daily" ]]; then
+    image_name="${release}-server-cloudimg-${UBUNTU_ARCH}.img"
+    image_url="https://cloud-images.ubuntu.com/${release}/current/${image_name}"
+  else
+    image_name="ubuntu-${release}-server-cloudimg-${UBUNTU_ARCH}.img"
+    image_url="https://cloud-images.ubuntu.com/releases/${release}/release/${image_name}"
+  fi
   local image_path="${STATE_DIR}/${image_name}"
+  if [[ -n "$IMAGE_CACHE_DIR" ]]; then
+    mkdir -p "$IMAGE_CACHE_DIR"
+    image_path="${IMAGE_CACHE_DIR}/${image_name}"
+  fi
 
   if [[ -f "$image_path" ]]; then
     echo "$image_path"
     return
   fi
 
-  echo "Downloading Ubuntu ${release} cloud image..." >&2
+  if [[ "$UBUNTU_IMAGE_CHANNEL" == "daily" ]]; then
+    echo "Downloading Ubuntu daily ${release} cloud image..." >&2
+    if ! curl -fsI "$image_url" >/dev/null 2>&1; then
+      echo "Daily image not available: ${image_url}" >&2
+      exit 1
+    fi
+  else
+    echo "Downloading Ubuntu ${release} cloud image..." >&2
+  fi
   curl -fL "$image_url" -o "$image_path"
   echo "$image_path"
 }
@@ -208,7 +239,9 @@ start_vms() {
 
   local release
   release=$(resolve_ubuntu_release)
-  if [[ "$release" != "$UBUNTU_RELEASE_PRIMARY" ]]; then
+  if [[ "$UBUNTU_IMAGE_CHANNEL" == "daily" ]]; then
+    echo "Using Ubuntu daily ${release} cloud image."
+  elif [[ "$release" != "$UBUNTU_RELEASE_PRIMARY" ]]; then
     echo "Ubuntu ${UBUNTU_RELEASE_PRIMARY} not available, using ${release}."
   fi
 
@@ -251,7 +284,7 @@ start_vms() {
   write_inventory
 
   qemu-system-x86_64 \
-    -machine accel=hvf \
+    "${QEMU_ACCEL_ARGS[@]}" \
     -cpu host \
     -smp 2 \
     -m 2048 \
@@ -271,7 +304,7 @@ start_vms() {
     -daemonize
 
   qemu-system-x86_64 \
-    -machine accel=hvf \
+    "${QEMU_ACCEL_ARGS[@]}" \
     -cpu host \
     -smp 2 \
     -m 1024 \
@@ -326,6 +359,7 @@ run_playbook() {
   wait_for_qga "router" "$router_qga_socket"
   qga_exec "$router_qga_socket" "command -v cloud-init >/dev/null 2>&1 && cloud-init status --wait || true"
   qga_exec "$router_qga_socket" "command -v ansible-playbook"
+  qga_exec_timeout "$router_qga_socket" 600 "cd /home/${ROUTER_USER}/rpi-firewall && sudo -u ${ROUTER_USER} ansible-playbook -i scripts/state/testbench-inventory.yml bootstrap.yml"
   qga_exec_timeout "$router_qga_socket" 1800 "cd /home/${ROUTER_USER}/rpi-firewall && sudo -u ${ROUTER_USER} ansible-playbook -i scripts/state/testbench-inventory.yml playbook.yml"
 }
 
@@ -336,6 +370,7 @@ verify_client() {
   qga_exec "$client_qga_socket" "ip -4 addr show lan0"
   qga_exec "$client_qga_socket" "resolvectl status lan0 || true"
   qga_exec "$client_qga_socket" "dig +short example.com"
+  qga_exec "$client_qga_socket" "tracepath -n 1.1.1.1 || true"
   qga_exec "$client_qga_socket" "ping -c 1 1.1.1.1"
 }
 
@@ -401,6 +436,8 @@ QGA sockets:
 Environment overrides:
   ROUTER_SSH_PORT, CLIENT_SSH_PORT, LAN_SOCKET_PORT, SSH_KEY_PATH
   QGA_RETRY_COUNT, QGA_RETRY_DELAY
+  UBUNTU_IMAGE_CHANNEL
+  IMAGE_CACHE_DIR
 EOF
 }
 

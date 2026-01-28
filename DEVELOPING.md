@@ -24,12 +24,23 @@ Start the router and client VMs:
 scripts/testbench.sh start
 ```
 
+To use the daily Resolute (26.04) image instead of the stable channel:
+
+```bash
+UBUNTU_IMAGE_CHANNEL=daily scripts/testbench.sh start
+```
+
+The daily channel fails fast if the image is unavailable.
+
 Sync the local repo into the router VM and run the playbook:
 
 ```bash
 scripts/testbench.sh sync
 scripts/testbench.sh run
 ```
+
+`scripts/testbench.sh run` executes `bootstrap.yml` before `playbook.yml` to
+install pinned Ansible collections.
 
 Verify DHCP/DNS from the client VM:
 

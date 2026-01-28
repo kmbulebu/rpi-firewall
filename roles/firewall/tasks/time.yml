@@ -2,6 +2,33 @@
 - name: Set timezone to UTC
   community.general.timezone:
     name: UTC
+- name: Install systemd-timesyncd
+  ansible.builtin.apt:
+    name: systemd-timesyncd
+    state: present
+- name: Collect service facts
+  ansible.builtin.service_facts:
+- name: Disable chrony service
+  ansible.builtin.service:
+    name: chrony
+    enabled: false
+    masked: true
+    state: stopped
+  when: ansible_facts.services is defined and 'chrony.service' in ansible_facts.services
+- name: Disable ntp service
+  ansible.builtin.service:
+    name: ntp
+    enabled: false
+    masked: true
+    state: stopped
+  when: ansible_facts.services is defined and 'ntp.service' in ansible_facts.services
+- name: Disable ntpsec service
+  ansible.builtin.service:
+    name: ntpsec
+    enabled: false
+    masked: true
+    state: stopped
+  when: ansible_facts.services is defined and 'ntpsec.service' in ansible_facts.services
 - name: Update timesyncd configuration
   ansible.builtin.template:
     src: timesyncd/timesyncd.conf

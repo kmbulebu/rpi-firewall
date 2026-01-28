@@ -19,6 +19,7 @@ packages:
   - dnsutils
   - iproute2
   - iputils-ping
+  - iputils-tracepath
   - qemu-guest-agent
 runcmd:
   - [systemctl, enable, --now, qemu-guest-agent]
