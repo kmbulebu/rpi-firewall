@@ -1,0 +1,23 @@
+---
+- name: Bootstrap Ansible dependencies
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Install Python dependencies for Ansible collections
+      ansible.builtin.apt:
+        name: python3-netaddr
+        state: present
+        update_cache: true
+        cache_valid_time: 86400
+
+    - name: Install required Ansible collections
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/ansible-galaxy
+          - collection
+          - install
+          - --requirements-file
+          - "{{ playbook_dir }}/collections/requirements.yml"
+      register: galaxy_install
+      changed_when: "'Nothing to do' not in galaxy_install.stdout"
