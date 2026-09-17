@@ -6,7 +6,7 @@ The Raspberry Pi 4B is the first Raspberry Pi device with true gigabit ethernet 
 
 - A Raspberry Pi 4B or newer
 - A USB gigabit ethernet adapter
-- Ubuntu Server 24.04 LTS (Noble)
+- Ubuntu Server 26.04 LTS (Resolute)
 
 ## Features
 
