@@ -1,11 +1,12 @@
 ---
 - name: Setup mounts
-  copy:
+  ansible.builtin.copy:
     src: mounts/fstab
     dest: /etc/fstab
     owner: root
     group: root
     mode: '0644'
   notify:
-    - mount auto
-    - restart rsyslog
+    - Mount auto
+    - Restart rsyslog
+  when: not firewall_skip_mounts

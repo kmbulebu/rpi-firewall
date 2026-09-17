@@ -1,22 +1,22 @@
 ---
 - name: Add admin user
-  user:
+  ansible.builtin.user:
     name: firewall
     groups: adm,sudo
     expires: -1
-    create_home: yes
-    password: "{{ admin_user_password_hash }}"
+    create_home: true
+    password: "{{ firewall_admin_user_password_hash }}"
     shell: /bin/bash
-    append: yes
+    append: true
 - name: Set authorized key for admin user
-  when: admin_user_authorized_key is defined
-  authorized_key:
+  when: firewall_admin_user_authorized_key is defined
+  ansible.posix.authorized_key:
     user: firewall
     state: present
-    key: "{{ admin_user_authorized_key }}"
+    key: "{{ firewall_admin_user_authorized_key }}"
 - name: Remove the user 'ubuntu'
-  user:
+  ansible.builtin.user:
     name: ubuntu
     state: absent
-    force: yes
-    remove: yes
+    force: true
+    remove: true

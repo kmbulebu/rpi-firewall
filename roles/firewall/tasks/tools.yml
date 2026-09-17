@@ -1,7 +1,7 @@
 ---
 # Install tools useful for administrators
 - name: Install show_dhcp_leases script
-  copy:
+  ansible.builtin.copy:
     src: tools/show_dhcp_leases.py
     dest: /usr/local/bin/show_dhcp_leases
     owner: root
@@ -11,9 +11,8 @@
     - tools
 
 - name: Ensure dnspython is installed (apt)
-  apt:
+  ansible.builtin.apt:
     name: python3-dnspython
     state: present
-    update_cache: yes
   tags:
     - tools

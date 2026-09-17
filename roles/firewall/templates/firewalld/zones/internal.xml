@@ -2,8 +2,8 @@
 <zone target="ACCEPT">
   <short>Internal</short>
   <description>For use on internal networks. You mostly trust the other computers on the networks to not harm your computer. Only selected incoming connections are accepted.</description>
-  <interface name="{{ lan_iface }}"/>
-  <interface name="{{ tailscale_iface }}"/>
+  <interface name="{{ firewall_lan_iface }}"/>
+  <interface name="{{ firewall_tailscale_iface }}"/>
   <!-- These are redundant with target ACCEPT -->
   <!-- Allow list ICMP instead of deny list -->
   <icmp-block-inversion/>
@@ -37,7 +37,7 @@
   <service name="dns"/>
   <service name="dns-over-tls"/>
   <service name="https"/>
-  {% if enable_prometheus_node_exporter_bool %}
+  {% if firewall_enable_prometheus_node_exporter_bool %}
   <service name="prometheus-node-exporter"/>
   {% endif %}
   <!-- Tailscale -->

@@ -1,8 +1,9 @@
 ---
-- hostname:
-    name: "{{ router_hostname }}"
+- name: Configure hostname
+  ansible.builtin.hostname:
+    name: "{{ firewall_router_hostname }}"
 - name: Setup /etc/hosts
-  template:
+  ansible.builtin.template:
     src: hostname/hosts
     dest: /etc/hosts
     owner: root

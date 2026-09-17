@@ -1,14 +1,14 @@
 [NetDev]
-Name={{ vpn_client_iface }}
+Name={{ firewall_vpn_client_iface }}
 Kind=wireguard
 MTUBytes=1292
 
 [WireGuard]
 PrivateKey={{ lan_vpn_wg_private_key }}
-ListenPort={{ lan_vpn_wg_listen_port }}
+ListenPort={{ firewall_lan_vpn_wg_listen_port }}
 
 [WireGuardPeer]
 PublicKey={{ lan_vpn_wg_peer_public_key }}
-AllowedIPs={{ lan_vpn_wg_peer_allowed_ips }}
+AllowedIPs={{ firewall_lan_vpn_wg_peer_allowed_ips }}
 Endpoint={{ lan_vpn_wg_peer_endpoint }}
-PersistentKeepalive={{ lan_vpn_wg_peer_persistent_keep_alive }}
+PersistentKeepalive={{ firewall_lan_vpn_wg_peer_persistent_keep_alive }}

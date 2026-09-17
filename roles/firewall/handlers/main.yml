@@ -1,67 +1,72 @@
-- name: netplan apply
-  command: netplan apply
-  become: yes
-- name: mount auto
-  command: mount -a
-  become: yes
-- name: restart systemd-networkd
-  service:
+- name: Netplan apply
+  ansible.builtin.command: netplan apply
+  changed_when: false
+  become: true
+- name: Mount auto
+  ansible.builtin.command: mount -a  # noqa command-instead-of-module
+  changed_when: false
+  become: true
+- name: Restart systemd-networkd
+  ansible.builtin.service:
     name: systemd-networkd
     state: restarted
-- name: restart systemd-udevd
-  service:
+- name: Restart systemd-udevd
+  ansible.builtin.service:
     name: systemd-udevd
     state: restarted
-- name: restart systemd-timesyncd
-  systemd:
+- name: Restart systemd-timesyncd
+  ansible.builtin.systemd:
     name: systemd-timesyncd.service
     state: restarted
-- name: restart rsyslog
-  service:
+- name: Restart rsyslog
+  ansible.builtin.service:
     name: rsyslog
     state: restarted
-- name: restart systemd-journald
-  service:
+  when: firewall_rsyslog_udp_server is defined or firewall_rsyslog_tcp_server is defined
+- name: Restart systemd-journald
+  ansible.builtin.service:
     name: systemd-journald
     state: restarted
-- name: restart systemd-resolved
-  service:
+- name: Restart systemd-resolved
+  ansible.builtin.service:
     name: systemd-resolved
     state: restarted
-- name: systemctl daemon-reload
-  systemd:
-    daemon_reload: yes
-- name: restart unbound
-  service:
+- name: Systemctl daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+- name: Restart unbound
+  ansible.builtin.service:
     name: unbound
     state: restarted
-- name: reload unbound
-  service:
+- name: Reload unbound
+  ansible.builtin.service:
     name: unbound
     state: reloaded
-- name: reload firewalld
-  service:
+- name: Reload firewalld
+  ansible.builtin.service:
     name: firewalld
     state: reloaded
-- name: restart prometheus-node-exporter
-  systemd:
+- name: Restart prometheus-node-exporter
+  ansible.builtin.systemd:
     name: prometheus-node-exporter.service
     state: restarted
-- name: restart tailscaled
-  service:
+- name: Restart tailscaled
+  ansible.builtin.service:
     name: tailscaled
     state: restarted
-- name: restart networkd-dispatcher
-  service:
+- name: Restart networkd-dispatcher
+  ansible.builtin.service:
     name: networkd-dispatcher
     state: restarted
-- name: run depmod apply
-  command: /sbin/depmod -a
-  become: yes
-- name: reload apparmor
-  service:
+- name: Run depmod apply
+  ansible.builtin.command: /sbin/depmod -a
+  changed_when: false
+  become: true
+- name: Reload apparmor
+  ansible.builtin.service:
     name: apparmor
     state: reloaded
-- name: update initramfs
-  command: update-initramfs -u
-  become: yes
+- name: Update initramfs
+  ansible.builtin.command: update-initramfs -u
+  changed_when: false
+  become: true

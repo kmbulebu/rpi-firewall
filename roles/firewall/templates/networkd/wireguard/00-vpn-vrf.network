@@ -1,5 +1,5 @@
 [Match]
-Name={{ vpn_vrf_iface }}
+Name={{ firewall_vpn_vrf_iface }}
 
 [Link]
 RequiredForOnline=no
@@ -14,5 +14,5 @@ IPForward=true
 [Route]
 # Help ensure our non VPN traffic is separate
 Type=prohibit
-Destination={{ lan_cidr }}
+Destination={{ firewall_lan_cidr }}
 Table=200
