@@ -112,7 +112,7 @@ Follow existing Ansible and Python conventions used in the repo.
 - Read `roles/firewall/tasks/main.yml` to understand task ordering.
 - Update templates and defaults together when adding a new variable.
 - When adding a new handler, register it in `roles/firewall/handlers/main.yml`.
-- Keep playbook changes compatible with Ubuntu Server 24.04.
+- Keep playbook changes compatible with Ubuntu Server 26.04 LTS.
 - When adding tools, ensure installation tasks are tagged consistently.
 
 ## Common Locations
