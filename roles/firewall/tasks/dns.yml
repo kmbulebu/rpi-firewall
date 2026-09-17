@@ -3,8 +3,8 @@
 # https://github.com/systemd/systemd/commit/a7fa29b1b52210e33f4e43efc1a2f06b7c7233c0
 - name: Compute PTR /24 zones for LAN (set ptr_zones)
   set_fact:
-    base_ip: "{{ (lan_network | default(router_ip_address | ipaddr('network'))).split('/')[0] }}"
-    prefix: "{{ (lan_cidr | default(router_ip_address | ipaddr('network/prefix'))).split('/')[-1] | int }}"
+    base_ip: "{{ (lan_network | default(router_ip_address | ansible.utils.ipaddr('network'))).split('/')[0] }}"
+    prefix: "{{ (lan_cidr | default(router_ip_address | ansible.utils.ipaddr('network/prefix'))).split('/')[-1] | int }}"
 - name: Build single PTR zone when prefix >= 24
   set_fact:
     ptr_zones: "{{ [ (base_ip.split('.')[2] ~ '.' ~ base_ip.split('.')[1] ~ '.' ~ base_ip.split('.')[0] ~ '.in-addr.arpa.') ] }}"
@@ -80,5 +80,4 @@
     enabled: yes
     state: started
     masked: no
-
 
