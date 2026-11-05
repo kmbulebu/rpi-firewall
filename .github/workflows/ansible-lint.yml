@@ -14,6 +14,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Test blocklist updater
+        run: python3 -m unittest discover -s tests -v
+
       - name: Run ansible-lint
         uses: ansible/ansible-lint@main
         with:

@@ -1,0 +1,5 @@
+{{ {
+  'blocklists': ad_blocklists,
+  'allow_domains': ad_allow_domains,
+  'protected_domains': [domain] + ptr_zones + dns_private_domains
+} | to_nice_json }}

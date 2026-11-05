@@ -9,6 +9,9 @@ ansible_bootstrap_directory: /root/.ansible/pull/bootstrap
 admin_user_password_hash: '$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'
 domain: my.home
 dns_private_domains: []
+# An empty list disables filtering. Inventory supplies the chosen subscriptions.
+ad_blocklists: []
+ad_allow_domains: []
 enable_prometheus_node_exporter: no
 wan_iface_networkd_link_match: "Property=ID_BUS=usb"
 wan_iface: wan0

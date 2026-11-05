@@ -36,5 +36,5 @@ all:
         # high breakage risk, requires active maintenance of exceptions.
         # - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/ultimate.txt
 
-      # Exact domains needed by your apps; prefer narrow exceptions.
+      # Allow these domains and their subdomains; prefer narrow exceptions.
       ad_allow_domains: []

@@ -1,0 +1,13 @@
+[Unit]
+Description=Download and validate Unbound ad blocking policy
+After=network-online.target unbound.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/update-ad-blocklists
+TimeoutStartSec=15min
+UMask=0022
+PrivateTmp=true
+ProtectHome=true
+NoNewPrivileges=true

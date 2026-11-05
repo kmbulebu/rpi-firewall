@@ -1,0 +1,62 @@
+---
+- name: Validate ad blocking inventory types
+  ansible.builtin.assert:
+    that:
+      - ad_blocklists is sequence and ad_blocklists is not string and ad_blocklists is not mapping
+      - ad_allow_domains is sequence and ad_allow_domains is not string and ad_allow_domains is not mapping
+
+- name: Create ad blocking configuration directory
+  ansible.builtin.file:
+    path: /etc/rpi-firewall
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Install ad blocking updater
+  ansible.builtin.copy:
+    src: unbound/update-ad-blocklists.py
+    dest: /usr/local/sbin/update-ad-blocklists
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Configure ad blocking subscriptions and exceptions
+  ansible.builtin.template:
+    src: ad-blocking/config.json.j2
+    dest: /etc/rpi-firewall/ad-blocking.json
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install ad blocking update units
+  ansible.builtin.copy:
+    src: "unbound/{{ item }}"
+    dest: "/etc/systemd/system/{{ item }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - ad-blocklists-update.service
+    - ad-blocklists-update.timer
+  register: ad_blocking_units
+
+- name: Reload ad blocking unit definitions
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  when: ad_blocking_units.changed
+
+# Run synchronously: a failed first download must fail the play, not silently
+# report success without filtering. Subsequent failures retain the active policy.
+- name: Apply current ad blocking inventory
+  ansible.builtin.command:
+    cmd: /usr/local/sbin/update-ad-blocklists
+  register: ad_blocking_update
+  changed_when: "'Policy updated:' in ad_blocking_update.stdout"
+  when: not ansible_check_mode
+
+- name: Schedule daily blocklist refresh when subscriptions are configured
+  ansible.builtin.systemd_service:
+    name: ad-blocklists-update.timer
+    enabled: "{{ ad_blocklists | length > 0 }}"
+    state: "{{ 'started' if ad_blocklists | length > 0 else 'stopped' }}"

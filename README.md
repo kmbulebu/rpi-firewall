@@ -109,6 +109,56 @@ name_servers:
   - 1.0.0.3
 ```
 
+### DNS ad blocking
+
+Set `ad_blocklists` under `all.hosts.localhost` in the live
+`/boot/firmware/inventory.yml` to enable filtering. The sample
+[inventory](./rpi/inventory.yml) includes OISD Small and commented alternatives
+with their scope and aggressiveness. Existing installations default to no lists.
+
+```yaml
+ad_blocklists:
+  - https://small.oisd.nl
+ad_allow_domains:
+  - needed.example.com
+```
+
+Ansible installs a Python standard-library updater and a daily systemd timer.
+It downloads the subscriptions immediately during the play and compiles them into
+`/etc/unbound/unbound.conf.d/ad-blocking.conf`. Unbound remains the LAN and guest
+resolver, with the existing local records, IPv6 listeners, DNSSEC validation and
+TLS upstreams. Ubuntu's own `systemd-resolved` configuration is unchanged. This is
+native Unbound filtering, without a Pi-hole container or dashboard. The VPN VLAN
+currently advertises external DNS servers and is not covered by this policy.
+
+Supported subscriptions are HTTPS DNS-only Adblock lists (`||domain^`, including
+`@@||domain^` exceptions), hosts files such as StevenBlack, and plain domain lists.
+Browser rules with URL paths or modifiers are unsupported and fail the update.
+Blocked domains **and their subdomains** return NXDOMAIN. Allowlisted domains and
+their subdomains override blocking, including more specific entries in the lists.
+Local forward/reverse zones and `dns_private_domains` are protected automatically.
+Permanent exceptions belong in inventory; prefer narrow exceptions.
+
+Downloads must all succeed and contain blocking entries before a policy is
+installed. The updater validates the candidate and complete Unbound configuration
+before reloading. Failed downloads or validation retain the previous policy; a
+reload failure restores it and attempts to reload the previous configuration.
+A failed initial update fails the Ansible play instead of reporting working
+filtering. Set `ad_blocklists: []` and rerun Ansible to clear the generated policy
+and disable scheduled updates. Keep the variable explicitly empty to override any
+inherited subscriptions.
+
+To inspect updates and verify both blocking and ordinary resolution (substitute
+your router's LAN address):
+
+```bash
+systemctl status ad-blocklists-update.timer
+journalctl -u ad-blocklists-update.service
+sudo /usr/local/sbin/update-ad-blocklists
+dig @192.168.1.1 pagead2.googlesyndication.com A  # NXDOMAIN when listed
+dig @192.168.1.1 example.com A                 # Ordinary public answer
+```
+
 ### NTP Servers
 
 To customize the automatic setting of the system clock, provide a list of NTP servers.
