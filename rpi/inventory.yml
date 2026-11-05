@@ -1,4 +1,40 @@
 all:
   hosts:
     localhost:
-      variable: value
+      # Inventory is the source of truth for permanent blocklists and exceptions.
+      # Prefer one general-purpose list; combining overlapping lists can increase
+      # false positives. No list guarantees that every app will work.
+      ad_blocklists:
+        # OISD Small: mainly website/mobile ads; conservative starting choice.
+        - https://small.oisd.nl
+
+        # OISD Big: ads, tracking, telemetry and malicious domains; broader than
+        # Small, with a functionality-focused exception policy. Replaces Small.
+        # - https://big.oisd.nl
+
+        # StevenBlack base: curated adware/malware hosts; moderate scope and
+        # Pi-hole's default. Excludes optional adult/social/gambling extensions.
+        # - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+
+        # HaGeZi Multi Light: basic ads/trackers and some badware; relaxed,
+        # minimal expected breakage. Choose only one HaGeZi Multi tier below.
+        # - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/light.txt
+
+        # HaGeZi Multi Normal: broader ads/tracking/telemetry and threat blocking;
+        # relaxed/balanced, low expected breakage. Leaves crash reporters alone.
+        # - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/multi.txt
+
+        # HaGeZi Multi Pro: extended tracking/telemetry and threat blocking,
+        # including crash reporters; balanced, low-to-moderate breakage risk.
+        # - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/pro.txt
+
+        # HaGeZi Multi Pro++: more aggressive tracking/telemetry blocking;
+        # moderate breakage risk, with more exceptions potentially needed.
+        # - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/pro.plus.txt
+
+        # HaGeZi Multi Ultimate: maximum coverage, aggressive filtering;
+        # high breakage risk, requires active maintenance of exceptions.
+        # - https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/ultimate.txt
+
+      # Exact domains needed by your apps; prefer narrow exceptions.
+      ad_allow_domains: []
