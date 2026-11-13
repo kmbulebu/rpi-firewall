@@ -6,7 +6,6 @@ firewalld configuration inside it. No router inventory or credentials are used.
 ```sh
 docker build -f tests/Dockerfile.forwarding -t rpi-forwarding-test .
 docker run -d --name rpi-forwarding-test --privileged --network=none --cgroupns=private \
-  --mount type=bind,src=/sys,dst=/sys,readonly \
   --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
   -v "$PWD:/repo:ro" -w /repo rpi-forwarding-test
 # Wait for systemctl is-system-running to report running or degraded.
@@ -18,8 +17,16 @@ docker rm -f rpi-forwarding-test
 
 A degraded container boot can be normal; inspect failed units if the test fails.
 The CI job waits for boot, prints service diagnostics on failure and always
-removes the container. Rootless Podman is also supported; the script uses
-`nsenter` to avoid remounting `/sys` when entering each network namespace.
+removes the container. Rootless Podman is also supported: substitute `podman` for `docker` and add
+`--mount type=bind,src=/sys,dst=/sys,readonly` to `podman run`. In rootless mode,
+systemd may not apply the service's filesystem sandbox, so sysfs must already be
+read-only. Do not add this host sysfs bind to the Docker command: its recursive
+submounts can interfere with the private cgroup hierarchy and prevent boot.
+
+The lab sets `ReadOnlyPaths=/sys` for networkd, then verifies that service's
+mount view before running scenarios. This prevents it waiting for an absent udev
+daemon. The script uses `nsenter` to enter client network namespaces without
+remounting `/sys`.
 
 ## What it exercises
 

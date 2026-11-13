@@ -23,12 +23,12 @@ jobs:
         run: |
           # No host networking or external network: all clients/ISPs are local namespaces.
           docker run -d --name rpi-forwarding-test --privileged --network=none --cgroupns=private \
-            --mount type=bind,src=/sys,dst=/sys,readonly \
             --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
             -v "$GITHUB_WORKSPACE:/repo:ro" -w /repo rpi-forwarding-test
           cleanup() {
             test_exit_status=$?
             if [ "$test_exit_status" -ne 0 ]; then
+              docker logs rpi-forwarding-test || true
               docker exec rpi-forwarding-test journalctl --no-pager -n 100 \
                 -u systemd-networkd -u firewalld || true
             fi

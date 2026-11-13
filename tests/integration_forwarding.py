@@ -375,8 +375,12 @@ def main():
                       '/etc/systemd/networkd.conf.d'):
         Path(directory).mkdir(parents=True, exist_ok=True)
     command('systemctl', 'stop', 'systemd-networkd', 'firewalld')
-    if not os.statvfs('/sys').f_flag & os.ST_RDONLY:
-        raise SystemExit('Launch the test container with read-only /sys (see tests/README.forwarding.md)')
+    # Networkd uses writable /sys as a signal that udev is available. This
+    # virtual-link lab has no udev daemon; expose read-only sysfs in its service.
+    unit = Path('/etc/systemd/system/systemd-networkd.service.d')
+    unit.mkdir(parents=True, exist_ok=True)
+    (unit / 'container.conf').write_text('[Service]\nReadOnlyPaths=/sys\n')
+    command('systemctl', 'daemon-reload')
     Path('/etc/systemd/networkd.conf.d/20-router.conf').write_text(
         (ROLE / 'files/networkd/20-router.conf').read_text())
     # Only namespace-local sysctls; never resize host-global conntrack buckets.
@@ -384,6 +388,10 @@ def main():
     try:
         topology()
         command('systemctl', 'start', 'systemd-networkd')
+        pid = command('systemctl', 'show', 'systemd-networkd', '-p', 'MainPID', '--value').strip()
+        command('nsenter', '--mount=/proc/' + pid + '/ns/mnt', 'python3', '-c',
+                "import os; assert os.statvfs('/sys').f_flag & os.ST_RDONLY, "
+                "'networkd needs read-only sysfs; see tests/README.forwarding.md'")
         apply = configure()
         apply()
         policy_fixtures()
