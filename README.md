@@ -304,13 +304,16 @@ rsyslog_udp_server:
 rsyslog_tcp_server:
 ```
 
-### Established TCP connections
+### Connection tracking
 
 ```yaml
-nf_conntrack_tcp_timeout_established: 3600  # One hour
+nf_conntrack_max: 524288
+nf_conntrack_buckets: 131072
+nf_conntrack_tcp_timeout_established: 5400  # 1.5 hours
 ```
 
-This is the idle timeout for established connections in connection tracking,
+The maximum and bucket count control connection capacity and hash table size.
+`nf_conntrack_tcp_timeout_established` is the idle timeout for established connections in connection tracking,
 not a maximum session length. The one-hour default bounds idle state retention.
 Quiet connections may need keepalives to preserve their NAT mappings.
 
@@ -604,7 +607,9 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs for the WireGuard peer (routes through VPN). |
 | `lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard persistent keepalive interval in seconds. |
 | `motd_dhcp_leases_limit` | `2` | Number of DHCP leases shown in the MOTD per interface. |
-| `nf_conntrack_tcp_timeout_established` | `3600` | Idle established TCP connection tracking timeout in seconds. |
+| `nf_conntrack_max` | `524288` | Maximum number of tracked connections. |
+| `nf_conntrack_buckets` | `131072` | Conntrack hash bucket count; applied before the connection limit. |
+| `nf_conntrack_tcp_timeout_established` | `5400` | Idle established TCP connection tracking timeout in seconds (1.5 hours). |
 | `name_servers` | `- 1.1.1.3#family.cloudflare-dns.com\n- 1.0.0.3#family.cloudflare-dns.com` | List of upstream name servers (default uses Cloudflare Family DNS). |
 | `ntp_servers` | `- ntp.ubuntu.com` | List of NTP servers used to sync system time. |
 | `router_hostname` | `router` | Hostname for the router. |
