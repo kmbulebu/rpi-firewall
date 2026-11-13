@@ -353,6 +353,56 @@ zone is in Coordinated Universal Time (UTC).
 upgrade_reboot_time: '07:00'
 ```
 
+### Ubuntu Pro
+
+Ubuntu Pro management is enabled by a non-empty token and disabled by default. Obtain your subscription token
+from the [Ubuntu Pro dashboard](https://ubuntu.com/pro/dashboard), then set:
+
+```yaml
+ubuntu_pro_token: YOUR_PRIVATE_SUBSCRIPTION_TOKEN
+ubuntu_pro_services:
+  - esm-apps
+  - esm-infra
+```
+
+Keep the token out of Git and shared inventory examples. Use protected private
+inventory or an encrypted variable source; Ansible Vault requires configuring
+vault decryption for `ansible-pull` as well. Keep the token configured while you
+want Ansible to manage the subscription and requested services. Already attached
+machines are not reattached, and a changed token does not switch subscriptions.
+
+The role ensures `ubuntu-pro-client` is installed, reads the current subscription,
+attaches only when needed, and enables missing requested services. Attachment
+uses a root-owned mode `0600` file under `/run`, with automatic service enablement
+disabled. Secret-bearing tasks suppress output and diffs; the temporary file is
+removed even after an attachment error. The Pro client retains its own machine
+credentials as part of normal operation. See Canonical's
+[attachment configuration documentation](https://ubuntu.com/pro-client/docs/en/latest/howtoguides/how_to_attach_with_config_file/).
+
+Core router handlers run before Pro configuration. Client/status/attachment/service
+failures produce a visible warning and allow the remaining play to continue;
+retry the play after correcting the issue. Invalid configured token types and
+service-list syntax are inventory errors and fail the play. CLI status, attachment
+and enable operations are bounded at 30, 120 and 300 seconds respectively, with a
+10-second forced termination grace period. In check mode only inventory shape is
+validated; Pro client/subscription operations are skipped.
+
+An absent, empty, null or whitespace-only `ubuntu_pro_token` skips all Pro tasks
+without detaching or disabling services on an attached machine. Removing a service
+from `ubuntu_pro_services` stops ensuring it is enabled; it does not disable it.
+An empty list attaches without enabling default services. Explicit detachment or
+service disablement remains an administrator action. Existing unattended-upgrades
+configuration already permits ESM Apps and ESM Infra security updates.
+
+Livepatch is not enabled by default. Canonical's current
+[supported kernel list](https://ubuntu.com/security/livepatch/docs/client/reference/platform/supported-kernels/)
+does not include the Raspberry Pi `raspi` kernel flavour. Enabling Ubuntu Pro does
+not change the kernel, enable FIPS, or apply hardening profiles by default.
+
+The `Optional Ubuntu Pro subscription` CI job checks real client status/error JSON,
+then substitutes a fake CLI to exercise attachment, idempotence,
+failure recovery and token protection. It runs offline with no real subscription.
+
 ### Prometheus Node Exporter
 
 Enable the prometheus node exporter on the LAN interface, TCP port 9100.
@@ -583,6 +633,8 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `ansible_bootstrap_directory` | `/root/.ansible/pull/bootstrap` | Separate checkout used to bootstrap Ansible collection dependencies. |
 | `ansible_playbook_filename` | `playbook.yml` | Playbook filename in the repository. |
 | `ansible_playbook_git_ref` | `master` | Git ref/branch to check out. |
+| `ubuntu_pro_services` | `[esm-apps, esm-infra]` | Services to ensure enabled; omissions do not disable existing services. |
+| `ubuntu_pro_token` | `''` | Private subscription token; a non-empty value enables management. Empty or absent stops management without detaching. |
 | `ansible_playbook_git_url` | `https://github.com/kmbulebu/rpi-firewall.git` | Git repository URL for the playbook. |
 | `domain` | `my.home` | Local domain name for LAN devices. |
 | `dns_private_domains` | `[]` | List of private domains to allow DNS resolution to local IP addresses. |

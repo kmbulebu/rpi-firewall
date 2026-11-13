@@ -1,0 +1,6 @@
+FROM ubuntu:26.04
+RUN apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      ubuntu-pro-client ansible-core python3-apt python3-yaml ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+WORKDIR /repo

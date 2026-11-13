@@ -7,6 +7,23 @@ permissions:
   contents: read
 
 jobs:
+  ubuntu-pro:
+    name: Optional Ubuntu Pro subscription
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build Ubuntu Pro test image
+        run: docker build -f tests/Dockerfile.ubuntu-pro -t rpi-ubuntu-pro-test .
+
+      - name: Test subscription management without a real token
+        run: |
+          docker run --rm --network=none -e RPI_FIREWALL_DISPOSABLE_TEST=1 \
+            --tmpfs /run --tmpfs /tmp -v "$GITHUB_WORKSPACE:/repo:ro" \
+            rpi-ubuntu-pro-test python3 tests/integration_ubuntu_pro.py
+
   forwarding-recovery:
     name: Forwarding and failure recovery
     runs-on: ubuntu-24.04
