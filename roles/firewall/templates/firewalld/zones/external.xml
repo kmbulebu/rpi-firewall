@@ -48,11 +48,13 @@
     <source-port port="41641" protocol="udp"/>
     <accept/>
   </rule>
+{% if enable_lan_vpn | bool %}
   <!-- Wireguard -->
   <rule family="ipv4">
     <source-port port="{{ lan_vpn_wg_listen_port }}" protocol="udp"/>
     <accept/>
   </rule>
+{% endif %}
   <!-- NAT internet traffic from our ULA range. -->
   <rule family="ipv6">
     <source address="fd00::/8"/>

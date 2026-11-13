@@ -44,3 +44,41 @@ jobs:
 
       - name: Test DNS behavior in the isolated container
         run: python3 tests/integration_dns_reliability.py
+
+  vpn-configuration:
+    name: VPN configuration lifecycle
+    runs-on: ubuntu-24.04
+    container:
+      image: ubuntu:26.04
+      options: --cap-add=NET_ADMIN --cap-add=NET_RAW --cap-add=NET_BROADCAST
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install VPN test dependencies
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            systemd dbus ansible-core wireguard python3-netaddr iproute2 python3-jinja2 python3-yaml
+
+      - name: Test enable, rename and disable with networkd
+        shell: bash
+        run: |
+          mkdir -p /run/dbus /run/systemd/netif /etc/systemd/network /etc/firewalld/zones
+          chown systemd-network:systemd-network /run/systemd/netif
+          dbus-daemon --system --fork
+          ip link add lan-test type dummy
+          ip link set lan-test up
+          setpriv --reuid systemd-network --regid systemd-network --init-groups \
+            --inh-caps +net_admin,+net_raw,+net_bind_service \
+            --ambient-caps +net_admin,+net_raw,+net_bind_service \
+            /usr/lib/systemd/systemd-networkd >/tmp/networkd.log 2>&1 &
+          networkd_test_pid=$!
+          trap 'kill "$networkd_test_pid"' EXIT
+          for attempt in {1..50}; do
+            if busctl --system --no-pager status org.freedesktop.network1 >/dev/null 2>&1; then
+              break
+            fi
+            sleep 0.1
+          done
+          RPI_FIREWALL_DISPOSABLE_TEST=1 python3 tests/integration_vpn_configuration.py

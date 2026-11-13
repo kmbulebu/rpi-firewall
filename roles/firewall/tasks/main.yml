@@ -1,4 +1,5 @@
 ---
+- include_tasks: validate_vpn.yml
 - include_tasks: time.yml
 - include_tasks: hostname.yml
 - include_tasks: user.yml

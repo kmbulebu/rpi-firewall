@@ -7,7 +7,7 @@ LIMIT={{ motd_dhcp_leases_limit | default(5) }}
 echo
 echo " DHCP server ${LIMIT} oldest leases:"
 
-for IFACE in "{{ lan_iface }}" "{{ lan_vpn_iface }}" "{{ lan_guests_iface }}"; do
+for IFACE in "{{ lan_iface }}" {% if enable_lan_vpn | bool %}"{{ lan_vpn_iface }}" {% endif %}"{{ lan_guests_iface }}"; do
     echo
     echo " Interface: ${IFACE}"
     if command -v /usr/local/bin/show_dhcp_leases >/dev/null 2>&1; then

@@ -383,11 +383,39 @@ port_forwards:
 
 #### Enabling
 
-The VPN client and associated LAN is disabled by default. Set to true to enable.
+The VPN client and associated LAN are disabled by default. Set to true to enable.
+Existing VPN installations must explicitly set this flag before upgrading; older
+versions configured VPN regardless of the flag. WireGuard credentials are required
+only when enabled.
 
 ```
 enable_lan_vpn: false
 ```
+
+Disabling removes the managed VPN network files and running VLAN, WireGuard and
+VRF devices. LAN attachment, the VPN subnet prohibition route, and VPN-specific
+WAN exception are removed as well. Firewall zones remain without interface
+bindings so administrator-managed policy references remain valid. Packages and
+administrator-managed firewall policies are retained.
+
+Cleanup uses the names recorded in the previous managed netdev files and checks
+kernel device kinds before deletion. Pending cleanup identities are retained for
+retry if a run fails. Changing interface names retires the old devices; disable
+first before reusing an old name for a different device kind. Existing VPN
+connections are interrupted when devices are retired.
+
+#### MTU
+
+```yaml
+lan_vpn_mtu: 1292
+```
+
+This sets the WireGuard, VPN VLAN and VRF MTUs, and the DHCP option 26 advertised
+to VPN clients. The default preserves existing behavior. The supported range is
+1280–1500 bytes; choose a value that fits the upstream path after WireGuard
+overhead. No automatic path measurement or MTU increase is performed. Clients
+receive a changed advertised MTU when they renew their DHCP leases, and client
+support for this DHCP option varies.
 
 #### VLAN ID
 
@@ -517,6 +545,8 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `lan_guests_iface` | `lan_guests` | Interface name for LAN guests network. |
 | `lan_guests_router_ip_address` | `192.168.200.254/24` | Router IP/prefix for the guests network. |
 | `lan_guests_vlan_id` | `6` | VLAN id for the guests network. |
+| `enable_lan_vpn` | `false` | Enable the VPN client and its VLAN/VRF; disabled configurations require no VPN credentials. |
+| `lan_vpn_mtu` | `1292` | Shared VPN tunnel/VLAN/VRF MTU and DHCP MTU advertisement, in bytes. |
 | `lan_vpn_iface` | `lan_vpn` | Desired interface name for the LAN VPN VLAN. |
 | `lan_vpn_router_ip_address` | `192.168.254.1/24` | Router IP/prefix for the LAN VPN network. |
 | `lan_vpn_dhcp_lease_seconds` | `86400` | Default and maximum VPN LAN lease duration in seconds. |

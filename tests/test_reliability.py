@@ -18,6 +18,7 @@ class LeaseTests(unittest.TestCase):
                       lan_vpn_cidr='192.168.254.0/24',
                       ip6_ula_cidr='fd12:3456::/48', lan_ip6_ula_cidr='fd12:3456::/64')
         env = Environment(loader=FileSystemLoader(ROLE / 'templates'), undefined=StrictUndefined)
+        env.filters['bool'] = bool
         cases = [('lan', '10-lan', 'lan_dhcp_lease_seconds', 86400),
                  ('lan_guests', '30-lan-guests', 'lan_guests_dhcp_lease_seconds', 3600),
                  ('lan_vpn', '20-lan-vpn', 'lan_vpn_dhcp_lease_seconds', 86400)]

@@ -7,7 +7,9 @@ RequiredForOnline=yes
 [Network]
 ConfigureWithoutCarrier=yes
 Address={{ router_ip_address }}
+{% if enable_lan_vpn | bool %}
 VLAN={{ lan_vpn_iface }}
+{% endif %}
 VLAN={{ lan_guests_iface }}
 DHCPPrefixDelegation=yes
 LinkLocalAddressing=ipv6
@@ -62,10 +64,12 @@ LifetimeSec=120
 Route=fd00::/8
 LifetimeSec=120
 
+{% if enable_lan_vpn | bool %}
 [Route]
 # Help ensure our non VPN traffic is separate
 Type=prohibit
 Destination={{ lan_vpn_cidr }}
+{% endif %}
 
 #[Route]
 # Help ensure our guest traffic is separate
