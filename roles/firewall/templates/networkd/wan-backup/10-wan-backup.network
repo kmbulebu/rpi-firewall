@@ -13,7 +13,8 @@ IgnoreCarrierLoss=no
 LLMNR=false
 MulticastDNS=false
 IPv6SendRA=no
-IPForward=true
+IPv4Forwarding=yes
+IPv6Forwarding=yes
 
 [DHCPv4]
 RouteMetric={{ wan_backup_route_metric }}

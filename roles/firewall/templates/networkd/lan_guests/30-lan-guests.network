@@ -17,7 +17,8 @@ EmitLLDP=nearest-bridge
 IPv6AcceptRA=false
 IPv6SendRA=true
 DHCPServer=true
-IPForward=true
+IPv4Forwarding=yes
+IPv6Forwarding=yes
 
 [DHCPPrefixDelegation]
 UplinkInterface={{ wan_iface }}

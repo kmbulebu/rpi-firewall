@@ -30,7 +30,19 @@ def main():
         (role / 'tasks').mkdir(parents=True)
         for directory in ('defaults', 'files', 'templates'):
             (role / directory).symlink_to(ROLE / directory)
-        tasks = [
+        # Exercise the real firewalld template and upgrade cleanup tasks without
+        # the host package/module management tasks in the full firewall role.
+        firewall_tasks = yaml.safe_load((ROLE / 'tasks/firewalld.yml').read_text())
+        firewall_tasks = [task for task in firewall_tasks if task.get('name') in (
+            'Remove obsolete lockdown whitelist', 'Template firewalld configuration')]
+        assert len(firewall_tasks) == 2
+        Path('/etc/firewalld/lockdown-whitelist.xml').write_text('<whitelist/>')
+        tasks = firewall_tasks + [
+            {'name': 'Parse additional network templates', 'ansible.builtin.template': {
+                'src': 'networkd/{{ item }}', 'dest': '/etc/systemd/network/{{ item | basename }}'},
+             'loop': ['wan/10-wan.network', 'wan-backup/10-wan-backup.network',
+                      'lan_guests/30-lan-guests.network'],
+             'notify': 'restart systemd-networkd'},
             {'ansible.builtin.include_tasks': str(ROLE / 'tasks/validate_vpn.yml')},
             {'name': 'Render LAN attachment', 'ansible.builtin.template': {
                 'src': 'networkd/lan/10-lan.network', 'dest': '/etc/systemd/network/10-lan.network'},
@@ -46,6 +58,7 @@ def main():
         (root / 'play.yml').write_text(yaml.safe_dump(play))
         values = dict(lan_iface='lan-test', router_ip_address='192.0.2.1/24', lan_address='192.0.2.1',
                       lan_cidr='192.0.2.0/24', lan_guests_iface='guest-test', lan_guests_cidr='198.51.100.0/24',
+                      lan_guests_address='198.51.100.1',
                       lan_vpn_cidr='192.168.254.0/24', ip6_ula_cidr='fd12:3456::/48',
                       lan_ip6_ula_cidr='fd12:3456::/64')
         private = command('wg', 'genkey').strip()
@@ -75,7 +88,8 @@ def main():
             details = log.read_text()[-12000:] if log.exists() else 'No networkd log available'
             raise AssertionError(f'Unexpected links: {list(links())}\n{details}')
 
-        output = apply({'enable_lan_vpn': False})
+        apply({'enable_lan_vpn': False})
+        assert not Path('/etc/firewalld/lockdown-whitelist.xml').exists()
         assert 'changed=0 ' in apply({'enable_lan_vpn': False})
         print('PASS: disabled needs no credentials; second run unchanged', flush=True)
         apply(credentials | {'enable_lan_vpn': True, 'lan_vpn_mtu': 1279}, expect_failure=True)
@@ -103,6 +117,12 @@ def main():
             assert '<interface ' not in Path(f'/etc/firewalld/zones/{zone}.xml').read_text()
         assert 'changed=0 ' in apply({'enable_lan_vpn': False})
         print('PASS: disable removes old custom devices without credentials; second run unchanged', flush=True)
+        command('firewall-offline-cmd', '--check-config')
+        networkd_log = Path('/tmp/networkd.log').read_text()
+        assert 'IPForward=' not in networkd_log, networkd_log
+        assert 'Unknown key' not in networkd_log, networkd_log
+        assert 'Unknown section' not in networkd_log, networkd_log
+        print('PASS: networkd accepts forwarding settings; firewalld config validates without lockdown', flush=True)
 
 
 if __name__ == '__main__':

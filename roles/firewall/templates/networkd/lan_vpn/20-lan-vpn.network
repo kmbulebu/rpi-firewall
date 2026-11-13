@@ -16,7 +16,8 @@ BindCarrier={{ vpn_client_iface }}
 LLDP=false
 LLMNR=false
 MulticastDNS=false
-IPForward=true
+IPv4Forwarding=yes
+IPv6Forwarding=yes
 
 [DHCPServer]
 EmitDNS=yes
