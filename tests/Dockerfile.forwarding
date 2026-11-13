@@ -1,0 +1,9 @@
+FROM ubuntu:26.04
+ENV container=docker
+RUN apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      systemd systemd-sysv dbus ansible-core python3-apt python3-yaml python3-jinja2 \
+      iproute2 iputils-ping dnsmasq-base wireguard firewalld nftables tcpdump ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+STOPSIGNAL SIGRTMIN+3
+CMD ["/sbin/init"]
