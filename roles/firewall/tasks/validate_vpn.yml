@@ -1,0 +1,33 @@
+---
+- name: Validate VPN device names
+  ansible.builtin.assert:
+    that:
+      - item is string and item is match('^[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,14}$')
+      - item not in ['lo', lan_iface, wan_iface, wan_backup_iface, lan_guests_iface, tailscale_iface]
+    fail_msg: VPN device names must be valid, distinct from the physical and other managed interfaces.
+  loop: '{{ [lan_vpn_iface, vpn_client_iface, vpn_vrf_iface] }}'
+
+- name: Validate distinct VPN devices
+  ansible.builtin.assert:
+    that:
+      - ([lan_vpn_iface, vpn_client_iface, vpn_vrf_iface] | unique | length) == 3
+
+- name: Validate VPN MTU
+  ansible.builtin.assert:
+    that:
+      - lan_vpn_mtu | string is match('^[0-9]+$')
+      - lan_vpn_mtu | int >= 1280
+      - lan_vpn_mtu | int <= 1500
+    fail_msg: VPN MTU must be an integer between 1280 and 1500.
+  when: enable_lan_vpn | bool
+
+- name: Validate enabled WireGuard credentials
+  ansible.builtin.assert:
+    that:
+      - lan_vpn_wg_address | default('', true) | length > 0
+      - lan_vpn_wg_private_key | default('', true) | length > 0
+      - lan_vpn_wg_peer_public_key | default('', true) | length > 0
+      - lan_vpn_wg_peer_endpoint | default('', true) | length > 0
+    fail_msg: Enabled VPN requires its WireGuard address, keys and endpoint.
+  when: enable_lan_vpn | bool
+  no_log: true

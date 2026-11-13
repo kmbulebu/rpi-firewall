@@ -1,44 +1,114 @@
 ---
-## VRF Network
-# No longer needed with Noble?
-# - name: Install linux-modules-extra
-#   apt:
-#     name: linux-modules-extra-raspi
-#     state: latest
-#     install_recommends: false
-- name: Create vpn vrf netdev
-  template:
-    src: networkd/wireguard/00-vpn-vrf.netdev
-    dest: /etc/systemd/network/00-vpn-vrf.netdev
+# Capture old names before replacing/removing their configuration. Never guess
+# which running links belong to us from the current inventory alone.
+- name: Discover retired managed VPN links
+  ansible.builtin.script:
+    cmd: >-
+      tools/vpn_links.py plan
+      {% if enable_lan_vpn | bool %}
+      --vlan {{ lan_vpn_iface | quote }}
+      --wireguard {{ vpn_client_iface | quote }}
+      --vrf {{ vpn_vrf_iface | quote }}
+      {% endif %}
+    executable: /usr/bin/python3
+  register: retired_vpn_links
+  changed_when: false
+  check_mode: false
+
+- name: Create VPN cleanup state directory
+  ansible.builtin.file:
+    path: /var/lib/rpi-firewall
+    state: directory
     owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
-- name: Configure vrf0 network
-  template:
-    src: networkd/wireguard/00-vpn-vrf.network
-    dest: /etc/systemd/network/00-vpn-vrf.network
+    group: root
+    mode: '0755'
+  when: retired_vpn_links.stdout | from_json | length > 0
+
+- name: Preserve retired VPN identities until cleanup succeeds
+  ansible.builtin.copy:
+    content: '{{ retired_vpn_links.stdout | from_json | to_json }}'
+    dest: /var/lib/rpi-firewall/retired-vpn-links.json
     owner: root
-    group: systemd-network
-    mode: '0644'
+    group: root
+    mode: '0600'
+  when: retired_vpn_links.stdout | from_json | length > 0
+
+- name: Configure enabled VPN
+  when: enable_lan_vpn | bool
+  block:
+    - name: Create vpn vrf netdev
+      template:
+        src: networkd/wireguard/00-vpn-vrf.netdev
+        dest: /etc/systemd/network/00-vpn-vrf.netdev
+        owner: root
+        group: systemd-network
+        mode: '0644'
+      notify: restart systemd-networkd
+    - name: Configure vrf0 network
+      template:
+        src: networkd/wireguard/00-vpn-vrf.network
+        dest: /etc/systemd/network/00-vpn-vrf.network
+        owner: root
+        group: systemd-network
+        mode: '0644'
+      notify: restart systemd-networkd
+    ## VPN VLAN Network
+    - name: Create lan vpn netdev
+      template:
+        src: networkd/lan_vpn/00-lan-vpn.netdev
+        dest: /etc/systemd/network/00-lan-vpn.netdev
+        owner: root
+        group: systemd-network
+        mode: '0644'
+      notify: restart systemd-networkd
+    - name: Configure lan vpn network
+      template:
+        src: networkd/lan_vpn/20-lan-vpn.network
+        dest: /etc/systemd/network/20-lan-vpn.network
+        owner: root
+        group: systemd-network
+        mode: '0644'
+      notify: restart systemd-networkd
+    ## Wireguard
+    - name: Install Wireguard
+      apt:
+        name: wireguard
+        state: latest
+    ## Wireguard Network
+    - name: Create wireguard client network
+      template:
+        src: networkd/wireguard/30-wireguard-client.netdev
+        dest: "/etc/systemd/network/30-wireguard-client.netdev"
+        owner: root
+        group: systemd-network
+        mode: '0640'
+      no_log: true
+      notify: restart systemd-networkd
+    - name: Configure wireguard client network
+      template:
+        src: networkd/wireguard/30-wireguard-client.network
+        dest: "/etc/systemd/network/30-wireguard-client.network"
+        owner: root
+        group: systemd-network
+        mode: '0644'
+      notify: restart systemd-networkd
+
+- name: Remove disabled VPN network configuration
+  ansible.builtin.file:
+    path: /etc/systemd/network/{{ item }}
+    state: absent
+  loop:
+    - 00-vpn-vrf.netdev
+    - 00-vpn-vrf.network
+    - 00-lan-vpn.netdev
+    - 20-lan-vpn.network
+    - 30-wireguard-client.netdev
+    - 30-wireguard-client.network
+  when: not (enable_lan_vpn | bool)
   notify: restart systemd-networkd
-## VPN VLAN Network
-- name: Create lan vpn netdev
-  template:
-    src: networkd/lan_vpn/00-lan-vpn.netdev
-    dest: /etc/systemd/network/00-lan-vpn.netdev
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
-- name: Configure lan vpn network
-  template:
-    src: networkd/lan_vpn/20-lan-vpn.network
-    dest: /etc/systemd/network/20-lan-vpn.network
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
+
+# Empty zones preserve references from administrator-managed policies, while
+# removing all bindings and tunnel masquerading when VPN is disabled.
 ## Firewalld
 - name: Template internal VPN zone config
   template:
@@ -56,25 +126,24 @@
     group: root
     mode: '0644'
   notify: reload firewalld
-## Wireguard
-- name: Install Wireguard
-  apt:
-    name: wireguard
-    state: latest
-## Wireguard Network
-- name: Create wireguard client network
-  template:
-    src: networkd/wireguard/30-wireguard-client.netdev
-    dest: "/etc/systemd/network/30-wireguard-client.netdev"
-    owner: root
-    group: systemd-network
-    mode: '0640'
-  notify: restart systemd-networkd
-- name: Configure wireguard client network
-  template:
-    src: networkd/wireguard/30-wireguard-client.network
-    dest: "/etc/systemd/network/30-wireguard-client.network"
-    owner: root
-    group: systemd-network
-    mode: '0644'
-  notify: restart systemd-networkd
+
+- name: Reload network definitions before retiring VPN devices
+  ansible.builtin.command: networkctl reload
+  changed_when: false
+  when:
+    - retired_vpn_links.stdout | from_json | length > 0
+    - not ansible_check_mode
+
+- name: Delete retired managed VPN devices
+  ansible.builtin.script:
+    cmd: tools/vpn_links.py delete {{ item.kind | quote }} {{ item.name | quote }}
+    executable: /usr/bin/python3
+  loop: '{{ retired_vpn_links.stdout | from_json }}'
+  register: vpn_link_cleanup
+  changed_when: (vpn_link_cleanup.stdout | from_json).changed
+  when: not ansible_check_mode
+
+- name: Clear completed VPN cleanup record
+  ansible.builtin.file:
+    path: /var/lib/rpi-firewall/retired-vpn-links.json
+    state: absent

@@ -31,6 +31,9 @@ lan_guests_vlan_id: 6
 lan_guests_dhcp_pool_offset: 10
 lan_guests_dhcp_pool_size: 200
 lan_guests_dhcp_lease_seconds: 3600
+enable_lan_vpn: false
+# Keep the existing tunnel, VLAN and DHCP MTU until a measured change is needed.
+lan_vpn_mtu: 1292
 vpn_client_iface: wg0
 vpn_vrf_iface: vpn_vrf0
 lan_vpn_iface: lan_vpn
