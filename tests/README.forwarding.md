@@ -19,13 +19,14 @@ A degraded container boot can be normal; inspect failed units if the test fails.
 The CI job waits for boot, prints service diagnostics on failure and always
 removes the container. Rootless Podman is also supported: substitute `podman` for `docker` and add
 `--mount type=bind,src=/sys,dst=/sys,readonly` to `podman run`. In rootless mode,
-systemd may not apply the service's filesystem sandbox, so sysfs must already be
-read-only. Do not add this host sysfs bind to the Docker command: its recursive
+the runtime does not permit remounting sysfs from inside the container, so it
+must already be read-only. Do not add this host sysfs bind to the Docker command: its recursive
 submounts can interfere with the private cgroup hierarchy and prevent boot.
 
-The lab sets `ReadOnlyPaths=/sys` for networkd, then verifies that service's
-mount view before running scenarios. This prevents it waiting for an absent udev
-daemon. The script uses `nsenter` to enter client network namespaces without
+After boot the lab makes only the container's `/sys` mount read-only with
+`mount -o remount,bind,ro /sys`, leaving the private cgroup submount writable.
+It verifies networkd's mount view before running scenarios. This prevents
+networkd waiting for an absent udev daemon. The script uses `nsenter` to enter client network namespaces without
 remounting `/sys`.
 
 ## What it exercises

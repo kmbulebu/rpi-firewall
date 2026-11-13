@@ -375,12 +375,12 @@ def main():
                       '/etc/systemd/networkd.conf.d'):
         Path(directory).mkdir(parents=True, exist_ok=True)
     command('systemctl', 'stop', 'systemd-networkd', 'firewalld')
-    # Networkd uses writable /sys as a signal that udev is available. This
-    # virtual-link lab has no udev daemon; expose read-only sysfs in its service.
-    unit = Path('/etc/systemd/system/systemd-networkd.service.d')
-    unit.mkdir(parents=True, exist_ok=True)
-    (unit / 'container.conf').write_text('[Service]\nReadOnlyPaths=/sys\n')
-    command('systemctl', 'daemon-reload')
+    # Networkd treats writable sysfs as evidence that udev is available.
+    # Remount only this container's /sys mount read-only, leaving its private
+    # cgroup submount writable. Service mount sandboxing is skipped by systemd
+    # in some containers. Rootless Podman must launch with read-only sysfs.
+    if not os.statvfs('/sys').f_flag & os.ST_RDONLY:
+        command('mount', '-o', 'remount,bind,ro', '/sys')
     Path('/etc/systemd/networkd.conf.d/20-router.conf').write_text(
         (ROLE / 'files/networkd/20-router.conf').read_text())
     # Only namespace-local sysctls; never resize host-global conntrack buckets.
