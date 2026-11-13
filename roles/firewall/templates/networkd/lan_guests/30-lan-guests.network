@@ -39,7 +39,6 @@ EmitRouter=yes
 {% endfor %}
 EmitTimezone=yes
 Timezone=America/New_York
-# Low for now. Allow longer once lease persistence is allowed.
 DefaultLeaseTimeSec=1h
 MaxLeaseTimeSec=1h
 
