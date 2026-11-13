@@ -7,6 +7,45 @@ permissions:
   contents: read
 
 jobs:
+  forwarding-recovery:
+    name: Forwarding and failure recovery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build disposable router test image
+        run: docker build -f tests/Dockerfile.forwarding -t rpi-forwarding-test .
+
+      - name: Test real packet forwarding and recovery
+        shell: bash
+        run: |
+          # No host networking or external network: all clients/ISPs are local namespaces.
+          docker run -d --name rpi-forwarding-test --privileged --network=none --cgroupns=private \
+            --mount type=bind,src=/sys,dst=/sys,readonly \
+            --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
+            -v "$GITHUB_WORKSPACE:/repo:ro" -w /repo rpi-forwarding-test
+          cleanup() {
+            test_exit_status=$?
+            if [ "$test_exit_status" -ne 0 ]; then
+              docker exec rpi-forwarding-test journalctl --no-pager -n 100 \
+                -u systemd-networkd -u firewalld || true
+            fi
+            docker rm -f rpi-forwarding-test >/dev/null
+            exit "$test_exit_status"
+          }
+          trap cleanup EXIT
+          for attempt in {1..30}; do
+            state=$(docker exec rpi-forwarding-test systemctl is-system-running 2>/dev/null || true)
+            if [[ "$state" == running || "$state" == degraded ]]; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec -e RPI_FIREWALL_DISPOSABLE_TEST=1 rpi-forwarding-test \
+            python3 tests/integration_forwarding.py
+
   blocklist-orchestration:
     name: Blocklist failure isolation
     runs-on: ubuntu-24.04

@@ -121,6 +121,10 @@ primary/LAN devices. Use the MOTD or `networkctl status wan-backup` to inspect
 addresses, and `ip -4 route show default` / `ip -6 route show default` to inspect
 uplink metrics.
 
+The [container forwarding lab and hardware checklist](tests/README.forwarding.md)
+cover simulated packet forwarding, failure recovery, and the checks that still
+require the physical router.
+
 Before relying on backup, test plugging it in while primary retains carrier,
 DNS and Internet access from LAN/guests, LAN Thread routes, VPN reconnection,
 unplugging to return to primary, and booting with the hotspot absent. Test IPv6
