@@ -83,6 +83,39 @@ plain.example.com
         self.assertEqual(count, 0)
         self.assertNotIn('local-zone:', policy)
 
+    def test_rollback_reload_failure_is_critical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'policy.conf'
+            path.write_text('old')
+            failed = subprocess.CalledProcessError(1, 'reload')
+            with patch.object(blocklists.subprocess, 'run', side_effect=[None, None, failed, failed]):
+                with self.assertRaises(blocklists.PolicyRollbackError):
+                    blocklists.apply_policy(path, 'new', Path(tmp) / 'unbound.conf')
+            self.assertEqual(path.read_text(), 'old')
+
+    def test_interrupted_transaction_restores_previous_state(self):
+        for previous in (None, 'old'):
+            with self.subTest(previous=previous), tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / 'policy.conf'
+                if previous is not None:
+                    path.write_text(previous)
+                with patch.object(blocklists.subprocess, 'run', side_effect=[None, InterruptedError(), None]):
+                    with self.assertRaises(InterruptedError):
+                        blocklists.apply_policy(path, 'new', Path(tmp) / 'unbound.conf')
+                self.assertEqual(path.read_text() if path.exists() else None, previous)
+
+    def test_status_is_local_and_distinguishes_empty_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'policy.conf'
+            self.assertEqual(blocklists.policy_status(path), {'checksum': None, 'blocked_domains': 0})
+            path.write_text('server:\n')
+            empty = blocklists.policy_status(path)
+            self.assertEqual(empty['blocked_domains'], 0)
+            path.write_text('server:\n  local-zone: "ads.example.test." always_nxdomain\n')
+            active = blocklists.policy_status(path)
+            self.assertEqual(active['blocked_domains'], 1)
+            self.assertNotEqual(active['checksum'], empty['checksum'])
+
 
 if __name__ == '__main__':
     unittest.main()

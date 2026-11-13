@@ -1,0 +1,9 @@
+FROM ubuntu:26.04
+ENV container=docker
+RUN apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      systemd systemd-sysv dbus unbound ansible-core python3-yaml python3-jinja2 \
+      python3-dnspython openssl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+STOPSIGNAL SIGRTMIN+3
+CMD ["/sbin/init"]

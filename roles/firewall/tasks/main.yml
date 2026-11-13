@@ -22,4 +22,8 @@
 - include_tasks: apparmor.yml
 - include_tasks: cleanup.yml
 - include_tasks: watchdog.yml
+- name: Apply core service changes before optional blocklist refresh
+  ansible.builtin.meta: flush_handlers
+- name: Configure DNS ad blocking
+  ansible.builtin.include_tasks: ad_blocking.yml
 - meta: clear_facts

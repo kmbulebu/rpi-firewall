@@ -236,9 +236,18 @@ Downloads must all succeed and contain blocking entries before a policy is
 installed. The updater validates the candidate and complete Unbound configuration
 before reloading. Failed downloads or validation retain the previous policy; a
 reload failure restores it and attempts to reload the previous configuration.
-A failed initial update fails the Ansible play instead of reporting working
-filtering. Set `ad_blocklists: []` and rerun Ansible to clear the generated policy
-and disable scheduled updates. Keep the variable explicitly empty to override any
+Core configuration and its handlers finish before blocklist work starts. Immediate
+and scheduled refreshes use the same systemd service, with a 15-minute timeout.
+Download/parse/update failures leave the service failed for visibility and the
+daily retry timer enabled. Ansible warns and continues only after checking that
+the installed DNS configuration is valid and local DNS still answers. A failed
+first update explicitly reports that filtering is inactive. Failed rollback,
+abnormal updater termination, and unhealthy DNS remain errors. The timeout's
+SIGTERM requests rollback of an in-progress policy installation; forced termination
+cannot guarantee recovery and is reported as an error.
+
+Set `ad_blocklists: []` and rerun Ansible to clear the generated policy locally,
+without downloads, and disable scheduled updates. Keep the variable explicitly empty to override any
 inherited subscriptions.
 
 To inspect updates and verify both blocking and ordinary resolution (substitute
@@ -247,7 +256,8 @@ your router's LAN address):
 ```bash
 systemctl status ad-blocklists-update.timer
 journalctl -u ad-blocklists-update.service
-sudo /usr/local/sbin/update-ad-blocklists
+sudo systemctl start ad-blocklists-update.service
+sudo /usr/local/sbin/update-ad-blocklists --status  # Installed policy checksum and blocking count
 dig @192.168.1.1 pagead2.googlesyndication.com A  # NXDOMAIN when listed
 dig @192.168.1.1 example.com A                 # Ordinary public answer
 ```

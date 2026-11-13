@@ -21,6 +21,14 @@
     group: root
     mode: '0755'
 
+- name: Install local DNS health check
+  ansible.builtin.copy:
+    src: unbound/check-local-dns.py
+    dest: /usr/local/sbin/check-local-dns
+    owner: root
+    group: root
+    mode: '0755'
+
 - name: Configure ad blocking subscriptions and exceptions
   ansible.builtin.template:
     src: ad-blocking/config.json.j2
@@ -46,17 +54,97 @@
     daemon_reload: true
   when: ad_blocking_units.changed
 
-# Run synchronously: a failed first download must fail the play, not silently
-# report success without filtering. Subsequent failures retain the active policy.
-- name: Apply current ad blocking inventory
-  ansible.builtin.command:
-    cmd: /usr/local/sbin/update-ad-blocklists
-  register: ad_blocking_update
-  changed_when: "'Policy updated:' in ad_blocking_update.stdout"
-  when: not ansible_check_mode
-
 - name: Schedule daily blocklist refresh when subscriptions are configured
   ansible.builtin.systemd_service:
     name: ad-blocklists-update.timer
     enabled: "{{ ad_blocklists | length > 0 }}"
     state: "{{ 'started' if ad_blocklists | length > 0 else 'stopped' }}"
+
+- name: Inspect blocking policy before refresh
+  ansible.builtin.command:
+    argv:
+      - /usr/local/sbin/update-ad-blocklists
+      - --status
+  register: ad_blocking_before
+  changed_when: false
+  when: not ansible_check_mode
+
+- name: Refresh optional blocking policy
+  when: not ansible_check_mode
+  block:
+    - name: Run blocklist refresh through its bounded oneshot service
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - start
+          - ad-blocklists-update.service
+      changed_when: false
+  rescue:
+    - name: Read blocklist updater exit status
+      ansible.builtin.command:
+        argv:
+          - systemctl
+          - show
+          - ad-blocklists-update.service
+          - --property=ExecMainStatus
+          - --value
+      register: ad_blocking_exit_status
+      changed_when: false
+
+    - name: Require completed blocklist failure recovery
+      ansible.builtin.assert:
+        that:
+          - ad_blocking_exit_status.stdout | trim == '1'
+        fail_msg: >-
+          Blocklist updater did not complete normal failure recovery. Core configuration
+          was applied, but DNS policy recovery needs attention. Inspect
+          journalctl -u ad-blocklists-update.service.
+
+    - name: Validate installed DNS configuration after refresh failure
+      ansible.builtin.command: unbound-checkconf
+      changed_when: false
+
+    - name: Verify Unbound is still running after refresh failure
+      ansible.builtin.command: systemctl is-active unbound.service
+      changed_when: false
+
+    - name: Verify local DNS still answers after refresh failure
+      ansible.builtin.command:
+        argv:
+          - /usr/local/sbin/check-local-dns
+          - '{{ lan_address }}'
+          - '{{ domain }}'
+      changed_when: false
+      register: ad_blocking_dns_health
+      retries: 3
+      delay: 2
+      until: ad_blocking_dns_health.rc == 0
+
+    - name: Inspect policy retained after failed refresh
+      ansible.builtin.command:
+        argv:
+          - /usr/local/sbin/update-ad-blocklists
+          - --status
+      register: ad_blocking_retained
+      changed_when: false
+
+    - name: Report optional filtering refresh failure
+      ansible.builtin.debug:
+        msg: >-
+          WARNING: Blocklist refresh failed; core configuration was applied and local
+          DNS is responding. {{ 'The previous blocking policy is retained.'
+          if (ad_blocking_retained.stdout | from_json).blocked_domains | int > 0
+          else 'No blocking rules are active; DNS is operating without ad filtering.' }}
+          {{ 'Disabling filtering did not complete.' if ad_blocklists | length == 0 else
+          'The daily timer remains enabled to retry.' }}
+          Inspect journalctl -u ad-blocklists-update.service for the cause.
+  always:
+    - name: Report whether the installed policy changed
+      ansible.builtin.command:
+        argv:
+          - /usr/local/sbin/update-ad-blocklists
+          - --status
+      register: ad_blocking_after
+      changed_when: >-
+        (ad_blocking_after.stdout | from_json).checksum !=
+        (ad_blocking_before.stdout | from_json).checksum
