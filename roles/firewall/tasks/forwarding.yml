@@ -1,3 +1,8 @@
+- name: Validate established TCP timeout
+  assert:
+    that:
+      - nf_conntrack_tcp_timeout_established | int > 0
+    fail_msg: The established TCP timeout must be a positive number of seconds.
 - name: Increase IPV6 Route Cache Max
   sysctl:
     name: net.ipv6.route.max_size
@@ -36,7 +41,7 @@
 - name: Set nf_conntrack TCP established timeout
   sysctl:
     name: net.netfilter.nf_conntrack_tcp_timeout_established
-    value: '1800'
+    value: '{{ nf_conntrack_tcp_timeout_established }}'
     sysctl_file: /etc/sysctl.d/20-router.conf
     reload: yes
     sysctl_set: yes
