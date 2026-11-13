@@ -22,8 +22,11 @@
 - include_tasks: apparmor.yml
 - include_tasks: cleanup.yml
 - include_tasks: watchdog.yml
-- name: Apply core service changes before optional blocklist refresh
+- name: Apply core service changes before optional integrations
   ansible.builtin.meta: flush_handlers
+- name: Configure optional Ubuntu Pro subscription
+  ansible.builtin.include_tasks: ubuntu_pro.yml
+  when: ubuntu_pro_enabled | bool
 - name: Configure DNS ad blocking
   ansible.builtin.include_tasks: ad_blocking.yml
 - meta: clear_facts

@@ -121,7 +121,7 @@ ExecReload={reload_script} $MAINPID
     (role / 'tasks/ad_blocking.yml').symlink_to(ROLE / 'tasks/ad_blocking.yml')
     main_tasks = yaml.safe_load((ROLE / 'tasks/main.yml').read_text())
     barrier = next(index for index, task in enumerate(main_tasks)
-                   if task.get('name') == 'Apply core service changes before optional blocklist refresh')
+                   if task.get('ansible.builtin.meta') == 'flush_handlers')
     (role / 'tasks/main.yml').write_text(yaml.safe_dump([
         {'name': 'Simulate core configuration', 'ansible.builtin.copy': {
             'content': '{{ test_run }}', 'dest': str(FIXTURE / 'core-config')}, 'notify': 'apply core'},
