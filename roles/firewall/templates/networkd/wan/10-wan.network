@@ -19,6 +19,7 @@ IPv6SendRA=no
 IPForward=true
 
 [IPv6AcceptRA]
+RouteMetric={{ wan_route_metric }}
 UseGateway=true
 UseDNS=false
 
@@ -34,6 +35,7 @@ Token=::1
 UseMTU=true
 
 [DHCPv4]
+RouteMetric={{ wan_route_metric }}
 UseDNS=false
 ClientIdentifier=mac
 SendHostname=false
@@ -49,6 +51,7 @@ UseAddress=false
 
 [Route]
 Gateway=_ipv6ra
+Metric={{ wan_route_metric }}
 Scope=global
 IPv6Preference=high
 # Documented option didn't pass parsing validation.

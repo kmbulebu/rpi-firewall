@@ -15,6 +15,10 @@ ad_allow_domains: []
 enable_prometheus_node_exporter: no
 wan_iface_networkd_link_match: "Property=ID_BUS=usb"
 wan_iface: wan0
+wan_backup_enabled: false
+wan_backup_iface: wan-backup
+wan_route_metric: 1024
+wan_backup_route_metric: 100
 lan_iface_networkd_link_match: "Driver=bcmgenet"
 lan_iface: lan0
 lan_dhcp_pool_offset: 10

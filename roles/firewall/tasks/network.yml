@@ -1,4 +1,19 @@
 ---
+# Reject ambiguous matches before writing any network configuration.
+- name: Validate backup WAN configuration
+  assert:
+    that:
+      - wan_backup_iface_networkd_link_match | default('', true) | trim | length > 0
+      - wan_iface_networkd_link_match | trim != 'Property=ID_BUS=usb'
+      - wan_backup_iface_networkd_link_match | default('') | trim != wan_iface_networkd_link_match | trim
+      - wan_backup_iface != wan_iface
+      - wan_backup_iface != lan_iface
+      - wan_backup_route_metric | int > 0
+      - wan_backup_route_metric | int < wan_route_metric | int
+    fail_msg: >-
+      Backup WAN requires distinct device matchers and interface names, an explicit
+      primary WAN matcher (not all USB devices), and a lower positive backup metric.
+  when: wan_backup_enabled | bool
 - name: Disable cloud-init network configuration
   copy:
     content: "network: {config: disabled}"
@@ -16,7 +31,9 @@
     owner: root
     group: systemd-network
     mode: '0644'
-  notify: restart systemd-networkd
+  notify:
+    - reload udev rules
+    - restart systemd-networkd
 - name: Configure wan network
   template:
     src: networkd/wan/10-wan.network
@@ -25,6 +42,32 @@
     group: systemd-network
     mode: '0644'
   notify: restart systemd-networkd
+## Optional hot-plug backup WAN
+- name: Configure backup wan link and network
+  template:
+    src: "networkd/wan-backup/{{ item }}"
+    dest: "/etc/systemd/network/{{ item }}"
+    owner: root
+    group: systemd-network
+    mode: '0644'
+  loop:
+    - 00-wan-backup.link
+    - 10-wan-backup.network
+  when: wan_backup_enabled | bool
+  notify:
+    - reload udev rules
+    - restart systemd-networkd
+- name: Remove disabled backup wan configuration
+  file:
+    path: "/etc/systemd/network/{{ item }}"
+    state: absent
+  loop:
+    - 00-wan-backup.link
+    - 10-wan-backup.network
+  when: not (wan_backup_enabled | bool)
+  notify:
+    - reload udev rules
+    - restart systemd-networkd
 ## LAN Network
 - name: Configure lan link
   template:

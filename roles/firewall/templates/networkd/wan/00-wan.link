@@ -2,7 +2,7 @@
 {{ wan_iface_networkd_link_match }}
 
 [Link]
-Description="Physical WAN (Raspberry Pi Internal Gigabit Ethernet)"
+Description="Primary WAN"
 NamePolicy=
 Name={{ wan_iface }}
 MACAddressPolicy=none

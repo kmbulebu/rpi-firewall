@@ -4,6 +4,8 @@
 - name: mount auto
   command: mount -a
   become: yes
+- name: reload udev rules
+  command: udevadm control --reload
 - name: restart systemd-networkd
   service:
     name: systemd-networkd

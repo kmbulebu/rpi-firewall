@@ -1,0 +1,34 @@
+[Match]
+Name={{ wan_backup_iface }}
+
+[Link]
+RequiredForOnline=no
+
+[Network]
+DHCP=yes
+IPv6AcceptRA=yes
+LinkLocalAddressing=ipv6
+ConfigureWithoutCarrier=no
+IgnoreCarrierLoss=no
+LLMNR=false
+MulticastDNS=false
+IPv6SendRA=no
+IPForward=true
+
+[DHCPv4]
+RouteMetric={{ wan_backup_route_metric }}
+UseDNS=false
+UseDomains=false
+UseHostname=false
+SendHostname=false
+
+[DHCPv6]
+UseDNS=false
+UseDomains=false
+SendHostname=false
+
+[IPv6AcceptRA]
+RouteMetric={{ wan_backup_route_metric }}
+UseGateway=true
+UseDNS=false
+UseDomains=false
