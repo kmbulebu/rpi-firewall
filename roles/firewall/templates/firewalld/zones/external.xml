@@ -3,6 +3,9 @@
   <short>External</short>
   <description>For use on external networks. You do not trust the other computers on networks to not harm your computer. Only selected incoming connections are accepted.</description>
   <interface name="{{ wan_iface }}"/>
+{% if wan_backup_enabled | bool %}
+  <interface name="{{ wan_backup_iface }}"/>
+{% endif %}
   <masquerade/>
   <!-- Allow list ICMP instead of deny list -->
   <icmp-block-inversion/>

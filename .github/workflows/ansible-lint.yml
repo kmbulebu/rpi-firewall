@@ -14,7 +14,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Test blocklist updater
+      - name: Install template test dependencies
+        run: python3 -m pip install Jinja2 PyYAML
+
+      - name: Test blocklists and network templates
         run: python3 -m unittest discover -s tests -v
 
       - name: Run ansible-lint

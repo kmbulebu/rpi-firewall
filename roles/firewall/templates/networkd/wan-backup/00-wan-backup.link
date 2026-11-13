@@ -1,0 +1,8 @@
+[Match]
+{{ wan_backup_iface_networkd_link_match }}
+
+[Link]
+Description="Backup WAN (USB hotspot)"
+NamePolicy=
+Name={{ wan_backup_iface }}
+MACAddressPolicy=none

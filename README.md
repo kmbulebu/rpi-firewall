@@ -60,6 +60,72 @@ admin_user_authorized_key=
 
 ### WAN Interface (Internet Side)
 
+#### Optional USB hotspot backup
+
+The router uses systemd-networkd 259 on Ubuntu 26.04. A hotspot providing USB
+Ethernet tethering can be plugged in when primary Internet service fails. Enable
+USB tethering on the hotspot if required. No modem dialer or health monitor is
+needed: plugging it in selects backup for each address family for which it
+supplies a default route; unplugging it returns that family to primary WAN.
+Primary WAN can retain Ethernet carrier throughout the outage.
+
+Add device-specific matchers to the router inventory, using each adapter's
+permanent MAC (obtain it with `ethtool -P INTERFACE`):
+
+```yaml
+wan_backup_enabled: true
+wan_backup_iface_networkd_link_match: "PermanentMACAddress=96:0b:9e:b5:54:6d"
+wan_iface_networkd_link_match: "PermanentMACAddress=70:88:6b:8d:9f:e0"
+```
+
+The addresses above are examples from this installation. Matchers must identify
+separate devices. The original `Property=ID_BUS=usb` primary matcher would also
+claim a USB hotspot, so it must be replaced before enabling backup. Backup MAC
+spoofing is not used. Some hotspots change their MAC on reboot; if that happens,
+update the matcher or use stable USB identity properties instead.
+
+The role defaults are:
+
+```yaml
+wan_backup_enabled: false
+wan_backup_iface: wan-backup
+wan_route_metric: 1024
+wan_backup_route_metric: 100
+```
+
+Lower route metrics win. The metrics apply to DHCPv4 and IPv6 RA routes on the
+two uplinks, including primary WAN's explicit IPv6 default route. They do not
+change LAN RA acceptance (including Thread routes), advertised LAN router
+preference, or the VPN VRF's table 200. WireGuard's outer connection can move to
+backup; existing connections may need to reconnect after either switch.
+
+Both uplinks share the external firewalld zone, including masquerading, inbound
+exceptions and configured port forwards. Cellular carrier NAT may prevent inbound
+connections regardless of those rules. IPv6 reverse-path filtering remains strict.
+Software flow offload remains configured for primary WAN and LAN; the optional
+hotspot is not added to the flowtable. Verify cached-flow behavior during switching
+as part of live failover testing. Disabling backup removes its networkd files. Unplug the hotspot when disabling it so an existing configured interface
+cannot retain old state.
+
+Prefix delegation to LAN and guests remains tied to primary WAN. Backup does not
+request PD. IPv4-only tethering is supported; it does not replace a failed primary
+IPv6 route. Previously advertised primary IPv6 prefixes may remain on clients
+until their lifetimes expire. Do not assume that cellular IPv6 can route primary
+WAN's delegated addresses. The hotspot's subnet must not overlap a LAN/VPN/guest
+subnet.
+
+After the first deployment, unplug and reconnect an already attached hotspot:
+`.link` naming is applied when the device appears, not by restarting networkd.
+The role reloads udev rules for future plug-ins without retriggering existing
+primary/LAN devices. Use the MOTD or `networkctl status wan-backup` to inspect
+addresses, and `ip -4 route show default` / `ip -6 route show default` to inspect
+uplink metrics.
+
+Before relying on backup, test plugging it in while primary retains carrier,
+DNS and Internet access from LAN/guests, LAN Thread routes, VPN reconnection,
+unplugging to return to primary, and booting with the hotspot absent. Test IPv6
+separately if the hotspot offers it.
+
 ### LAN Interface
 
 #### Router hostname
@@ -421,3 +487,8 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `wan_device_set_mac_address` | `` | Optional MAC address to set on WAN device (empty by default). |
 | `wan_iface` | `wan0` | Desired WAN interface name. |
 | `wan_iface_networkd_link_match` | `"Property=ID_BUS=usb"` | `systemd-networkd` match string for WAN link. |
+| `wan_backup_enabled` | `false` | Configure optional USB hotspot backup. |
+| `wan_backup_iface` | `wan-backup` | Desired backup WAN interface name. |
+| `wan_backup_iface_networkd_link_match` | unset | Explicit device matcher; required when backup is enabled. |
+| `wan_route_metric` | `1024` | Primary DHCPv4 and IPv6 RA route metric. |
+| `wan_backup_route_metric` | `100` | Backup metric; must be positive and lower than primary. |
