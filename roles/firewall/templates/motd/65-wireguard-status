@@ -1,0 +1,19 @@
+#!/bin/bash
+# Read-only WireGuard status; never expose private or preshared keys.
+
+echo
+echo " WireGuard:"
+{% if enable_lan_vpn | bool %}
+IFACE={{ vpn_client_iface | quote }}
+if ! command -v wg >/dev/null 2>&1; then
+    echo "  wg is not installed"
+elif ! ip link show dev "$IFACE" >/dev/null 2>&1; then
+    echo "  ${IFACE}: interface not found"
+elif stats=$(WG_HIDE_KEYS=always WG_COLOR_MODE=never timeout 2s wg show "$IFACE" 2>/dev/null); then
+    printf '%s\n' "$stats" | sed 's/^/  /'
+else
+    echo "  ${IFACE}: statistics unavailable (requires root)"
+fi
+{% else %}
+echo "  VPN disabled"
+{% endif %}

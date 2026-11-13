@@ -274,6 +274,23 @@ ntp_servers:
   - ntp.ubuntu.com
 ```
 
+### Login status (MOTD)
+
+The MOTD shows WAN address availability, WireGuard status, conntrack utilization,
+systemd health, and DHCP leases. Each enabled DHCP interface shows the two leases
+with the most time remaining first; override `motd_dhcp_leases_limit` to change
+this per-interface count. Route listings are omitted.
+
+WireGuard uses the configured VPN interface and the normal `wg show` display,
+including handshake age and transfer totals. Private and preshared keys are always
+hidden. Statistics require root privileges, as provided by the normal PAM MOTD
+update; manually running the script without permission reports them unavailable.
+
+Conntrack shows current entries, capacity, utilization, the established TCP idle
+timeout, and cumulative kernel drop/early-eviction/insert-failure counters where
+available. These counters are totals, not rates. Status collection reads existing
+kernel state and does not dump the connection table or add logging/polling services.
+
 ### Remote Syslog
 
 To send router and firewall logs to a remote syslog server, provide
@@ -586,7 +603,7 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `lan_vpn_wg_listen_port` | `51820` | WireGuard listen port for the VPN interface. |
 | `lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs for the WireGuard peer (routes through VPN). |
 | `lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard persistent keepalive interval in seconds. |
-| `motd_dhcp_leases_limit` | `5` | Number of DHCP leases shown in the MOTD per interface. |
+| `motd_dhcp_leases_limit` | `2` | Number of DHCP leases shown in the MOTD per interface. |
 | `nf_conntrack_tcp_timeout_established` | `3600` | Idle established TCP connection tracking timeout in seconds. |
 | `name_servers` | `- 1.1.1.3#family.cloudflare-dns.com\n- 1.0.0.3#family.cloudflare-dns.com` | List of upstream name servers (default uses Cloudflare Family DNS). |
 | `ntp_servers` | `- ntp.ubuntu.com` | List of NTP servers used to sync system time. |

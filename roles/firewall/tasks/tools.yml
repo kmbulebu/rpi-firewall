@@ -10,9 +10,11 @@
   tags:
     - tools
 
-- name: Ensure dnspython is installed (apt)
+- name: Ensure DNS and conntrack tools are installed (apt)
   apt:
-    name: python3-dnspython
+    name:
+      - python3-dnspython
+      - conntrack
     state: present
     update_cache: yes
   tags:
