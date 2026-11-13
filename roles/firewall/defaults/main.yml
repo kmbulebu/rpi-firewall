@@ -46,8 +46,8 @@ lan_vpn_wg_peer_persistent_keep_alive: 15
 name_servers:
   - 1.1.1.3#family.cloudflare-dns.com 
   - 1.0.0.3#family.cloudflare-dns.com
-# Keep idle connections unless conntrack capacity measurements justify shortening.
-nf_conntrack_tcp_timeout_established: 432000
+# Bound idle TCP state retention to limit connection-table growth.
+nf_conntrack_tcp_timeout_established: 3600
 dns_serve_expired: true
 dns_serve_expired_ttl: 86400
 dns_serve_expired_client_timeout: 1800

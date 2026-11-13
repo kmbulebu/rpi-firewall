@@ -280,12 +280,12 @@ rsyslog_tcp_server:
 ### Established TCP connections
 
 ```yaml
-nf_conntrack_tcp_timeout_established: 432000  # Five days, kernel default
+nf_conntrack_tcp_timeout_established: 3600  # One hour
 ```
 
 This is the idle timeout for established connections in connection tracking,
-not a maximum session length. Shorter values can break quiet connections through
-NAT. Reduce it only if measured connection-table pressure warrants it.
+not a maximum session length. The one-hour default bounds idle state retention.
+Quiet connections may need keepalives to preserve their NAT mappings.
 
 ### Automatic Updates
 
@@ -555,7 +555,7 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs for the WireGuard peer (routes through VPN). |
 | `lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard persistent keepalive interval in seconds. |
 | `motd_dhcp_leases_limit` | `5` | Number of DHCP leases shown in the MOTD per interface. |
-| `nf_conntrack_tcp_timeout_established` | `432000` | Idle established TCP connection tracking timeout in seconds. |
+| `nf_conntrack_tcp_timeout_established` | `3600` | Idle established TCP connection tracking timeout in seconds. |
 | `name_servers` | `- 1.1.1.3#family.cloudflare-dns.com\n- 1.0.0.3#family.cloudflare-dns.com` | List of upstream name servers (default uses Cloudflare Family DNS). |
 | `ntp_servers` | `- ntp.ubuntu.com` | List of NTP servers used to sync system time. |
 | `router_hostname` | `router` | Hostname for the router. |
