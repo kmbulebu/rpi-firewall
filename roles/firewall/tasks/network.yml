@@ -1,4 +1,11 @@
 ---
+- name: Validate DHCP lease durations
+  assert:
+    that:
+      - lan_dhcp_lease_seconds | int > 0
+      - lan_guests_dhcp_lease_seconds | int > 0
+      - lan_vpn_dhcp_lease_seconds | int > 0
+    fail_msg: DHCP lease durations must be positive numbers of seconds.
 # Reject ambiguous matches before writing any network configuration.
 - name: Validate backup WAN configuration
   assert:

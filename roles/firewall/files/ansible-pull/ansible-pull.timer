@@ -2,6 +2,7 @@
 Description=Run ansible-pull on a timer.
 
 [Timer]
+OnBootSec=10min
 OnUnitActiveSec=60min
 
 [Install]

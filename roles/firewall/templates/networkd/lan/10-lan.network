@@ -84,8 +84,8 @@ EmitRouter=yes
 {% endfor %}
 EmitTimezone=yes
 Timezone=America/New_York
-DefaultLeaseTimeSec=1h
-MaxLeaseTimeSec=1h
+DefaultLeaseTimeSec={{ lan_dhcp_lease_seconds }}
+MaxLeaseTimeSec={{ lan_dhcp_lease_seconds }}
 
 {% for dhcp_reservation in (dhcp_reservations | default([], true))%}
 # {{ dhcp_reservation.hostname }}

@@ -25,3 +25,22 @@ jobs:
         with:
           args: "--profile=min"
           requirements_file: collections/requirements.yml
+
+  dns-reliability:
+    name: DNS resilience and IPv6 ACLs
+    runs-on: ubuntu-24.04
+    container:
+      image: ubuntu:26.04
+      options: --cap-add=NET_ADMIN
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install DNS test dependencies
+        run: |
+          apt-get update -qq
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            unbound dnsutils iproute2 python3 python3-jinja2 python3-yaml openssl ca-certificates
+
+      - name: Test DNS behavior in the isolated container
+        run: python3 tests/integration_dns_reliability.py

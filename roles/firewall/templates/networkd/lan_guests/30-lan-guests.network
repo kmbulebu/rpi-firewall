@@ -39,8 +39,8 @@ EmitRouter=yes
 {% endfor %}
 EmitTimezone=yes
 Timezone=America/New_York
-DefaultLeaseTimeSec=1h
-MaxLeaseTimeSec=1h
+DefaultLeaseTimeSec={{ lan_guests_dhcp_lease_seconds }}
+MaxLeaseTimeSec={{ lan_guests_dhcp_lease_seconds }}
 
 [IPv6SendRA]
 RouterPreference=high

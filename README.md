@@ -175,6 +175,33 @@ name_servers:
   - 1.0.0.3
 ```
 
+### DNS resilience and IPv6 clients
+
+Unbound first attempts an upstream lookup, then can use an expired cached answer
+if upstream fails or takes longer than the configured wait. Defaults are:
+
+```yaml
+dns_serve_expired: true
+dns_serve_expired_ttl: 86400             # Maximum age after expiry, seconds
+dns_serve_expired_client_timeout: 1800  # Upstream wait, milliseconds
+```
+
+Expired replies have a 30-second TTL. Failed refreshes do not extend the age
+limit. This uses the in-memory cache and adds no persistent cache or disk writes;
+it cannot supply uncached names or survive an Unbound restart.
+
+DNS listeners remain restricted to LAN and guest addresses. Unbound's
+`interface-action` permits queries to those listening sockets from clients with
+delegated global IPv6 addresses, without hardcoding the changing delegated
+prefix. Existing source ACLs remain in place. These rules select destination
+sockets, not ingress devices: firewalld must continue to block DNS access from WAN.
+IPv6 RA advertises the router's stable link-local DNS address. Interface names are
+expanded to addresses when Unbound starts; a newly assigned global listener address
+requires a restart, but the advertised link-local listener does not depend on PD.
+
+See [Unbound's configuration reference](https://unbound.docs.nlnetlabs.nl/en/latest/manpages/unbound.conf.html)
+for interface ACLs and stale response behavior.
+
 ### DNS ad blocking
 
 Set `ad_blocklists` under `all.hosts.localhost` in the live
@@ -250,7 +277,19 @@ rsyslog_udp_server:
 rsyslog_tcp_server:
 ```
 
+### Established TCP connections
+
+```yaml
+nf_conntrack_tcp_timeout_established: 432000  # Five days, kernel default
+```
+
+This is the idle timeout for established connections in connection tracking,
+not a maximum session length. Shorter values can break quiet connections through
+NAT. Reduce it only if measured connection-table pressure warrants it.
+
 ### Automatic Updates
+
+The configuration update timer first runs ten minutes after boot, then hourly.
 
 To ensure the router remains patched and current, packages updates are installed
 automatically. Specify a time when reboots, if needed, are scheduled. The time
@@ -272,11 +311,17 @@ enable_prometheus_node_exporter: no
 
 #### DHCP Lease Length
 
-The length of time devices may use an IP addressed assigned by the router.
+Configure lease durations separately for each network, in seconds. Both the
+default and maximum lease time use the configured value. Existing leases adopt
+the new duration when renewed. Networkd persists leases to disk on systemd 259.
 
+```yaml
+lan_dhcp_lease_seconds: 86400         # 24 hours
+lan_vpn_dhcp_lease_seconds: 86400     # 24 hours
+lan_guests_dhcp_lease_seconds: 3600   # 1 hour
 ```
-dhcp_lease_seconds: 86400
-```
+
+A guest DHCP lease is independent of Wi-Fi portal authorization or session expiry.
 
 #### DHCP Address Allocation Range
 
@@ -457,23 +502,30 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `ansible_playbook_git_url` | `https://github.com/kmbulebu/rpi-firewall.git` | Git repository URL for the playbook. |
 | `domain` | `my.home` | Local domain name for LAN devices. |
 | `dns_private_domains` | `[]` | List of private domains to allow DNS resolution to local IP addresses. |
+| `dns_serve_expired` | `true` | Use expired cached answers when upstream resolution fails or times out. |
+| `dns_serve_expired_ttl` | `86400` | Maximum age in seconds after a cached answer expires. |
+| `dns_serve_expired_client_timeout` | `1800` | Upstream wait in milliseconds before using an expired answer. |
 | `enable_prometheus_node_exporter` | `no` | Enable Prometheus node exporter and listen on LAN interface. |
 | `lan_dhcp_pool_offset` | `10` | Offset from router IP to start DHCP pool. |
 | `lan_dhcp_pool_size` | `200` | Number of DHCP addresses in the LAN pool. |
+| `lan_dhcp_lease_seconds` | `86400` | Default and maximum trusted LAN lease duration in seconds. |
 | `lan_iface` | `lan0` | Desired LAN interface name. |
 | `lan_iface_networkd_link_match` | `"Driver=bcmgenet"` | `systemd-networkd` match string for LAN link. |
 | `lan_guests_dhcp_pool_offset` | `10` | DHCP pool offset for guests network. |
 | `lan_guests_dhcp_pool_size` | `200` | DHCP pool size for guests network. |
+| `lan_guests_dhcp_lease_seconds` | `3600` | Default and maximum guest lease duration in seconds. |
 | `lan_guests_iface` | `lan_guests` | Interface name for LAN guests network. |
 | `lan_guests_router_ip_address` | `192.168.200.254/24` | Router IP/prefix for the guests network. |
 | `lan_guests_vlan_id` | `6` | VLAN id for the guests network. |
 | `lan_vpn_iface` | `lan_vpn` | Desired interface name for the LAN VPN VLAN. |
 | `lan_vpn_router_ip_address` | `192.168.254.1/24` | Router IP/prefix for the LAN VPN network. |
+| `lan_vpn_dhcp_lease_seconds` | `86400` | Default and maximum VPN LAN lease duration in seconds. |
 | `lan_vpn_vlan_id` | `2` | VLAN id for the LAN VPN network. |
 | `lan_vpn_wg_listen_port` | `51820` | WireGuard listen port for the VPN interface. |
 | `lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs for the WireGuard peer (routes through VPN). |
 | `lan_vpn_wg_peer_persistent_keep_alive` | `15` | WireGuard persistent keepalive interval in seconds. |
 | `motd_dhcp_leases_limit` | `5` | Number of DHCP leases shown in the MOTD per interface. |
+| `nf_conntrack_tcp_timeout_established` | `432000` | Idle established TCP connection tracking timeout in seconds. |
 | `name_servers` | `- 1.1.1.3#family.cloudflare-dns.com\n- 1.0.0.3#family.cloudflare-dns.com` | List of upstream name servers (default uses Cloudflare Family DNS). |
 | `ntp_servers` | `- ntp.ubuntu.com` | List of NTP servers used to sync system time. |
 | `router_hostname` | `router` | Hostname for the router. |

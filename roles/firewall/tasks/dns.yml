@@ -1,4 +1,10 @@
 ---
+- name: Validate stale DNS response limits
+  assert:
+    that:
+      - dns_serve_expired_ttl | int > 0
+      - dns_serve_expired_client_timeout | int > 0
+    fail_msg: Stale DNS responses require a positive age limit and upstream wait time.
 # Note: systemd-networkd is adding support for DNS resolution through resolved of DHCP server leases in v259.
 # https://github.com/systemd/systemd/commit/a7fa29b1b52210e33f4e43efc1a2f06b7c7233c0
 - name: Compute PTR /24 zones for LAN (set ptr_zones)
