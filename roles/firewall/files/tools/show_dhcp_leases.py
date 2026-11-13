@@ -174,8 +174,9 @@ def sort_entries(entries, sort_key, reverse=False):
             return (0, e["mac_key"]) if e["mac_key"] is not None else (1,)
     else:  # exp
         def keyfn(e):
-            # Treat unknown remaining as +inf so they appear last
-            return (e["remaining"] if e["remaining"] is not None else float("inf"))
+            # Keep unknown expiration times last in either direction.
+            return (e["remaining"] if e["remaining"] is not None
+                    else float("-inf") if reverse else float("inf"))
 
     entries.sort(key=keyfn, reverse=reverse)
     return entries

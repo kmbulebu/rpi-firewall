@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install template test dependencies
-        run: python3 -m pip install Jinja2 PyYAML
+        run: python3 -m pip install Jinja2 PyYAML dnspython
 
       - name: Test blocklists and network templates
         run: python3 -m unittest discover -s tests -v

@@ -7,6 +7,22 @@
     group: root
     mode: '0755'
 
+- name: Install MOTD WireGuard status script
+  ansible.builtin.template:
+    src: motd/65-wireguard-status
+    dest: /etc/update-motd.d/65-wireguard-status
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Install MOTD conntrack status script
+  ansible.builtin.copy:
+    src: motd/68-conntrack-status.py
+    dest: /etc/update-motd.d/68-conntrack-status
+    owner: root
+    group: root
+    mode: '0755'
+
 - name: Install MOTD systemd health script
   ansible.builtin.copy:
     src: motd/70-systemd-health

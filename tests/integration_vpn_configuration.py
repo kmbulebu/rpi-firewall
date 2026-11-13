@@ -48,6 +48,8 @@ def main():
                 'src': 'networkd/lan/10-lan.network', 'dest': '/etc/systemd/network/10-lan.network'},
              'notify': 'restart systemd-networkd'},
             {'ansible.builtin.include_tasks': str(ROLE / 'tasks/wireguard_client.yml')},
+            {'name': 'Render WireGuard MOTD', 'ansible.builtin.template': {
+                'src': 'motd/65-wireguard-status', 'dest': '/run/test-wg-motd', 'mode': '0755'}},
         ]
         (role / 'tasks/main.yml').write_text(yaml.safe_dump(tasks))
         play = [{'hosts': 'localhost', 'gather_facts': False, 'connection': 'local',
@@ -97,6 +99,9 @@ def main():
         print('PASS: invalid MTU rejected before deployment', flush=True)
         apply(credentials | {'enable_lan_vpn': True})
         wait_for(['lan_vpn', 'wg0', 'vpn_vrf0'])
+        motd = command('bash', '/run/test-wg-motd', env=os.environ | {'WG_HIDE_KEYS': 'never'})
+        assert 'interface: wg0' in motd and 'private key: (hidden)' in motd
+        assert private not in motd
         assert 'changed=0 ' in apply(credentials | {'enable_lan_vpn': True})
         print('PASS: enable creates VPN devices; second run unchanged', flush=True)
         renamed = credentials | dict(enable_lan_vpn=True, lan_vpn_iface='privacy',
@@ -105,12 +110,15 @@ def main():
         state = wait_for(['privacy', 'tunnel1', 'privacy_vrf'], ['lan_vpn', 'wg0', 'vpn_vrf0'])
         for iface in ('privacy', 'tunnel1', 'privacy_vrf'):
             assert state[iface]['mtu'] == 1400, state[iface]
+        motd = command('bash', '/run/test-wg-motd', env=os.environ | {'WG_HIDE_KEYS': 'never'})
+        assert 'interface: tunnel1' in motd and private not in motd
         assert 'BindCarrier=tunnel1' in Path('/etc/systemd/network/20-lan-vpn.network').read_text()
         assert 'SendOption=26:uint16:1400' in Path('/etc/systemd/network/20-lan-vpn.network').read_text()
         print('PASS: rename retires previous devices; custom MTU applied', flush=True)
         # Reset inventory names to defaults: cleanup must use previous file names.
         apply({'enable_lan_vpn': False})
         wait_for([], ['privacy', 'tunnel1', 'privacy_vrf', 'lan_vpn', 'wg0', 'vpn_vrf0'])
+        assert 'VPN disabled' in command('bash', '/run/test-wg-motd')
         assert not Path('/etc/systemd/network/30-wireguard-client.netdev').exists()
         assert not Path('/var/lib/rpi-firewall/retired-vpn-links.json').exists()
         for zone in ('internal_vpn', 'external_vpn'):

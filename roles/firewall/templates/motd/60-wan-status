@@ -37,9 +37,3 @@ for IFACE in {{ wan_iface }}{% if wan_backup_enabled | bool %} {{ wan_backup_ifa
     fi
 
 done
-
-# A hotspot may supply IPv4 only; show selected uplinks separately by family.
-echo " IPv4 default routes:"
-ip -4 route show default
-echo " IPv6 default routes:"
-ip -6 route show default
