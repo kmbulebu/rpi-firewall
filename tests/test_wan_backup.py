@@ -57,8 +57,8 @@ class WanBackupTests(unittest.TestCase):
             self.assertEqual(interfaces, ['wan0', 'wan-backup'] if enabled else ['wan0'])
             self.assertIsNotNone(zone.find('masquerade'))
             conf = self.render('firewalld/firewalld.conf')
-            self.assertIn('IPv6_rpfilter=' + ('loose' if enabled else 'yes'), conf)
-            self.assertIn('NftablesFlowtable=' + ('off' if enabled else 'wan0 lan0'), conf)
+            self.assertIn('IPv6_rpfilter=yes', conf)
+            self.assertIn('NftablesFlowtable=wan0 lan0', conf)
 
     def test_status_script_parses_with_both_settings(self):
         for enabled in (False, True):

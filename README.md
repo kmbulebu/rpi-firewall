@@ -101,11 +101,10 @@ backup; existing connections may need to reconnect after either switch.
 
 Both uplinks share the external firewalld zone, including masquerading, inbound
 exceptions and configured port forwards. Cellular carrier NAT may prevent inbound
-connections regardless of those rules. With backup enabled, IPv6 reverse-path
-filtering uses loose mode to allow asymmetric uplinks, and software flow offload
-is disabled to avoid retaining cached egress paths during switching. Disabling
-backup restores the original filtering/offload settings and removes its networkd
-files. Unplug the hotspot when disabling it so an existing configured interface
+connections regardless of those rules. IPv6 reverse-path filtering remains strict.
+Software flow offload remains configured for primary WAN and LAN; the optional
+hotspot is not added to the flowtable. Verify cached-flow behavior during switching
+as part of live failover testing. Disabling backup removes its networkd files. Unplug the hotspot when disabling it so an existing configured interface
 cannot retain old state.
 
 Prefix delegation to LAN and guests remains tied to primary WAN. Backup does not
