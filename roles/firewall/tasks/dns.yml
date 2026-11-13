@@ -86,7 +86,3 @@
     enabled: yes
     state: started
     masked: no
-
-- name: Configure DNS ad blocking
-  ansible.builtin.include_tasks: ad_blocking.yml
-

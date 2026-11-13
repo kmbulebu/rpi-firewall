@@ -3,11 +3,13 @@
 
 import argparse
 import fcntl
+import hashlib
 import ipaddress
 import json
 import os
 from pathlib import Path
 import re
+import signal
 import subprocess
 import sys
 import tempfile
@@ -15,6 +17,24 @@ import urllib.request
 
 
 MAX_DOWNLOAD_BYTES = 64 * 1024 * 1024
+
+
+class PolicyRollbackError(RuntimeError):
+    """Restoring the previous policy or reloading it failed; DNS needs attention."""
+
+
+def policy_status(path):
+    data = path.read_bytes() if path.exists() else None
+    return {
+        'checksum': hashlib.sha256(data).hexdigest() if data is not None else None,
+        'blocked_domains': len(re.findall(rb'^\s*local-zone:.*\balways_nxdomain\s*$', data or b'', re.M)),
+    }
+
+
+def interrupted(_signum, _frame):
+    # systemd timeouts send SIGTERM. Raising lets an in-progress transaction
+    # restore the previous policy before exiting.
+    raise InterruptedError('Blocklist refresh interrupted')
 
 
 def domain(value):
@@ -134,18 +154,20 @@ def apply_policy(path, content, config):
         candidate = Path(temporary) / 'candidate.conf'
         candidate.write_bytes(data)
         subprocess.run(['unbound-checkconf', str(candidate)], check=True)
-    atomic_write(path, data)
     try:
+        atomic_write(path, data)
         subprocess.run(['unbound-checkconf', str(config)], check=True)
         subprocess.run(['systemctl', 'reload', 'unbound.service'], check=True)
     except BaseException:
-        if previous is None:
-            path.unlink()
-        else:
-            atomic_write(path, previous)
-        # A failed reload may have partially applied the candidate. Restore the
-        # old on-disk configuration and attempt to load it again.
-        subprocess.run(['systemctl', 'reload', 'unbound.service'], check=False)
+        try:
+            if previous is None:
+                path.unlink(missing_ok=True)
+            else:
+                atomic_write(path, previous)
+            # A failed reload may have partially applied the candidate.
+            subprocess.run(['systemctl', 'reload', 'unbound.service'], check=True)
+        except Exception as error:
+            raise PolicyRollbackError('Restoring or reloading the previous policy failed') from error
         raise
     print('Policy updated:', path)
 
@@ -157,7 +179,11 @@ def main():
     parser.add_argument('--unbound-config', type=Path, default=Path('/etc/unbound/unbound.conf'))
     parser.add_argument('--lock', type=Path, default=Path('/run/lock/ad-blocklists-update.lock'))
     parser.add_argument('--compile-only', action='store_true', help='Compile to --output without loading it')
+    parser.add_argument('--status', action='store_true', help='Report installed policy checksum and blocking count')
     args = parser.parse_args()
+    if args.status:
+        print(json.dumps(policy_status(args.output)))
+        return
     with args.lock.open('w') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         config = json.loads(args.config.read_text())
@@ -179,8 +205,12 @@ def main():
 
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGTERM, interrupted)
     try:
         main()
+    except PolicyRollbackError as error:
+        print(f'Blocklist rollback failed; DNS needs attention: {error}', file=sys.stderr)
+        sys.exit(2)
     except Exception as error:
-        print(f'Blocklist update failed; previous policy retained: {error}', file=sys.stderr)
+        print(f'Blocklist update failed: {error}', file=sys.stderr)
         sys.exit(1)

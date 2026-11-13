@@ -7,6 +7,34 @@ permissions:
   contents: read
 
 jobs:
+  blocklist-orchestration:
+    name: Blocklist failure isolation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build disposable systemd test image
+        run: docker build -f tests/Dockerfile.blocklists -t rpi-blocklists-test .
+
+      - name: Test blocklist failures with real services
+        shell: bash
+        run: |
+          # systemd needs a writable private cgroup hierarchy in this disposable runner.
+          docker run -d --name rpi-blocklists-test --privileged --cgroupns=private \
+            --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
+            -v "$GITHUB_WORKSPACE:/repo:ro" -w /repo rpi-blocklists-test
+          trap 'docker rm -f rpi-blocklists-test >/dev/null' EXIT
+          for attempt in {1..30}; do
+            if docker exec rpi-blocklists-test systemctl show --property=Version --value >/dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec -e RPI_FIREWALL_DISPOSABLE_TEST=1 rpi-blocklists-test \
+            python3 tests/integration_blocklist_orchestration.py
+
   lint:
     name: Ansible Lint
     runs-on: ubuntu-24.04
