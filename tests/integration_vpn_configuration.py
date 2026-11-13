@@ -71,7 +71,9 @@ def main():
                 if set(names) <= state.keys() and not set(absent) & state.keys():
                     return state
                 time.sleep(0.1)
-            raise AssertionError(f'Unexpected links: {list(links())}')
+            log = Path('/tmp/networkd.log')
+            details = log.read_text()[-12000:] if log.exists() else 'No networkd log available'
+            raise AssertionError(f'Unexpected links: {list(links())}\n{details}')
 
         output = apply({'enable_lan_vpn': False})
         assert 'changed=0 ' in apply({'enable_lan_vpn': False})

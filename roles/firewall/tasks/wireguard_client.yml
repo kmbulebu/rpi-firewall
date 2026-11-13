@@ -33,6 +33,36 @@
     mode: '0600'
   when: retired_vpn_links.stdout | from_json | length > 0
 
+- name: Remove VPN definitions before disabling or replacing devices
+  ansible.builtin.file:
+    path: /etc/systemd/network/{{ item }}
+    state: absent
+  loop:
+    - 00-vpn-vrf.netdev
+    - 00-vpn-vrf.network
+    - 00-lan-vpn.netdev
+    - 20-lan-vpn.network
+    - 30-wireguard-client.netdev
+    - 30-wireguard-client.network
+  when: not (enable_lan_vpn | bool) or retired_vpn_links.stdout | from_json | length > 0
+  notify: restart systemd-networkd
+
+- name: Reload network definitions before retiring VPN devices
+  ansible.builtin.command: networkctl reload
+  changed_when: false
+  when:
+    - retired_vpn_links.stdout | from_json | length > 0
+    - not ansible_check_mode
+
+- name: Delete retired managed VPN devices
+  ansible.builtin.script:
+    cmd: tools/vpn_links.py delete {{ item.kind | quote }} {{ item.name | quote }}
+    executable: /usr/bin/python3
+  loop: '{{ retired_vpn_links.stdout | from_json }}'
+  register: vpn_link_cleanup
+  changed_when: (vpn_link_cleanup.stdout | from_json).changed
+  when: not ansible_check_mode
+
 - name: Configure enabled VPN
   when: enable_lan_vpn | bool
   block:
@@ -93,20 +123,6 @@
         mode: '0644'
       notify: restart systemd-networkd
 
-- name: Remove disabled VPN network configuration
-  ansible.builtin.file:
-    path: /etc/systemd/network/{{ item }}
-    state: absent
-  loop:
-    - 00-vpn-vrf.netdev
-    - 00-vpn-vrf.network
-    - 00-lan-vpn.netdev
-    - 20-lan-vpn.network
-    - 30-wireguard-client.netdev
-    - 30-wireguard-client.network
-  when: not (enable_lan_vpn | bool)
-  notify: restart systemd-networkd
-
 # Empty zones preserve references from administrator-managed policies, while
 # removing all bindings and tunnel masquerading when VPN is disabled.
 ## Firewalld
@@ -127,21 +143,24 @@
     mode: '0644'
   notify: reload firewalld
 
-- name: Reload network definitions before retiring VPN devices
-  ansible.builtin.command: networkctl reload
-  changed_when: false
+# A renamed VLAN may reuse the old VLAN tag on the same parent. Its old device
+# must be gone before networkd sees the replacement definition.
+- name: Apply replacement VPN devices after retiring old devices
   when:
     - retired_vpn_links.stdout | from_json | length > 0
+    - enable_lan_vpn | bool
     - not ansible_check_mode
-
-- name: Delete retired managed VPN devices
-  ansible.builtin.script:
-    cmd: tools/vpn_links.py delete {{ item.kind | quote }} {{ item.name | quote }}
-    executable: /usr/bin/python3
-  loop: '{{ retired_vpn_links.stdout | from_json }}'
-  register: vpn_link_cleanup
-  changed_when: (vpn_link_cleanup.stdout | from_json).changed
-  when: not ansible_check_mode
+  block:
+    - name: Load replacement VPN definitions
+      ansible.builtin.command: networkctl reload
+      changed_when: false
+    - name: Attach replacement VPN VLAN to LAN
+      ansible.builtin.command:
+        argv:
+          - networkctl
+          - reconfigure
+          - '{{ lan_iface }}'
+      changed_when: false
 
 - name: Clear completed VPN cleanup record
   ansible.builtin.file:
