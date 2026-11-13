@@ -26,7 +26,7 @@
   ansible.builtin.meta: flush_handlers
 - name: Configure optional Ubuntu Pro subscription
   ansible.builtin.include_tasks: ubuntu_pro.yml
-  when: ubuntu_pro_enabled | bool
+  when: ubuntu_pro_token | default('', true) | string | trim | length > 0
 - name: Configure DNS ad blocking
   ansible.builtin.include_tasks: ad_blocking.yml
 - meta: clear_facts

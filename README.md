@@ -355,11 +355,10 @@ upgrade_reboot_time: '07:00'
 
 ### Ubuntu Pro
 
-Ubuntu Pro is optional and disabled by default. Obtain your subscription token
+Ubuntu Pro management is enabled by a non-empty token and disabled by default. Obtain your subscription token
 from the [Ubuntu Pro dashboard](https://ubuntu.com/pro/dashboard), then set:
 
 ```yaml
-ubuntu_pro_enabled: true
 ubuntu_pro_token: YOUR_PRIVATE_SUBSCRIPTION_TOKEN
 ubuntu_pro_services:
   - esm-apps
@@ -368,9 +367,9 @@ ubuntu_pro_services:
 
 Keep the token out of Git and shared inventory examples. Use protected private
 inventory or an encrypted variable source; Ansible Vault requires configuring
-vault decryption for `ansible-pull` as well. The token is needed only for initial
-attachment. Already attached machines need no inventory token, so it can be
-removed after successful attachment. A changed token does not switch subscriptions.
+vault decryption for `ansible-pull` as well. Keep the token configured while you
+want Ansible to manage the subscription and requested services. Already attached
+machines are not reattached, and a changed token does not switch subscriptions.
 
 The role ensures `ubuntu-pro-client` is installed, reads the current subscription,
 attaches only when needed, and enables missing requested services. Attachment
@@ -382,13 +381,14 @@ credentials as part of normal operation. See Canonical's
 
 Core router handlers run before Pro configuration. Client/status/attachment/service
 failures produce a visible warning and allow the remaining play to continue;
-retry the play after correcting the issue. Missing initial credentials and invalid
+retry the play after correcting the issue. Invalid configured token types and
 service-list syntax are inventory errors and fail the play. CLI status, attachment
 and enable operations are bounded at 30, 120 and 300 seconds respectively, with a
 10-second forced termination grace period. In check mode only inventory shape is
 validated; Pro client/subscription operations are skipped.
 
-`ubuntu_pro_enabled: false` stops management without detaching. Removing a service
+An absent, empty, null or whitespace-only `ubuntu_pro_token` skips all Pro tasks
+without detaching or disabling services on an attached machine. Removing a service
 from `ubuntu_pro_services` stops ensuring it is enabled; it does not disable it.
 An empty list attaches without enabling default services. Explicit detachment or
 service disablement remains an administrator action. Existing unattended-upgrades
@@ -633,9 +633,8 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `ansible_bootstrap_directory` | `/root/.ansible/pull/bootstrap` | Separate checkout used to bootstrap Ansible collection dependencies. |
 | `ansible_playbook_filename` | `playbook.yml` | Playbook filename in the repository. |
 | `ansible_playbook_git_ref` | `master` | Git ref/branch to check out. |
-| `ubuntu_pro_enabled` | `false` | Manage Ubuntu Pro attachment and requested services; false leaves existing subscriptions untouched. |
 | `ubuntu_pro_services` | `[esm-apps, esm-infra]` | Services to ensure enabled; omissions do not disable existing services. |
-| `ubuntu_pro_token` | Not set | Private subscription token, required only when attaching an unattached machine. |
+| `ubuntu_pro_token` | `''` | Private subscription token; a non-empty value enables management. Empty or absent stops management without detaching. |
 | `ansible_playbook_git_url` | `https://github.com/kmbulebu/rpi-firewall.git` | Git repository URL for the playbook. |
 | `domain` | `my.home` | Local domain name for LAN devices. |
 | `dns_private_domains` | `[]` | List of private domains to allow DNS resolution to local IP addresses. |

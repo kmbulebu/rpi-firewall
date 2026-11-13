@@ -7,8 +7,8 @@ ansible_playbook_filename: playbook.yml
 ansible_inventory: /boot/firmware/inventory.yml
 ansible_pull_timer_enabled: true
 ansible_pull_timer_interval: 1h
-# Attach only when explicitly enabled; the token belongs in private inventory.
-ubuntu_pro_enabled: false
+# A non-empty token enables management; override only in private inventory.
+ubuntu_pro_token: ''
 ubuntu_pro_services:
   - esm-apps
   - esm-infra

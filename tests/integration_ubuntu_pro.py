@@ -135,7 +135,7 @@ def main():
         varfile = root / 'vars.yml'
 
         def apply(values=None, fail=False, check=False):
-            values = {'ubuntu_pro_enabled': True} if values is None else values
+            values = {'ubuntu_pro_token': TOKEN} if values is None else values
             varfile.write_text(yaml.safe_dump(values))
             varfile.chmod(0o600)
             args = ['ansible-playbook', '-i', 'localhost,', str(root / 'play.yml'), '-e', '@' + str(varfile), '--diff']
@@ -157,16 +157,19 @@ def main():
             assert 'WARNING: Ubuntu Pro' not in output, output
 
         reset()
-        apply({})
-        assert calls() == [] and not state()['attached']
-        print('PASS: disabled by default, no client commands', flush=True)
+        disabled = [{}, {'ubuntu_pro_token': ''}, {'ubuntu_pro_token': None}, {'ubuntu_pro_token': '  '}]
+        for values in disabled:
+            apply(values)
+            assert calls() == [] and not state()['attached']
+        print('PASS: absent/empty/null/whitespace token skips management', flush=True)
         apply(check=True)
         assert calls() == []
         print('PASS: check mode does not inspect or mutate subscription', flush=True)
-        for values in [dict(ubuntu_pro_services='esm-apps'), dict(ubuntu_pro_services=['--invalid']), {}]:
-            apply({'ubuntu_pro_enabled': True} | values, fail=True)
+        for values in [dict(ubuntu_pro_services='esm-apps'), dict(ubuntu_pro_services=['--invalid']),
+                       dict(ubuntu_pro_token=True)]:
+            apply({'ubuntu_pro_token': TOKEN} | values, fail=True)
             assert not any(call[0] in ('attach', 'enable') for call in calls())
-        print('PASS: invalid inventory and missing initial token fail before mutation', flush=True)
+        print('PASS: invalid inventory fails before mutation', flush=True)
         for flag in ('fail_status', 'bad_schema'):
             reset(**{flag: True})
             output = apply()
@@ -174,7 +177,7 @@ def main():
             assert not any(call[0] in ('attach', 'enable') for call in calls())
         print('PASS: unavailable/malformed status preserves core run and skips attachment', flush=True)
         reset()
-        output = apply({'ubuntu_pro_enabled': True, 'ubuntu_pro_token': TOKEN})
+        output = apply({'ubuntu_pro_token': TOKEN})
         assert 'WARNING: Ubuntu Pro' not in output, output
         assert state()['attached'] and state()['attach_count'] == 1
         assert state()['services'] == {'esm-apps': 'enabled', 'esm-infra': 'enabled'}
@@ -182,22 +185,23 @@ def main():
         before = len([call for call in calls() if call[0] in ('attach', 'enable')])
         unchanged()
         assert len([call for call in calls() if call[0] in ('attach', 'enable')]) == before
-        print('PASS: attach, explicit ESM services, token cleanup and unchanged tokenless retry', flush=True)
+        print('PASS: attach, explicit ESM services, token cleanup and unchanged retry with token retained', flush=True)
         before = calls()
-        apply({'ubuntu_pro_enabled': False})
-        assert calls() == before and state()['attached']
-        apply({'ubuntu_pro_enabled': True, 'ubuntu_pro_services': []})
+        for values in disabled:
+            apply(values)
+            assert calls() == before and state()['attached']
+        apply({'ubuntu_pro_token': TOKEN, 'ubuntu_pro_services': []})
         assert state()['services'] == {'esm-apps': 'enabled', 'esm-infra': 'enabled'}
         print('PASS: disabling management or removing services never detaches/disables', flush=True)
         for partial in (False, True):
             reset(fail_attach=True, partial_attach=partial)
-            output = apply({'ubuntu_pro_enabled': True, 'ubuntu_pro_token': TOKEN})
+            output = apply({'ubuntu_pro_token': TOKEN})
             assert 'WARNING: Ubuntu Pro' in output
             assert not Path(state()['attach_path']).exists()
             prior = state()
             prior['fail_attach'] = False
             statefile.write_text(json.dumps(prior))
-            apply({'ubuntu_pro_enabled': True} | ({} if partial else {'ubuntu_pro_token': TOKEN}))
+            apply()
             assert state()['attach_count'] == (1 if partial else 2)
             assert state()['services'] == {'esm-apps': 'enabled', 'esm-infra': 'enabled'}
         print('PASS: failed/partial attachment cleans token and retries from observed state', flush=True)
@@ -215,7 +219,7 @@ def main():
         assert 'WARNING: Ubuntu Pro' in apply()
         print('PASS: verification detects a service that did not become enabled', flush=True)
         reset()
-        apply({'ubuntu_pro_enabled': True, 'ubuntu_pro_services': [], 'ubuntu_pro_token': TOKEN})
+        apply({'ubuntu_pro_services': [], 'ubuntu_pro_token': TOKEN})
         assert state()['attached'] and state()['services'] == {}
         print('PASS: empty requested service list attaches without enabling defaults', flush=True)
     fake.unlink()

@@ -1,4 +1,11 @@
 ---
+- name: Validate configured Ubuntu Pro token
+  ansible.builtin.assert:
+    that:
+      - ubuntu_pro_token is string and ubuntu_pro_token | trim | length > 0
+    fail_msg: ubuntu_pro_token must be a non-empty subscription token string.
+  no_log: true
+
 - name: Validate Ubuntu Pro services
   ansible.builtin.assert:
     that:
@@ -61,16 +68,6 @@
               WARNING: Ubuntu Pro client setup or status check failed. Core router configuration
               was already applied. Subscription changes were skipped; retry on the next Ansible run.
               Inspect sudo pro status on the router.
-
-    # Missing credentials are an inventory error, not a subscription outage.
-    # Already attached machines need no inventory token and are never reattached.
-    - name: Require a token for initial Ubuntu Pro attachment
-      ansible.builtin.assert:
-        that:
-          - ubuntu_pro_token is defined and ubuntu_pro_token is string and ubuntu_pro_token | trim | length > 0
-        fail_msg: Set ubuntu_pro_token in private inventory for the initial Ubuntu Pro attachment.
-      when: ubuntu_pro_ready and not ubuntu_pro_status.attached
-      no_log: true
 
     - name: Reconcile Ubuntu Pro attachment and requested services
       when: ubuntu_pro_ready
