@@ -57,13 +57,10 @@
     group: root
     mode: '0644'
   notify: reload firewalld
-- name: Template lockdown whitelist
-  template:
-    src: firewalld/lockdown-whitelist.xml
-    dest: /etc/firewalld/lockdown-whitelist.xml
-    owner: root
-    group: root
-    mode: '0644'
+- name: Remove obsolete lockdown whitelist
+  ansible.builtin.file:
+    path: /etc/firewalld/lockdown-whitelist.xml
+    state: absent
   notify: reload firewalld
 - name: Template firewalld configuration
   template:

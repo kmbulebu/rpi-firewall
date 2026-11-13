@@ -9,7 +9,8 @@ MTUBytes={{ lan_vpn_mtu }}
 ConfigureWithoutCarrier=yes
 LLMNR=false
 MulticastDNS=false
-IPForward=true
+IPv4Forwarding=yes
+IPv6Forwarding=yes
 
 [Route]
 # Help ensure our non VPN traffic is separate

@@ -59,12 +59,13 @@ jobs:
         run: |
           apt-get update -qq
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            systemd dbus ansible-core wireguard python3-netaddr iproute2 python3-jinja2 python3-yaml
+            systemd dbus ansible-core wireguard firewalld python3-netaddr iproute2 python3-jinja2 python3-yaml
 
       - name: Test enable, rename and disable with networkd
         shell: bash
         run: |
-          mkdir -p /run/dbus /run/systemd/netif /etc/systemd/network /etc/firewalld/zones
+          mkdir -p /run/dbus /run/systemd/netif /etc/systemd/network /etc/systemd/networkd.conf.d /etc/firewalld/zones
+          cp roles/firewall/files/networkd/20-router.conf /etc/systemd/networkd.conf.d/20-router.conf
           chown systemd-network:systemd-network /run/systemd/netif
           dbus-daemon --system --fork
           ip link add lan-test type dummy

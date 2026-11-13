@@ -16,7 +16,8 @@ LLMNR=false
 MulticastDNS=false
 DHCPPrefixDelegation=yes
 IPv6SendRA=no
-IPForward=true
+IPv4Forwarding=yes
+IPv6Forwarding=yes
 
 [IPv6AcceptRA]
 RouteMetric={{ wan_route_metric }}

@@ -21,6 +21,21 @@
       Backup WAN requires distinct device matchers and interface names, an explicit
       primary WAN matcher (not all USB devices), and a lower positive backup metric.
   when: wan_backup_enabled | bool
+- name: Create networkd global configuration directory
+  ansible.builtin.file:
+    path: /etc/systemd/networkd.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+- name: Enable global router forwarding
+  ansible.builtin.copy:
+    src: networkd/20-router.conf
+    dest: /etc/systemd/networkd.conf.d/20-router.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart systemd-networkd
 - name: Disable cloud-init network configuration
   copy:
     content: "network: {config: disabled}"

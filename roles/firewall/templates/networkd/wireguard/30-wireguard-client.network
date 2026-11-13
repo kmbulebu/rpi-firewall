@@ -14,4 +14,5 @@ LinkLocalAddressing=no
 Address={{ lan_vpn_wg_address }}
 LLMNR=false
 MulticastDNS=false
-IPForward=true
+IPv4Forwarding=yes
+IPv6Forwarding=yes
