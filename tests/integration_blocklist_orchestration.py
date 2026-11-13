@@ -65,7 +65,8 @@ include: "/etc/unbound/unbound.conf.d/*.conf"
     # Discard distro snippets in this disposable fixture only.
     for path in Path('/etc/unbound/unbound.conf.d').glob('*.conf'):
         path.unlink()
-    reload_script = FIXTURE / 'reload-unbound'
+    # Docker tmpfs mounts may be noexec; keep executable fixtures on the rootfs.
+    reload_script = Path('/usr/local/sbin/test-reload-unbound')
     reload_script.write_text('''#!/bin/sh
 if test -f /run/rpi-firewall-blocklist-test/fail-reload; then exit 1; fi
 if test -f /run/rpi-firewall-blocklist-test/fail-once; then

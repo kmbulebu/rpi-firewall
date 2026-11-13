@@ -25,7 +25,16 @@ jobs:
           docker run -d --name rpi-blocklists-test --privileged --cgroupns=private \
             --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
             -v "$GITHUB_WORKSPACE:/repo:ro" -w /repo rpi-blocklists-test
-          trap 'docker rm -f rpi-blocklists-test >/dev/null' EXIT
+          cleanup() {
+            test_exit_status=$?
+            if [ "$test_exit_status" -ne 0 ]; then
+              docker exec rpi-blocklists-test journalctl --no-pager -n 80 \
+                -u ad-blocklists-update.service -u unbound.service || true
+            fi
+            docker rm -f rpi-blocklists-test >/dev/null
+            exit "$test_exit_status"
+          }
+          trap cleanup EXIT
           for attempt in {1..30}; do
             if docker exec rpi-blocklists-test systemctl show --property=Version --value >/dev/null 2>&1; then
               break
