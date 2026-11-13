@@ -1,8 +1,10 @@
-- name: Validate established TCP timeout
+- name: Validate conntrack settings
   assert:
     that:
-      - nf_conntrack_tcp_timeout_established | int > 0
-    fail_msg: The established TCP timeout must be a positive number of seconds.
+      - nf_conntrack_max | string is match('^[1-9][0-9]*$')
+      - nf_conntrack_buckets | string is match('^[1-9][0-9]*$')
+      - nf_conntrack_tcp_timeout_established | string is match('^[1-9][0-9]*$')
+    fail_msg: Conntrack capacity, bucket count, and established TCP timeout must be positive integers.
 - name: Increase IPV6 Route Cache Max
   sysctl:
     name: net.ipv6.route.max_size
@@ -31,10 +33,17 @@
     sysctl_file: /etc/sysctl.d/20-router.conf
     reload: yes
     sysctl_set: yes
+- name: Set nf_conntrack hash table size
+  sysctl:
+    name: net.netfilter.nf_conntrack_buckets
+    value: '{{ nf_conntrack_buckets }}'
+    sysctl_file: /etc/sysctl.d/20-router.conf
+    reload: yes
+    sysctl_set: yes
 - name: Adjust nf_conntrack_max
   sysctl:
     name: net.netfilter.nf_conntrack_max
-    value: '262144'
+    value: '{{ nf_conntrack_max }}'
     sysctl_file: /etc/sysctl.d/20-router.conf
     reload: yes
     sysctl_set: yes
