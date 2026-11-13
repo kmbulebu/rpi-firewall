@@ -289,7 +289,27 @@ Quiet connections may need keepalives to preserve their NAT mappings.
 
 ### Automatic Updates
 
-The configuration update timer first runs ten minutes after boot, then hourly.
+The configuration update timer first runs ten minutes after boot, then at the
+configured interval (hourly by default). For daily polling:
+
+```yaml
+ansible_pull_timer_enabled: true
+ansible_pull_timer_interval: 1d
+```
+
+Use a positive systemd timespan such as `30min`, `1h`, or `1d`. The interval is
+measured from the last activation of the polling service; it is not a fixed time
+of day. The initial run ten minutes after boot still applies with a daily interval.
+
+To disable periodic polling:
+
+```yaml
+ansible_pull_timer_enabled: false
+```
+
+This stops and disables the timer. Inventory changes still trigger reconfiguration,
+and manual service starts remain available. Disabling the timer does not stop an
+already running play. These settings do not change unattended package upgrades.
 
 To ensure the router remains patched and current, packages updates are installed
 automatically. Specify a time when reboots, if needed, are scheduled. The time
@@ -523,6 +543,8 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | Variable | Default | Description |
 |---|---|---|
 | `admin_user_password_hash` | `'$6$mPBFViTIy1dObC2$mYr5HlI2uiZ9DsPvvLFz8CePmCgcyyddlQ.R9tN6vibTMTZJ4XiNtADYv4cwx9Ocxqb9ZFzwvziOPPIfC9I5K0'` | Shadow-format password hash for the `firewall` admin user. |
+| `ansible_pull_timer_enabled` | `true` | Enable periodic configuration polling. |
+| `ansible_pull_timer_interval` | `1h` | Positive systemd timespan between polling service activations. |
 | `ansible_inventory` | `/boot/firmware/inventory.yml` | Path to inventory file on the target system. |
 | `ansible_bootstrap_directory` | `/root/.ansible/pull/bootstrap` | Separate checkout used to bootstrap Ansible collection dependencies. |
 | `ansible_playbook_filename` | `playbook.yml` | Playbook filename in the repository. |

@@ -1,4 +1,19 @@
 ---
+- name: Validate positive Ansible polling interval
+  ansible.builtin.assert:
+    that:
+      - ansible_pull_timer_interval | string | regex_search('[1-9]') is not none
+    fail_msg: Use a positive polling interval, or disable the timer with ansible_pull_timer_enabled.
+  when: ansible_pull_timer_enabled | bool
+- name: Parse Ansible polling interval before updating units
+  ansible.builtin.command:
+    argv:
+      - systemd-analyze
+      - timespan
+      - '{{ ansible_pull_timer_interval }}'
+  changed_when: false
+  check_mode: false
+  when: ansible_pull_timer_enabled | bool
 - name: Setup ansible-pull config
   template:
     src: ansible-pull/ansible-pull
@@ -23,7 +38,7 @@
     mode: '0644'
   notify: systemctl daemon-reload
 - name: Setup ansible-pull timer
-  copy:
+  template:
     src: ansible-pull/ansible-pull.timer
     dest: /etc/systemd/system/ansible-pull.timer
     owner: root
@@ -46,11 +61,11 @@
     name: ansible-pull.service
     enabled: no # Do not run on boot, only on timer trigger.
     masked: no
-- name: Enable ansible-pull.timer
+- name: Configure ansible-pull.timer
   systemd:
     name: ansible-pull.timer
-    enabled: yes
-    state: started
+    enabled: '{{ ansible_pull_timer_enabled | bool }}'
+    state: "{{ (ansible_pull_timer_enabled | bool) | ternary('started', 'stopped') }}"
     masked: no
 - name: Setup ansible-pull-reconfigure.service
   systemd:
