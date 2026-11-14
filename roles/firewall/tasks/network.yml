@@ -13,6 +13,35 @@
       Set both wan_dhcpv6_duid_type and wan_dhcpv6_duid_raw_data, or leave both empty.
       Type must be link-layer-time, vendor, link-layer, or uuid. Raw data must contain
       1 to 126 colon-separated hexadecimal bytes, excluding the two-byte DUID type prefix.
+- name: Validate WAN DHCPv4 DUID configuration
+  ansible.builtin.assert:
+    that:
+      - wan_dhcpv4_client_identifier in ['mac', 'duid', 'duid-only']
+      - wan_dhcpv4_duid_type == '' or wan_dhcpv4_client_identifier in ['duid', 'duid-only']
+      - wan_dhcpv4_duid_type is string
+      - wan_dhcpv4_duid_raw_data is string
+      - wan_dhcpv4_duid_type in ['', 'link-layer-time', 'vendor', 'link-layer', 'uuid']
+      - (wan_dhcpv4_duid_type | length > 0) == (wan_dhcpv4_duid_raw_data | length > 0)
+      - >-
+        wan_dhcpv4_duid_raw_data == '' or
+        wan_dhcpv4_duid_raw_data is match('^[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){0,125}$')
+    fail_msg: >-
+      Choose mac, duid, or duid-only for wan_dhcpv4_client_identifier.
+      Custom DUID settings require duid or duid-only. Set both wan_dhcpv4_duid_type and wan_dhcpv4_duid_raw_data, or leave both empty.
+      Type must be link-layer-time, vendor, link-layer, or uuid. Raw data must contain
+      1 to 126 colon-separated hexadecimal bytes, excluding the two-byte DUID type prefix.
+- name: Validate WAN DHCPv4 IAID
+  ansible.builtin.assert:
+    that:
+      - >-
+        wan_dhcpv4_iaid == '' or
+        (wan_dhcpv4_client_identifier == 'duid' and
+         wan_dhcpv4_iaid is not boolean and
+         (wan_dhcpv4_iaid | string) is match('^[0-9]+$') and
+         wan_dhcpv4_iaid | int >= 0 and wan_dhcpv4_iaid | int <= 4294967295)
+    fail_msg: >-
+      wan_dhcpv4_iaid must be empty or a decimal integer from 0 to 4294967295
+      with wan_dhcpv4_client_identifier set to duid.
 - name: Validate DHCP lease durations
   assert:
     that:

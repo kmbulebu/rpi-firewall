@@ -38,7 +38,14 @@ UseMTU=true
 [DHCPv4]
 RouteMetric={{ wan_route_metric }}
 UseDNS=false
-ClientIdentifier=mac
+ClientIdentifier={{ wan_dhcpv4_client_identifier }}
+{% if wan_dhcpv4_duid_type | length > 0 %}
+DUIDType={{ wan_dhcpv4_duid_type }}
+DUIDRawData={{ wan_dhcpv4_duid_raw_data }}
+{% endif %}
+{% if wan_dhcpv4_iaid != '' %}
+IAID={{ wan_dhcpv4_iaid }}
+{% endif %}
 SendHostname=false
 UseHostname=false
 

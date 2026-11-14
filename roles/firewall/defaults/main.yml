@@ -24,6 +24,12 @@ wan_iface_networkd_link_match: "Property=ID_BUS=usb"
 wan_iface: wan0
 wan_backup_enabled: false
 wan_backup_iface: wan-backup
+# DHCPv4 uses MAC identity by default. DUID settings apply with duid/duid-only.
+wan_dhcpv4_client_identifier: mac
+wan_dhcpv4_duid_type: ''
+wan_dhcpv4_duid_raw_data: ''
+# Empty retains networkd's generated IAID; integer 0 is a valid explicit value.
+wan_dhcpv4_iaid: ''
 # Optional DHCPv6 client identity; configure both to override networkd's default.
 # Raw data excludes the two-byte DUID type prefix supplied by DUIDType.
 wan_dhcpv6_duid_type: ''

@@ -759,6 +759,10 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `upgrade_reboot_time` | `'04:55'` | Time (UTC) to schedule automatic reboots after upgrades. |
 | `vpn_client_iface` | `wg0` | Desired WireGuard client interface name. |
 | `vpn_vrf_iface` | `vpn_vrf0` | VRF interface name for VPN routing. |
+| `wan_dhcpv4_client_identifier` | `mac` | Primary WAN DHCPv4 client ID: `mac`, `duid` (RFC4361 IAID+DUID), or `duid-only`. |
+| `wan_dhcpv4_duid_type` | `''` | Optional custom DHCPv4 DUID type; same types as DHCPv6. Requires `duid` or `duid-only`. |
+| `wan_dhcpv4_duid_raw_data` | `''` | Custom DUID bytes excluding the type prefix; set together with type. |
+| `wan_dhcpv4_iaid` | `''` | Optional decimal IAID, 0–4294967295; requires `duid`. Empty uses networkd's generated value. |
 | `wan_dhcpv6_duid_type` | `''` | Optional primary WAN DHCPv6 DUID type: `link-layer-time`, `vendor`, `link-layer`, or `uuid`. Set together with raw data. |
 | `wan_dhcpv6_duid_raw_data` | `''` | Colon-separated hex bytes excluding the two-byte DUID type prefix. Empty settings retain networkd's generated identity. |
 | `wan_device_set_mac_address` | `` | Optional MAC address to set on WAN device (empty by default). |
@@ -802,3 +806,27 @@ No IAID is inferred from these inputs.
 See [systemd's DUID settings](https://www.freedesktop.org/software/systemd/man/latest/networkd.conf.html)
 for the raw-data format. Changing a client identity can result in a different
 lease or delegated prefix when network configuration is applied.
+
+### Custom WAN DHCPv4 identity
+
+DHCPv4 defaults to `ClientIdentifier=mac`. To send an RFC4361 client ID
+(`ff` + four-byte IAID + DUID), use `duid`. The `duid-only` mode sends just the
+DUID. Custom DUID type/raw-data settings use the same format as DHCPv6 and are
+independent of its settings. The role does not add provider-specific identity
+rules or change the backup WAN's identity.
+
+To reuse the custom DHCPv6 DUID from the preceding example, add:
+
+```yaml
+wan_dhcpv4_client_identifier: duid
+wan_dhcpv4_duid_type: "{{ wan_dhcpv6_duid_type }}"
+wan_dhcpv4_duid_raw_data: "{{ wan_dhcpv6_duid_raw_data }}"
+# Optional: first DHCPv4 IAID allocation in the analyzed BGW firmware was 1.
+# This is not a captured value from your gateway.
+wan_dhcpv4_iaid: 1
+```
+
+Omit `wan_dhcpv4_iaid` to keep networkd's generated IAID. Leave the custom DUID
+pair empty to use networkd's generated DUID with either DUID client-ID mode.
+An IPv4 identity change may change your public IPv4 lease or interrupt WAN
+connectivity when applied. See [ClientIdentifier in systemd.network](https://www.freedesktop.org/software/systemd/man/latest/systemd.network.html).
