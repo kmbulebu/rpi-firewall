@@ -321,23 +321,28 @@ This captures console output only; authenticated status polling is a later step.
 ```bash
 sudo systemctl status wag-d20-serial.service
 sudo journalctl -u wag-d20-serial.service -n 30
-sudo tail -f /var/log/wag-d20/serial.jsonl
+sudo journalctl -u wag-d20-serial.service -f -o cat  # Follow console output
 sudo systemctl stop wag-d20-serial.service  # Release port for interactive access
 sudo systemctl start wag-d20-serial.service
 ```
 
-Console data stays in root-only `/var/log/wag-d20/`, separate from forwarded
-router syslog. JSONL records have host UTC receive timestamps, event names,
-readable `text`, and byte-exact `data_base64`. Receive chunks may span or split
-lines and UTF-8 characters; use base64 when reconstructing original bytes.
-Status messages appear in the service journal. An active service can be waiting
-for an absent or busy adapter; check the journal or `connected` capture events.
-
-Rotation retains one current file and five backups (`serial.jsonl.1` is newest),
-up to approximately 60 MiB total. Each record is flushed to the OS, without an
-fsync per chunk; abrupt router power loss can lose recently buffered output.
-Host timestamps can jump when NTP corrects the router clock. Captures can contain
+Console output and connection status go directly to journald. View timestamped
+history with `sudo journalctl -u wag-d20-serial.service`, or use `-f -o cat`
+for readable live output. Journald supplies timestamps, access control, rotation,
+and retention. The router currently configures volatile journald storage with a
+100 MiB shared runtime limit; logs are lost when the router reboots. Logs may also
+be forwarded by the router's existing syslog configuration. Captures can contain
 personal identifiers and should stay private.
+
+The receiver converts CR/LF to lines, decodes UTF-8 with replacement for invalid
+bytes, and displays NUL bytes as `\x00`. Unterminated prompts are emitted after
+one idle second; long lines are split to bound buffering. These are readable
+console logs, not byte-exact recordings. Journald timestamps reflect receipt by
+the journal, and can jump when NTP corrects the router clock. An active service
+can be waiting for an absent or busy adapter; check for `Serial capture connected`.
+
+Existing `/var/log/wag-d20/serial.jsonl*` files from earlier versions are retained
+but no longer written or rotated. They can be archived or removed manually.
 
 Set `wag_d20_serial_enabled: false` and reapply Ansible to stop and disable the
 service and release the adapter. Existing logs and installed files are retained;

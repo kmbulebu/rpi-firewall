@@ -1,12 +1,8 @@
 #!/usr/bin/python3
-"""Receive-only serial capture with bounded, byte-preserving JSONL logs."""
+"""Receive-only serial console output for systemd-journald."""
 import argparse
-import base64
-from datetime import datetime, timezone
+import codecs
 import fcntl
-import json
-import logging
-from logging.handlers import RotatingFileHandler
 import os
 import select
 import sys
@@ -35,54 +31,56 @@ def open_serial(path):
         raise
 
 
-def record(logger, event, **fields):
-    logger.info(json.dumps({
-        "time": datetime.now(timezone.utc).isoformat(),
-        "event": event,
-        **fields,
-    }, ensure_ascii=True))
+def capture(fd):
+    decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+    pending = ""
 
+    def emit(text):
+        # Journald frames stdout on newline/NUL; keep NULs visible in the text.
+        if text:
+            print(text.replace("\x00", "\\x00"), flush=True)
 
-def capture(fd, logger):
-    while True:
-        ready, _, _ = select.select([fd], [], [], 1)
-        if not ready:
-            continue
-        try:
-            data = os.read(fd, 4096)
-        except BlockingIOError:
-            continue
-        if not data:
-            raise OSError("serial device disconnected")
-        record(logger, "rx", data_base64=base64.b64encode(data).decode("ascii"),
-               text=data.decode("utf-8", errors="replace"))
+    try:
+        while True:
+            ready, _, _ = select.select([fd], [], [], 1)
+            if not ready:
+                # Prompts often have no newline. Publish after an idle second.
+                emit(pending)
+                pending = ""
+                continue
+            try:
+                data = os.read(fd, 4096)
+            except BlockingIOError:
+                continue
+            if not data:
+                raise OSError("serial device disconnected")
+            pending += decoder.decode(data).replace("\r", "\n")
+            lines = pending.split("\n")
+            pending = lines.pop()
+            for line in lines:
+                emit(line)
+            if len(pending) >= 4096:
+                emit(pending)
+                pending = ""
+    finally:
+        emit(pending + decoder.decode(b"", final=True))
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", required=True)
-    parser.add_argument("--log", required=True)
     args = parser.parse_args()
-    os.umask(0o077)
-    logger = logging.getLogger("serial-capture")
-    logger.setLevel(logging.INFO)
-    handler = RotatingFileHandler(args.log, maxBytes=10 * 1024 * 1024,
-                                  backupCount=5, encoding="utf-8")
-    handler.setFormatter(logging.Formatter("%(message)s"))
-    logger.addHandler(handler)
     last_error = None
     while True:
         fd = None
         try:
             fd = open_serial(args.device)
-            record(logger, "connected", device=args.device)
             print("Serial capture connected", file=sys.stderr, flush=True)
             last_error = None
-            capture(fd, logger)
+            capture(fd)
         except (OSError, termios.error) as error:
             message = str(error)
             if message != last_error:
-                record(logger, "unavailable", error=message)
                 print(f"Serial capture waiting: {message}", file=sys.stderr, flush=True)
                 last_error = message
         finally:

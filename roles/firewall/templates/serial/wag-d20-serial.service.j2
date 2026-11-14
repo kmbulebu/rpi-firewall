@@ -5,11 +5,9 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /usr/local/sbin/wag-d20-serial-capture --device {{ wag_d20_serial_device | quote }} --log /var/log/wag-d20/serial.jsonl
+ExecStart=/usr/bin/python3 /usr/local/sbin/wag-d20-serial-capture --device {{ wag_d20_serial_device | quote }}
 Restart=on-failure
 RestartSec=5
-LogsDirectory=wag-d20
-LogsDirectoryMode=0700
 UMask=0077
 NoNewPrivileges=yes
 ProtectSystem=strict
@@ -21,6 +19,7 @@ ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 StandardOutput=journal
 StandardError=journal
+SyslogLevelPrefix=no
 
 [Install]
 WantedBy=multi-user.target
