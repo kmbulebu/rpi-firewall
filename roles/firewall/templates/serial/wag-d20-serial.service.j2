@@ -1,0 +1,26 @@
+[Unit]
+Description=WAG-D20 receive-only serial capture
+After=local-fs.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /usr/local/sbin/wag-d20-serial-capture --device {{ wag_d20_serial_device | quote }} --log /var/log/wag-d20/serial.jsonl
+Restart=on-failure
+RestartSec=5
+LogsDirectory=wag-d20
+LogsDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
