@@ -24,6 +24,10 @@ wan_iface_networkd_link_match: "Property=ID_BUS=usb"
 wan_iface: wan0
 wan_backup_enabled: false
 wan_backup_iface: wan-backup
+# Optional DHCPv6 client identity; configure both to override networkd's default.
+# Raw data excludes the two-byte DUID type prefix supplied by DUIDType.
+wan_dhcpv6_duid_type: ''
+wan_dhcpv6_duid_raw_data: ''
 wan_route_metric: 1024
 wan_backup_route_metric: 100
 lan_iface_networkd_link_match: "Driver=bcmgenet"

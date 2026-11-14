@@ -43,6 +43,17 @@ class WanBackupTests(unittest.TestCase):
         self.assertIn('IgnoreCarrierLoss=no', backup)
         self.assertNotIn('DHCPPrefixDelegation=yes', backup)
 
+    def test_optional_primary_dhcpv6_identity(self):
+        primary = 'networkd/wan/10-wan.network'
+        self.assertNotIn('DUIDType=', self.render(primary))
+        self.assertNotIn('DUIDRawData=', self.render(primary))
+        self.values.update(wan_dhcpv6_duid_type='vendor',
+                           wan_dhcpv6_duid_raw_data='00:00:0d:e9:45:58:41:4d:50:4c:45')
+        rendered = self.render(primary)
+        self.assertIn('DUIDType=vendor', rendered)
+        self.assertIn('DUIDRawData=00:00:0d:e9:45:58:41:4d:50:4c:45', rendered)
+        self.assertNotIn('DUIDType=', self.render('networkd/wan-backup/10-wan-backup.network'))
+
     def test_backup_identity_does_not_spoof_primary_mac(self):
         link = self.render('networkd/wan-backup/00-wan-backup.link')
         self.assertIn('PermanentMACAddress=96:0b:9e:b5:54:6d', link)

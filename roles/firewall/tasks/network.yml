@@ -1,4 +1,18 @@
 ---
+- name: Validate WAN DHCPv6 DUID configuration
+  ansible.builtin.assert:
+    that:
+      - wan_dhcpv6_duid_type is string
+      - wan_dhcpv6_duid_raw_data is string
+      - wan_dhcpv6_duid_type in ['', 'link-layer-time', 'vendor', 'link-layer', 'uuid']
+      - (wan_dhcpv6_duid_type | length > 0) == (wan_dhcpv6_duid_raw_data | length > 0)
+      - >-
+        wan_dhcpv6_duid_raw_data == '' or
+        wan_dhcpv6_duid_raw_data is match('^[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){0,125}$')
+    fail_msg: >-
+      Set both wan_dhcpv6_duid_type and wan_dhcpv6_duid_raw_data, or leave both empty.
+      Type must be link-layer-time, vendor, link-layer, or uuid. Raw data must contain
+      1 to 126 colon-separated hexadecimal bytes, excluding the two-byte DUID type prefix.
 - name: Validate DHCP lease durations
   assert:
     that:
