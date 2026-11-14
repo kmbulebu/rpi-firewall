@@ -4,8 +4,10 @@
     that:
       - wag_d20_serial_enabled is boolean
       - wag_d20_serial_device is string
+      - wag_d20_status_interval is integer
+      - wag_d20_status_interval >= 10
       - wag_d20_serial_device is match('^/dev/serial/by-id/[A-Za-z0-9_.:-]+$')
-    fail_msg: Serial capture requires a boolean enable flag and a stable /dev/serial/by-id/ path.
+    fail_msg: Serial monitoring requires a boolean enable flag, a stable /dev/serial/by-id/ path and an integer poll interval of at least ten seconds.
 
 - name: Configure enabled WAG-D20 serial capture
   when: wag_d20_serial_enabled
@@ -15,7 +17,7 @@
         name: python3
         state: present
 
-    - name: Install receive-only serial capture program
+    - name: Install serial logging and status program
       ansible.builtin.copy:
         src: serial/capture.py
         dest: /usr/local/sbin/wag-d20-serial-capture
@@ -32,6 +34,14 @@
         group: root
         mode: '0644'
       register: wag_d20_serial_unit
+
+    - name: Install cached WAG-D20 status MOTD
+      ansible.builtin.copy:
+        src: serial/motd.py
+        dest: /etc/update-motd.d/62-wag-d20-status
+        owner: root
+        group: root
+        mode: '0755'
 
     - name: Enable and start serial capture
       ansible.builtin.systemd_service:
@@ -54,3 +64,15 @@
   when:
     - not wag_d20_serial_enabled
     - wag_d20_serial_installed.stat.exists
+
+- name: Remove WAG-D20 MOTD when serial monitoring is disabled
+  ansible.builtin.file:
+    path: /etc/update-motd.d/62-wag-d20-status
+    state: absent
+  when: not wag_d20_serial_enabled
+
+- name: Remove cached WAG-D20 observations when monitoring is disabled
+  ansible.builtin.file:
+    path: /run/wag-d20
+    state: absent
+  when: not wag_d20_serial_enabled

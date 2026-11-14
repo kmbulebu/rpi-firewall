@@ -1,13 +1,15 @@
 [Unit]
-Description=WAG-D20 receive-only serial capture
+Description=WAG-D20 console logging and PON status
 After=local-fs.target
 StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /usr/local/sbin/wag-d20-serial-capture --device {{ wag_d20_serial_device | quote }}
+ExecStart=/usr/bin/python3 /usr/local/sbin/wag-d20-serial-capture --device {{ wag_d20_serial_device | quote }} --interval {{ wag_d20_status_interval }}
 Restart=on-failure
 RestartSec=5
+RuntimeDirectory=wag-d20
+RuntimeDirectoryMode=0755
 UMask=0077
 NoNewPrivileges=yes
 ProtectSystem=strict

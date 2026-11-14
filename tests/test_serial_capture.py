@@ -1,83 +1,136 @@
-"""Exercise capture against real pseudo terminals without touching the ONT."""
+"""Exercise the receiver and cache reader without touching the physical ONT."""
+import contextlib
 import errno
+import importlib.util
+import io
+import json
 import os
 from pathlib import Path
-import pty
-import select
+import runpy
 import subprocess
 import sys
 import tempfile
 import time
 import unittest
+from unittest.mock import patch
 
+from wag_serial_fixture import OntEmulator
 
-SCRIPT = Path(__file__).resolve().parents[1] / 'roles/firewall/files/serial/capture.py'
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / 'roles/firewall/files/serial/capture.py'
+MOTD = ROOT / 'roles/firewall/files/serial/motd.py'
+spec = importlib.util.spec_from_file_location('serial_capture', SCRIPT)
+receiver = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(receiver)
 
 
 class SerialCaptureTests(unittest.TestCase):
-    def test_absent_attach_text_capture_exclusive_and_reconnect(self):
+    def test_status_queries_reboot_guard_and_recovery(self):
         with tempfile.TemporaryDirectory() as directory:
             directory = Path(directory)
+            log = directory / 'console.log'
+            status = directory / 'status.json'
             device = directory / 'adapter'
-            log = directory / 'stdout.log'
             output = log.open('wb')
-            process = subprocess.Popen(
-                [sys.executable, str(SCRIPT), '--device', str(device)],
-                stdout=output, stderr=output)
-            masters = []
+            process = subprocess.Popen([sys.executable, str(SCRIPT), '--device', str(device),
+                                        '--status', str(status), '--interval', '10'],
+                                       stdout=output, stderr=output)
+            emulator = OntEmulator()
+            def wait_for(predicate, timeout=10):
+                deadline = time.monotonic() + timeout
+                while time.monotonic() < deadline:
+                    self.assertIsNone(process.poll(), log.read_text())
+                    if predicate():
+                        return
+                    time.sleep(.03)
+                self.fail(log.read_text())
+            def state():
+                return json.loads(status.read_text()) if status.exists() else {}
             try:
-                def records():
-                    if not log.exists():
-                        return []
-                    return log.read_text()
-
-                def wait_for(predicate):
-                    deadline = time.monotonic() + 8
-                    while time.monotonic() < deadline:
-                        self.assertIsNone(process.poll(), 'capture process exited')
-                        if predicate(records()):
-                            return
-                        time.sleep(0.03)
-                    self.fail('timed out waiting for serial capture')
-
-                def attach():
-                    master, slave = pty.openpty()
-                    masters.append(master)
-                    path = os.ttyname(slave)
-                    device.unlink(missing_ok=True)
-                    device.symlink_to(path)
-                    os.close(slave)
-                    return master, path
-
-                wait_for(lambda rows: 'Serial capture waiting:' in rows)
-                master, path = attach()
-                wait_for(lambda rows: 'Serial capture connected' in rows)
-                # No login, newline, or bootloader-interrupting bytes are transmitted.
-                self.assertFalse(select.select([master], [], [], 0.1)[0])
+                wait_for(lambda: 'WAG status unavailable:' in log.read_text())
+                device.symlink_to(emulator.path)
+                wait_for(lambda: 'Serial capture connected' in log.read_text())
+                emulator.start()
+                emulator.ready.set()
+                wait_for(lambda: state().get('health') == 'ok')
+                self.assertEqual(state()['ploam']['current'], 5)
+                self.assertEqual(state()['optics']['rx_los'], 0)
+                self.assertEqual(state()['uptime_seconds'], 1234)
+                self.assertEqual(status.stat().st_mode & 0o777, 0o644)
                 with self.assertRaises(OSError) as failure:
-                    os.open(path, os.O_RDONLY | os.O_NOCTTY)
+                    os.open(emulator.path, os.O_RDONLY | os.O_NOCTTY)
                 self.assertEqual(failure.exception.errno, errno.EBUSY)
-                os.write(master, b'boot\x00\xff\r\nUser: ')
-                # Complete lines appear immediately; a partial prompt after idle.
-                wait_for(lambda text: 'boot\\x00\ufffd\n' in text)
-                wait_for(lambda text: 'User: \n' in text)
-                # A UTF-8 character split across serial reads remains readable.
-                os.write(master, b'\xe2')
-                time.sleep(0.1)
-                os.write(master, b'\x82\xac\n')
-                wait_for(lambda text: '\u20ac\n' in text)
-                os.close(master)
-                masters.remove(master)
-                master, _ = attach()
-                wait_for(lambda rows: rows.count('Serial capture connected') == 2)
-                os.write(master, b'new boot')
-                wait_for(lambda rows: 'new boot\n' in rows)
+                # Spontaneous firmware messages can obscure a previously seen prompt.
+                sampled = state()['last_success_monotonic']
+                emulator.write(b'\r\nunsolicited firmware message\r\n')
+                wait_for(lambda: state().get('last_success_monotonic', 0) > sampled, timeout=13)
+                emulator.boot.set()
+                self.assertTrue(emulator.boot_sent.wait(3))
+                count = len(emulator.commands)
+                wait_for(lambda: state().get('health') == 'stale')
+                self.assertEqual(state()['ploam']['current'], 5)
+                time.sleep(.2)
+                self.assertEqual(len(emulator.commands), count)
+                emulator.ready.set()
+                wait_for(lambda: state().get('health') == 'ok')
+                self.assertGreater(emulator.commands.count('test'), 1)
+                # Only login/navigation and the four allowlisted queries were sent.
+                for command in emulator.commands:
+                    self.assertTrue(command in ('', 'test', 'default', 'lsh') or
+                                    any(getter in command for getter in (
+                                        'ploam_state_get', 'gpon_status_get',
+                                        'optic_status_get', 'cat /proc/uptime')), command)
             finally:
                 process.terminate()
                 process.wait(timeout=5)
                 output.close()
-                for master in masters:
-                    os.close(master)
+                # SIGTERM releases exclusivity even while the PTY master stays open.
+                if device.exists():
+                    fd = os.open(emulator.path, os.O_RDONLY | os.O_NOCTTY)
+                    os.close(fd)
+                if emulator.worker.ident is not None:
+                    emulator.close()
+                else:
+                    os.close(emulator.master)
+
+    def test_boot_and_ready_markers_split_across_reads(self):
+        console = receiver.Console(123)
+        with patch('select.select', return_value=([123], [], [])), \
+                patch('os.read', side_effect=[b'U-Bo', b'ot 2016',
+                                             b'\r\nOMCI daemon initi', b'alized\n']), \
+                contextlib.redirect_stdout(io.StringIO()):
+            console.pump()
+            console.pump()
+            self.assertTrue(console.booting)
+            console.pump()
+            self.assertTrue(console.booting)
+            console.pump()
+            self.assertFalse(console.booting)
+
+    def test_getter_parser_preserves_quotes_and_rejects_failures(self):
+        self.assertEqual(receiver.pairs('errorcode=0 pon_id="0 1 2" current=11'),
+                         {'errorcode': 0, 'pon_id': '0 1 2', 'current': 11})
+        for bad in ['errorcode=-1 current=5', 'current=5']:
+            with self.assertRaises(ValueError):
+                receiver.pairs(bad)
+
+    def test_motd_fresh_stale_first_poll_and_invalid_cache(self):
+        state = {'health': 'ok', 'last_success_monotonic': 988, 'ploam': {'current': 5},
+                 'optics': {'rx_los': 0}, 'uptime_seconds': 8070}
+        def display(document):
+            output = io.StringIO()
+            with patch('pathlib.Path.read_text', return_value=json.dumps(document)), \
+                    patch('time.monotonic', return_value=1000), contextlib.redirect_stdout(output):
+                runpy.run_path(str(MOTD), run_name='__main__')
+            return output.getvalue()
+        self.assertIn('PON state 5 (raw)', display(state))
+        self.assertIn('12s ago', display(state))
+        state['health'] = 'stale'
+        self.assertIn('STALE', display(state))
+        state.update(health='ok', last_success_monotonic=800)
+        self.assertIn('STALE', display(state))
+        self.assertIn('first successful poll', display({}))
+        self.assertIn('status unavailable', display({'last_success_monotonic': 999}))
 
 
 if __name__ == '__main__':
