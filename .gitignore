@@ -2,3 +2,5 @@
 .vagrant
 mine/
 __pycache__/
+.venv/
+.ansible/

@@ -141,17 +141,28 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Install template test dependencies
-        run: python3 -m pip install Jinja2 PyYAML dnspython
+      - name: Install locked development tools
+        run: |
+          python3 -m pip install uv==0.13.8
+          uv sync --locked
+
+      - name: Install pinned Ansible collections
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}/.ansible/collections
+        run: uv run --locked ansible-galaxy collection install --no-cache -r collections/requirements.yml
 
       - name: Test blocklists and network templates
-        run: python3 -m unittest discover -s tests -v
+        run: uv run --locked python -m unittest discover -s tests -v
 
       - name: Run ansible-lint
-        uses: ansible/ansible-lint@main
-        with:
-          args: "--profile=min"
-          requirements_file: collections/requirements.yml
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}/.ansible/collections
+        run: uv run --locked ansible-lint --profile=min playbook.yml
+
+      - name: Check playbook syntax
+        env:
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}/.ansible/collections
+        run: uv run --locked ansible-playbook -i rpi/inventory.yml playbook.yml --syntax-check
 
   dns-reliability:
     name: DNS resilience and IPv6 ACLs
