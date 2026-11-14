@@ -84,6 +84,8 @@ ExecStart=/usr/sbin/unbound -d -c /etc/unbound/unbound.conf
 ExecReload={reload_script} $MAINPID
 ''')
     command('systemctl', 'daemon-reload')
+    # Distro startup may exhaust its restart limit before this fixture replaces it.
+    command('systemctl', 'reset-failed', 'unbound.service')
     command('systemctl', 'start', 'unbound.service')
     ready()
     command('openssl', 'req', '-x509', '-newkey', 'rsa:2048', '-nodes',
@@ -118,7 +120,11 @@ ExecReload={reload_script} $MAINPID
     (role / 'tasks').mkdir(parents=True)
     for directory in ('defaults', 'files', 'templates'):
         (role / directory).symlink_to(ROLE / directory)
-    (role / 'tasks/ad_blocking.yml').symlink_to(ROLE / 'tasks/ad_blocking.yml')
+    # The production tail can include other optional integrations. Keep all
+    # task dependencies available while replacing only the entry point below.
+    for taskfile in (ROLE / 'tasks').glob('*.yml'):
+        if taskfile.name != 'main.yml':
+            (role / 'tasks' / taskfile.name).symlink_to(taskfile)
     main_tasks = yaml.safe_load((ROLE / 'tasks/main.yml').read_text())
     barrier = next(index for index, task in enumerate(main_tasks)
                    if task.get('ansible.builtin.meta') == 'flush_handlers')
