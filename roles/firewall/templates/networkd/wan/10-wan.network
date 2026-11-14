@@ -43,6 +43,10 @@ SendHostname=false
 UseHostname=false
 
 [DHCPv6]
+{% if wan_dhcpv6_duid_type | length > 0 %}
+DUIDType={{ wan_dhcpv6_duid_type }}
+DUIDRawData={{ wan_dhcpv6_duid_raw_data }}
+{% endif %}
 SendHostname=false
 UseDNS=false
 PrefixDelegationHint=::/60

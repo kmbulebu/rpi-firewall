@@ -759,6 +759,8 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `upgrade_reboot_time` | `'04:55'` | Time (UTC) to schedule automatic reboots after upgrades. |
 | `vpn_client_iface` | `wg0` | Desired WireGuard client interface name. |
 | `vpn_vrf_iface` | `vpn_vrf0` | VRF interface name for VPN routing. |
+| `wan_dhcpv6_duid_type` | `''` | Optional primary WAN DHCPv6 DUID type: `link-layer-time`, `vendor`, `link-layer`, or `uuid`. Set together with raw data. |
+| `wan_dhcpv6_duid_raw_data` | `''` | Colon-separated hex bytes excluding the two-byte DUID type prefix. Empty settings retain networkd's generated identity. |
 | `wan_device_set_mac_address` | `` | Optional MAC address to set on WAN device (empty by default). |
 | `wan_iface` | `wan0` | Desired WAN interface name. |
 | `wan_iface_networkd_link_match` | `"Property=ID_BUS=usb"` | `systemd-networkd` match string for WAN link. |
@@ -767,3 +769,36 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `wan_backup_iface_networkd_link_match` | unset | Explicit device matcher; required when backup is enabled. |
 | `wan_route_metric` | `1024` | Primary DHCPv4 and IPv6 RA route metric. |
 | `wan_backup_route_metric` | `100` | Backup metric; must be positive and lower than primary. |
+
+### Custom WAN DHCPv6 identity
+
+Set `wan_dhcpv6_duid_type` and `wan_dhcpv6_duid_raw_data` together in private
+inventory. The role passes these generic settings to the primary WAN's
+`[DHCPv6]` section. Removing both settings restores networkd's generated DUID.
+The backup WAN and DHCPv4 identity are configured independently.
+
+For example, this inventory constructs a vendor DUID from an enterprise number
+and an ASCII identifier. Provider-specific conventions belong in inventory:
+
+```yaml
+# Example BGW320-500 identity: use your own System Information serial, not ONT ID.
+bgw_manufacturer_oui: '0C08B4'
+bgw_serial_number: 'EXAMPLE123'
+
+# DUID-EN: enterprise 3561 followed by ASCII "OUI-serial".
+# networkd adds the 00:02 type prefix, so omit it from raw data.
+wan_dhcpv6_duid_type: vendor
+wan_dhcpv6_duid_raw_data: >-
+  {{ '00:00:0d:e9:' ~
+     (bgw_manufacturer_oui ~ '-' ~ bgw_serial_number).encode('ascii').hex(':') }}
+```
+
+The BGW example follows static analysis of HUMAX 3.17.5 firmware: its generator
+uses `mgmt.cwmp.oui` and `system.serial-number`; the System Information page
+renders that same serial property. It preserves an existing DUID file. This is
+not a verification of a particular device's stored DUID or newer firmware.
+No IAID is inferred from these inputs.
+
+See [systemd's DUID settings](https://www.freedesktop.org/software/systemd/man/latest/networkd.conf.html)
+for the raw-data format. Changing a client identity can result in a different
+lease or delegated prefix when network configuration is applied.
