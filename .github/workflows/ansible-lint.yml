@@ -7,6 +7,40 @@ permissions:
   contents: read
 
 jobs:
+  wag-serial:
+    name: WAG-D20 serial status lifecycle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build disposable systemd image
+        run: docker build -f tests/Dockerfile.blocklists -t wag-serial-test .
+
+      - name: Test serial monitoring enable and disable with Ansible
+        shell: bash
+        run: |
+          docker run -d --name wag-serial-test --privileged --cgroupns=private \
+            --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
+            -v "$GITHUB_WORKSPACE:/repo:ro" -w /repo wag-serial-test
+          cleanup() {
+            test_exit_status=$?
+            if [ "$test_exit_status" -ne 0 ]; then
+              docker exec wag-serial-test journalctl --no-pager -n 100 -u wag-d20-serial.service || true
+            fi
+            docker rm -f wag-serial-test >/dev/null
+            exit "$test_exit_status"
+          }
+          trap cleanup EXIT
+          for attempt in {1..30}; do
+            if docker exec wag-serial-test systemctl show --property=Version --value >/dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec -e RPI_FIREWALL_DISPOSABLE_TEST=1 wag-serial-test python3 tests/integration_wag_serial.py
+
   ubuntu-pro:
     name: Optional Ubuntu Pro subscription
     runs-on: ubuntu-24.04

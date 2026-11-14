@@ -295,58 +295,85 @@ timeout, and cumulative kernel drop/early-eviction/insert-failure counters where
 available. These counters are totals, not rates. Status collection reads existing
 kernel state and does not dump the connection table or add logging/polling services.
 
-### Optional WAG-D20 serial console capture
+### Optional WAG-D20 console and PON status
 
-Enable passive ONT console logging in the router's live inventory before moving
-its soldered USB adapter to the router:
+Enable ONT console logging and read-only status polling in the router inventory:
 
 ```yaml
 wag_d20_serial_enabled: true
 wag_d20_serial_device: /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
+wag_d20_status_interval: 30
 ```
 
-The feature defaults to `false`. Apply the playbook and check the service before
-powering on the ONT. The receiver starts at router boot, waits for the adapter,
-and retries once per second after unplug/replug. It has no network dependency and
-an absent adapter does not delay boot. With the adapter already connected and the
-service receiving, power on the WAG-D20 to capture its boot and PON registration.
-Bytes emitted before the receiver opens the port cannot be recovered.
+The feature defaults to disabled. When enabled, Ansible installs one systemd
+service that owns the serial port at 115200 baud, 8N1 without flow control. It
+captures console output to journald and polls the ONT every 30 seconds (minimum
+configurable interval: 10 seconds). It waits for an absent adapter and retries
+connection failures without blocking router boot. With the adapter attached,
+confirm `Serial capture connected` before powering on the ONT. Bytes emitted
+before the receiver opens the port cannot be recovered.
 
-The port is opened read-only and configured for 115200 baud, 8N1, without flow
-control or hangup on close. The receiver sends no login, newline, or other console
-commands. It holds the port exclusively while connected. Stop the service before
-using a terminal or another management tool; getty should not run on this adapter.
-This captures console output only; authenticated status polling is a later step.
+Polling logs into the vendor console with the previously verified factory
+`test` / `default` account, enters `lsh`, and runs only these read-only getters:
+
+- `/opt/intel/bin/pon ploam_state_get`
+- `/opt/intel/bin/pon gpon_status_get`
+- `/opt/intel/bin/pon optic_status_get /sys/bus/i2c/devices/0-0050/eeprom /sys/bus/i2c/devices/0-0051/eeprom`
+- `cat /proc/uptime`
+
+These commands and credentials are specific to the explored WAG-D20 firmware.
+The receiver requires recognized prompts before sending queries and suppresses
+input during a detected boot/autoboot sequence. It does not change ONT
+configuration or restart its PON services. Poll responses are also visible in
+the console journal. Changed PON state/LOS and polling failures get concise
+status messages.
+
+A successful poll atomically updates `/run/wag-d20/status.json` with raw PLOAM,
+PON and optics records, device uptime, and observation timestamps. A failed poll
+marks the previous values stale. Firmware-specific state numbers, authentication
+flags and optical units are not yet mapped; no guessed O-state or dBm conversion
+is displayed. Optical `rx_los` indicates loss of signal independently of PON
+registration. An observation marked `ok` means the getters succeeded, not that
+Internet service is available. Router IPv4, IPv6 and DHCPv6 prefix delegation
+remain separate observations.
+
+The MOTD reads this local cache without serial I/O or network requests:
+
+```text
+ WAG-D20: PON state 5 (raw) | optical LOS clear
+          uptime 2h 14m | observed 12s ago
+```
+
+This example is illustrative. Failed polling, or observations older than three
+poll intervals (at least 90 seconds), display `STALE`. Before the first successful
+poll, the MOTD reports unavailable status.
 
 ```bash
 sudo systemctl status wag-d20-serial.service
-sudo journalctl -u wag-d20-serial.service -n 30
-sudo journalctl -u wag-d20-serial.service -f -o cat  # Follow console output
+sudo journalctl -u wag-d20-serial.service -f -o cat
+cat /run/wag-d20/status.json
+/etc/update-motd.d/62-wag-d20-status
 sudo systemctl stop wag-d20-serial.service  # Release port for interactive access
 sudo systemctl start wag-d20-serial.service
 ```
 
-Console output and connection status go directly to journald. View timestamped
-history with `sudo journalctl -u wag-d20-serial.service`, or use `-f -o cat`
-for readable live output. Journald supplies timestamps, access control, rotation,
-and retention. The router currently configures volatile journald storage with a
-100 MiB shared runtime limit; logs are lost when the router reboots. Logs may also
-be forwarded by the router's existing syslog configuration. Captures can contain
-personal identifiers and should stay private.
+The receiver holds the port exclusively. Stop it before using another serial
+tool; getty should not run on this adapter. Console output is decoded as UTF-8
+with replacement, CR/LF become lines, NUL is shown as `\x00`, and unterminated
+prompts are emitted after an idle second. These are readable logs rather than
+byte-exact recordings.
 
-The receiver converts CR/LF to lines, decodes UTF-8 with replacement for invalid
-bytes, and displays NUL bytes as `\x00`. Unterminated prompts are emitted after
-one idle second; long lines are split to bound buffering. These are readable
-console logs, not byte-exact recordings. Journald timestamps reflect receipt by
-the journal, and can jump when NTP corrects the router clock. An active service
-can be waiting for an absent or busy adapter; check for `Serial capture connected`.
+Journald supplies timestamps, access control, rotation and retention. The router
+currently uses volatile journal storage with a shared 100 MiB runtime limit, so
+logs are lost when the router reboots. Logs may be forwarded by existing syslog
+configuration. Console output can contain personal identifiers and should stay
+private. `/run` caches also disappear on reboot. Existing JSONL files from earlier
+versions are retained without further writes or rotation.
 
-Existing `/var/log/wag-d20/serial.jsonl*` files from earlier versions are retained
-but no longer written or rotated. They can be archived or removed manually.
-
-Set `wag_d20_serial_enabled: false` and reapply Ansible to stop and disable the
-service and release the adapter. Existing logs and installed files are retained;
-a fresh disabled installation installs no capture service or program.
+Set `wag_d20_serial_enabled: false` and reapply Ansible to stop/disable the
+service, release the adapter, and remove its MOTD entry and runtime cache.
+Installed receiver/unit files and existing logs are retained. A fresh disabled
+installation installs no receiver, service or MOTD file.
 
 ### Remote Syslog
 
