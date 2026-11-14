@@ -73,3 +73,7 @@ tailscaled_listen_port: 0
 tailscale_iface: tailscale0
 port_forwards: []
 dhcp_reservations: []
+
+# Optional, passive ONT console logging. No credentials or commands are sent.
+wag_d20_serial_enabled: false
+wag_d20_serial_device: /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0

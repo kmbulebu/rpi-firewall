@@ -29,4 +29,6 @@
   when: ubuntu_pro_token | default('', true) | string | trim | length > 0
 - name: Configure DNS ad blocking
   ansible.builtin.include_tasks: ad_blocking.yml
+- name: Configure optional WAG-D20 serial capture
+  ansible.builtin.include_tasks: wag_d20_serial.yml
 - meta: clear_facts

@@ -295,6 +295,54 @@ timeout, and cumulative kernel drop/early-eviction/insert-failure counters where
 available. These counters are totals, not rates. Status collection reads existing
 kernel state and does not dump the connection table or add logging/polling services.
 
+### Optional WAG-D20 serial console capture
+
+Enable passive ONT console logging in the router's live inventory before moving
+its soldered USB adapter to the router:
+
+```yaml
+wag_d20_serial_enabled: true
+wag_d20_serial_device: /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
+```
+
+The feature defaults to `false`. Apply the playbook and check the service before
+powering on the ONT. The receiver starts at router boot, waits for the adapter,
+and retries once per second after unplug/replug. It has no network dependency and
+an absent adapter does not delay boot. With the adapter already connected and the
+service receiving, power on the WAG-D20 to capture its boot and PON registration.
+Bytes emitted before the receiver opens the port cannot be recovered.
+
+The port is opened read-only and configured for 115200 baud, 8N1, without flow
+control or hangup on close. The receiver sends no login, newline, or other console
+commands. It holds the port exclusively while connected. Stop the service before
+using a terminal or another management tool; getty should not run on this adapter.
+This captures console output only; authenticated status polling is a later step.
+
+```bash
+sudo systemctl status wag-d20-serial.service
+sudo journalctl -u wag-d20-serial.service -n 30
+sudo tail -f /var/log/wag-d20/serial.jsonl
+sudo systemctl stop wag-d20-serial.service  # Release port for interactive access
+sudo systemctl start wag-d20-serial.service
+```
+
+Console data stays in root-only `/var/log/wag-d20/`, separate from forwarded
+router syslog. JSONL records have host UTC receive timestamps, event names,
+readable `text`, and byte-exact `data_base64`. Receive chunks may span or split
+lines and UTF-8 characters; use base64 when reconstructing original bytes.
+Status messages appear in the service journal. An active service can be waiting
+for an absent or busy adapter; check the journal or `connected` capture events.
+
+Rotation retains one current file and five backups (`serial.jsonl.1` is newest),
+up to approximately 60 MiB total. Each record is flushed to the OS, without an
+fsync per chunk; abrupt router power loss can lose recently buffered output.
+Host timestamps can jump when NTP corrects the router clock. Captures can contain
+personal identifiers and should stay private.
+
+Set `wag_d20_serial_enabled: false` and reapply Ansible to stop and disable the
+service and release the adapter. Existing logs and installed files are retained;
+a fresh disabled installation installs no capture service or program.
+
 ### Remote Syslog
 
 To send router and firewall logs to a remote syslog server, provide
