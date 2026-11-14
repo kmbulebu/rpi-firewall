@@ -60,7 +60,7 @@ def main():
             time.sleep(.1)
         else:
             raise AssertionError(command('journalctl', '-u', 'wag-d20-serial.service', '--no-pager'))
-        assert 'PON state 5 (raw)' in command(str(motd))
+        assert 'PON state: 5 (raw)' in command(str(motd))
         assert 'enabled' == command('systemctl', 'is-enabled', 'wag-d20-serial.service').strip()
         print('PASS: enable installs service, polls ONT, exposes cached MOTD', flush=True)
         pid = command('systemctl', 'show', 'wag-d20-serial.service', '--property=MainPID', '--value')

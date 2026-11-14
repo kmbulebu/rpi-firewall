@@ -122,15 +122,18 @@ class SerialCaptureTests(unittest.TestCase):
             with patch('pathlib.Path.read_text', return_value=json.dumps(document)), \
                     patch('time.monotonic', return_value=1000), contextlib.redirect_stdout(output):
                 runpy.run_path(str(MOTD), run_name='__main__')
-            return output.getvalue()
-        self.assertIn('PON state 5 (raw)', display(state))
+            rendered = output.getvalue()
+            self.assertTrue(rendered.startswith('\n PON status (WAG-D20):\n'))
+            self.assertTrue(all(line.startswith('  ') for line in rendered.splitlines()[2:]))
+            return rendered
+        self.assertIn('PON state: 5 (raw)', display(state))
         self.assertIn('12s ago', display(state))
         state['health'] = 'stale'
         self.assertIn('STALE', display(state))
         state.update(health='ok', last_success_monotonic=800)
         self.assertIn('STALE', display(state))
         self.assertIn('first successful poll', display({}))
-        self.assertIn('status unavailable', display({'last_success_monotonic': 999}))
+        self.assertIn('Status: unavailable', display({'last_success_monotonic': 999}))
 
 
 if __name__ == '__main__':

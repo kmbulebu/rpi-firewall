@@ -340,8 +340,11 @@ remain separate observations.
 The MOTD reads this local cache without serial I/O or network requests:
 
 ```text
- WAG-D20: PON state 5 (raw) | optical LOS clear
-          uptime 2h 14m | observed 12s ago
+ PON status (WAG-D20):
+  PON state: 5 (raw)
+  Optical LOS: clear
+  Uptime: 2h 14m
+  Observation: observed 12s ago
 ```
 
 This example is illustrative. Failed polling, or observations older than three
