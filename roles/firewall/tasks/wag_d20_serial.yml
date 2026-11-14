@@ -1,0 +1,56 @@
+---
+- name: Validate serial capture settings
+  ansible.builtin.assert:
+    that:
+      - wag_d20_serial_enabled is boolean
+      - wag_d20_serial_device is string
+      - wag_d20_serial_device is match('^/dev/serial/by-id/[A-Za-z0-9_.:-]+$')
+    fail_msg: Serial capture requires a boolean enable flag and a stable /dev/serial/by-id/ path.
+
+- name: Configure enabled WAG-D20 serial capture
+  when: wag_d20_serial_enabled
+  block:
+    - name: Ensure Python is installed for serial capture
+      ansible.builtin.apt:
+        name: python3
+        state: present
+
+    - name: Install receive-only serial capture program
+      ansible.builtin.copy:
+        src: serial/capture.py
+        dest: /usr/local/sbin/wag-d20-serial-capture
+        owner: root
+        group: root
+        mode: '0755'
+      register: wag_d20_serial_program
+
+    - name: Install serial capture service
+      ansible.builtin.template:
+        src: serial/wag-d20-serial.service.j2
+        dest: /etc/systemd/system/wag-d20-serial.service
+        owner: root
+        group: root
+        mode: '0644'
+      register: wag_d20_serial_unit
+
+    - name: Enable and start serial capture
+      ansible.builtin.systemd_service:
+        name: wag-d20-serial.service
+        daemon_reload: "{{ wag_d20_serial_unit.changed }}"
+        enabled: true
+        state: "{{ 'restarted' if wag_d20_serial_program.changed or wag_d20_serial_unit.changed else 'started' }}"
+
+- name: Inspect installed serial capture service
+  ansible.builtin.stat:
+    path: /etc/systemd/system/wag-d20-serial.service
+  register: wag_d20_serial_installed
+  when: not wag_d20_serial_enabled
+
+- name: Stop and disable previously installed serial capture
+  ansible.builtin.systemd_service:
+    name: wag-d20-serial.service
+    enabled: false
+    state: stopped
+  when:
+    - not wag_d20_serial_enabled
+    - wag_d20_serial_installed.stat.exists

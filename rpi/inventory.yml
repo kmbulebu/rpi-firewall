@@ -1,6 +1,9 @@
 all:
   hosts:
     localhost:
+      # Optional passive ONT console logging; same soldered CP2102 adapter.
+      wag_d20_serial_enabled: false
+
       # Inventory is the source of truth for permanent blocklists and exceptions.
       # Prefer one general-purpose list; combining overlapping lists can increase
       # false positives. No list guarantees that every app will work.
