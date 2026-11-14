@@ -181,6 +181,18 @@ name_servers:
 
 ### DNS resilience and IPv6 clients
 
+Router-local resolution uses systemd-resolved through the
+`/etc/resolv.conf` symlink to `/run/systemd/resolve/stub-resolv.conf`. The role
+installs DNS packages using the existing resolver, starts resolved, and waits
+for its stub configuration before changing that symlink. Resolved startup
+failures stop the play instead of being ignored.
+
+A missing Unbound trust anchor is seeded from Ubuntu's `dns-root-data` package
+without an Internet request. Existing `/var/lib/unbound/root.key` state is
+preserved by Ansible. Unbound continues RFC 5011 tracking, and Ubuntu's service
+helper refreshes the anchor from newer packaged root data at service startup.
+The role no longer runs `unbound-anchor` unconditionally on every pull.
+
 Unbound first attempts an upstream lookup, then can use an expired cached answer
 if upstream fails or takes longer than the configured wait. Defaults are:
 

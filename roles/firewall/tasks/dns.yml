@@ -5,6 +5,14 @@
       - dns_serve_expired_ttl | int > 0
       - dns_serve_expired_client_timeout | int > 0
     fail_msg: Stale DNS responses require a positive age limit and upstream wait time.
+- name: Install DNS services and packaged root trust anchors
+  ansible.builtin.apt:
+    name:
+      - systemd-resolved
+      - unbound
+      - dns-root-data
+    state: present
+    install_recommends: false
 # Note: systemd-networkd is adding support for DNS resolution through resolved of DHCP server leases in v259.
 # https://github.com/systemd/systemd/commit/a7fa29b1b52210e33f4e43efc1a2f06b7c7233c0
 - name: Compute PTR /24 zones for LAN (set ptr_zones)
@@ -29,22 +37,21 @@
     mode: '0644'
   notify: restart systemd-resolved
 - name: Enable systemd-resolved
-  ignore_errors: true
-  systemd:
+  ansible.builtin.systemd:
     name: systemd-resolved
     enabled: yes
     state: started
     masked: no
-- name: Install Unbound server
-  apt:
-    name: unbound
-    state: latest
-    install_recommends: false
-- name: Install Unbound DNSSEC anchor updater
-  apt:
-    name: unbound-anchor
-    state: latest
-    install_recommends: false
+- name: Wait for the resolved stub configuration
+  ansible.builtin.wait_for:
+    path: /run/systemd/resolve/stub-resolv.conf
+    timeout: 10
+- name: Use the systemd-resolved stub resolver
+  ansible.builtin.file:
+    src: /run/systemd/resolve/stub-resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+    force: true
 # We don't need or want unbound to perform local resolution.
 # systemd-resolved is fine for that.
 - name: Disable and mask unbound-resolvconf.service
@@ -53,10 +60,18 @@
     enabled: no
     state: stopped
     masked: yes
-- name: Run unbound-anchor
-  ansible.builtin.command:
-    cmd: /usr/sbin/unbound-anchor -v
-#    creates: /var/lib/unbound/root.key
+# Seed once without network access. Unbound tracks RFC 5011 updates itself;
+# Ubuntu's service helper also refreshes from newer dns-root-data at startup.
+- name: Seed a missing Unbound root trust anchor
+  ansible.builtin.copy:
+    src: /usr/share/dns/root.key
+    dest: /var/lib/unbound/root.key
+    remote_src: true
+    force: false
+    owner: unbound
+    group: unbound
+    mode: '0644'
+  notify: restart unbound
 - name: Template a file to /etc/unbound/unbound.conf.d/server.conf
   template:
     src: unbound/server.conf
