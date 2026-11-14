@@ -127,7 +127,7 @@ class SerialCaptureTests(unittest.TestCase):
             self.assertTrue(all(line.startswith('  ') for line in rendered.splitlines()[2:]))
             return rendered
         self.assertIn('PON state: 5 (raw)', display(state))
-        self.assertIn('12s ago', display(state))
+        self.assertIn('  Last check: 12s ago\n', display(state))
         state['health'] = 'stale'
         self.assertIn('STALE', display(state))
         state.update(health='ok', last_success_monotonic=800)

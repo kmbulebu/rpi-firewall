@@ -344,7 +344,7 @@ The MOTD reads this local cache without serial I/O or network requests:
   PON state: 5 (raw)
   Optical LOS: clear
   Uptime: 2h 14m
-  Observation: observed 12s ago
+  Last check: 12s ago
 ```
 
 This example is illustrative. Failed polling, or observations older than three
