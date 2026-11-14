@@ -54,6 +54,30 @@ class WanBackupTests(unittest.TestCase):
         self.assertIn('DUIDRawData=00:00:0d:e9:45:58:41:4d:50:4c:45', rendered)
         self.assertNotIn('DUIDType=', self.render('networkd/wan-backup/10-wan-backup.network'))
 
+    def test_optional_primary_dhcpv4_identity(self):
+        def config():
+            result = configparser.ConfigParser(strict=False, interpolation=None)
+            result.read_string(self.render('networkd/wan/10-wan.network'))
+            return result
+        self.assertEqual(config()['DHCPv4']['ClientIdentifier'], 'mac')
+        self.assertNotIn('DUIDType', config()['DHCPv4'])
+        self.assertNotIn('IAID', config()['DHCPv4'])
+        self.values.update(wan_dhcpv4_client_identifier='duid',
+                           wan_dhcpv4_duid_type='vendor',
+                           wan_dhcpv4_duid_raw_data='00:00:0d:e9:45',
+                           wan_dhcpv4_iaid=1)
+        self.assertEqual(config()['DHCPv4']['ClientIdentifier'], 'duid')
+        self.assertEqual(config()['DHCPv4']['DUIDType'], 'vendor')
+        self.assertEqual(config()['DHCPv4']['DUIDRawData'], '00:00:0d:e9:45')
+        self.assertEqual(config()['DHCPv4']['IAID'], '1')
+        self.assertNotIn('DUIDType', config()['DHCPv6'])
+        self.assertNotIn('DUIDType=', self.render('networkd/wan-backup/10-wan-backup.network'))
+        self.values['wan_dhcpv4_iaid'] = 0
+        self.assertEqual(config()['DHCPv4']['IAID'], '0')
+        self.values.update(wan_dhcpv4_client_identifier='duid-only', wan_dhcpv4_iaid='')
+        self.assertEqual(config()['DHCPv4']['ClientIdentifier'], 'duid-only')
+        self.assertNotIn('IAID', config()['DHCPv4'])
+
     def test_backup_identity_does_not_spoof_primary_mac(self):
         link = self.render('networkd/wan-backup/00-wan-backup.link')
         self.assertIn('PermanentMACAddress=96:0b:9e:b5:54:6d', link)
