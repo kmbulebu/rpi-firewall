@@ -1,7 +1,5 @@
 """Exercise capture against real pseudo terminals without touching the ONT."""
-import base64
 import errno
-import json
 import os
 from pathlib import Path
 import pty
@@ -17,20 +15,21 @@ SCRIPT = Path(__file__).resolve().parents[1] / 'roles/firewall/files/serial/capt
 
 
 class SerialCaptureTests(unittest.TestCase):
-    def test_absent_attach_binary_capture_exclusive_and_reconnect(self):
+    def test_absent_attach_text_capture_exclusive_and_reconnect(self):
         with tempfile.TemporaryDirectory() as directory:
             directory = Path(directory)
             device = directory / 'adapter'
-            log = directory / 'serial.jsonl'
+            log = directory / 'stdout.log'
+            output = log.open('wb')
             process = subprocess.Popen(
-                [sys.executable, str(SCRIPT), '--device', str(device), '--log', str(log)],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                [sys.executable, str(SCRIPT), '--device', str(device)],
+                stdout=output, stderr=output)
             masters = []
             try:
                 def records():
                     if not log.exists():
                         return []
-                    return [json.loads(line) for line in log.read_text().splitlines()]
+                    return log.read_text()
 
                 def wait_for(predicate):
                     deadline = time.monotonic() + 8
@@ -50,30 +49,33 @@ class SerialCaptureTests(unittest.TestCase):
                     os.close(slave)
                     return master, path
 
-                wait_for(lambda rows: any(r['event'] == 'unavailable' for r in rows))
+                wait_for(lambda rows: 'Serial capture waiting:' in rows)
                 master, path = attach()
-                wait_for(lambda rows: any(r['event'] == 'connected' for r in rows))
+                wait_for(lambda rows: 'Serial capture connected' in rows)
                 # No login, newline, or bootloader-interrupting bytes are transmitted.
                 self.assertFalse(select.select([master], [], [], 0.1)[0])
                 with self.assertRaises(OSError) as failure:
                     os.open(path, os.O_RDONLY | os.O_NOCTTY)
                 self.assertEqual(failure.exception.errno, errno.EBUSY)
-                payload = b'boot\x00\xff\r\nUser: '
-                os.write(master, payload)
-                wait_for(lambda rows: any(r['event'] == 'rx' for r in rows))
-                received = b''.join(base64.b64decode(r['data_base64'])
-                                    for r in records() if r['event'] == 'rx')
-                self.assertEqual(received, payload)
-                self.assertEqual(log.stat().st_mode & 0o777, 0o600)
+                os.write(master, b'boot\x00\xff\r\nUser: ')
+                # Complete lines appear immediately; a partial prompt after idle.
+                wait_for(lambda text: 'boot\\x00\ufffd\n' in text)
+                wait_for(lambda text: 'User: \n' in text)
+                # A UTF-8 character split across serial reads remains readable.
+                os.write(master, b'\xe2')
+                time.sleep(0.1)
+                os.write(master, b'\x82\xac\n')
+                wait_for(lambda text: '\u20ac\n' in text)
                 os.close(master)
                 masters.remove(master)
                 master, _ = attach()
-                wait_for(lambda rows: sum(r['event'] == 'connected' for r in rows) == 2)
+                wait_for(lambda rows: rows.count('Serial capture connected') == 2)
                 os.write(master, b'new boot')
-                wait_for(lambda rows: any(r.get('text') == 'new boot' for r in rows))
+                wait_for(lambda rows: 'new boot\n' in rows)
             finally:
                 process.terminate()
                 process.wait(timeout=5)
+                output.close()
                 for master in masters:
                     os.close(master)
 
