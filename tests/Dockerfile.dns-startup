@@ -1,0 +1,12 @@
+FROM ubuntu:26.04
+ENV container=docker
+COPY collections/requirements.yml /tmp/collections.yml
+RUN apt-get update -qq && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      systemd systemd-sysv systemd-resolved dbus unbound dns-root-data \
+      ansible-core python3-apt python3-netaddr python3-yaml python3-dnspython \
+      iproute2 openssl ca-certificates && \
+    ansible-galaxy collection install -r /tmp/collections.yml && \
+    rm -rf /var/lib/apt/lists/*
+STOPSIGNAL SIGRTMIN+3
+CMD ["/sbin/init"]
