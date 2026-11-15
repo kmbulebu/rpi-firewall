@@ -18,8 +18,15 @@
     state: present
     install_recommends: false
   when: rsyslog_remote_enabled | bool
-- name: Discover installed logging services
-  ansible.builtin.service_facts:
+# service_facts can retain absent units with misleading status after a rerun.
+- name: Check the rsyslog unit load state
+  ansible.builtin.command:
+    argv: [systemctl, show, --property=LoadState, --value, rsyslog.service]
+  register: rsyslog_unit_load_state
+  changed_when: false
+  check_mode: false
+  failed_when: rsyslog_unit_load_state.rc != 0 and rsyslog_unit_load_state.stdout | trim != 'not-found'
+  when: not (rsyslog_remote_enabled | bool)
 - name: Remote Syslog configuration
   template:
     src: rsyslog/60-remote.conf
@@ -58,5 +65,4 @@
     enabled: false
   when:
     - not (rsyslog_remote_enabled | bool)
-    - "'rsyslog.service' in ansible_facts.services"
-    - ansible_facts.services['rsyslog.service'].status != 'not-found'
+    - rsyslog_unit_load_state.stdout | trim != 'not-found'
