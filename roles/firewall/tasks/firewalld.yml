@@ -22,12 +22,12 @@
 - name: Install firewalld
   apt:
     name: firewalld
-    state: latest
+    state: present
     install_recommends: false
 - name: Install ipset
   apt:
     name: ipset
-    state: latest
+    state: present
     install_recommends: false
 - name: Remove packages
   apt:

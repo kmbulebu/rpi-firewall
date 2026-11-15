@@ -3,7 +3,7 @@
     - name: Install Prometheus Node Exporter
       apt:
         name: prometheus-node-exporter
-        state: latest
+        state: present
         install_recommends: false
     - name: Configure Prometheus Node Exporter
       copy:
@@ -19,7 +19,7 @@
         state: directory
         mode: '0755'
     - name: Override systemd settings
-      copy:
+      template:
         src: node-exporter/10-priority.conf
         dest: /etc/systemd/system/prometheus-node-exporter.service.d/10-priority.conf
         owner: root
