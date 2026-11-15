@@ -2,7 +2,7 @@
   apt:
     update_cache: yes
     name: networkd-dispatcher
-    state: latest
+    state: present
     install_recommends: false
 - name: Start networkd-dispatcher
   systemd:

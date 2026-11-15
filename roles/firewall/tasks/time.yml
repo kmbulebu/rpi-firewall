@@ -2,6 +2,28 @@
 - name: Set timezone to UTC
   timezone:
     name: UTC
+# Stop existing daemons before apt switches the conflicting time-daemon packages.
+- name: Discover installed time synchronization services
+  ansible.builtin.service_facts:
+- name: Stop and disable competing NTP daemons
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  loop:
+    - chrony.service
+    - ntp.service
+    - ntpsec.service
+  when:
+    - item in ansible_facts.services
+    - ansible_facts.services[item].status != 'not-found'
+- name: Install systemd-timesyncd
+  ansible.builtin.apt:
+    name: systemd-timesyncd
+    state: present
+    update_cache: true
+    cache_valid_time: 86400
+    install_recommends: false
 - name: Update timesyncd configuration
   template:
     src: timesyncd/timesyncd.conf

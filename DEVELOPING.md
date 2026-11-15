@@ -25,7 +25,32 @@ uv run --locked ansible-lint --profile=min playbook.yml
 uv run --locked ansible-playbook -i rpi/inventory.yml playbook.yml --syntax-check
 ```
 
-Use a private inventory for your target. Review proposed changes with:
+Before the first deployment, bootstrap dependencies **on the target**. The
+bootstrap playbook requires Ubuntu's distribution-provided `ansible-core` and
+an on-target repository checkout. It reads the collection manifest from that
+checkout; running it over SSH from the development machine does not transfer
+the manifest and is not supported.
+
+For a target without a checkout, run the following in a shell **on that target**:
+
+```sh
+sudo apt-get update
+sudo apt-get install --no-install-recommends ansible-core git
+git clone https://github.com/kmbulebu/rpi-firewall.git rpi-firewall-bootstrap
+cd rpi-firewall-bootstrap
+sudo /usr/bin/ansible-playbook -i localhost, -c local bootstrap.yml
+```
+
+If a checkout already exists on the target, run the last command from its root
+instead. The explicit local connection keeps bootstrap execution and the
+manifest on the same host. Bootstrap needs apt and Ansible Galaxy access to
+install target dependencies and collections. It does not install uv on the
+router. The existing ansible-pull service already performs this on-target
+bootstrap from its own checkout before applying the role; an operational router
+using that service does not need a separate manual bootstrap.
+
+Back on the **development machine**, use a private SSH inventory for your target
+and the local tools/collections installed above. Review proposed changes with:
 
 ```sh
 uv run --locked ansible-playbook -i /path/to/inventory.yml playbook.yml --check --diff
@@ -33,16 +58,11 @@ uv run --locked ansible-playbook -i /path/to/inventory.yml playbook.yml --check 
 
 Check mode connects to the inventory's hosts and may require sudo. Diff output
 can contain private configuration; keep it out of public issues and commits.
-For a real deployment, bootstrap target dependencies before applying the role:
+After reviewing the proposed changes, apply the role from the development machine:
 
 ```sh
-uv run --locked ansible-playbook -i /path/to/inventory.yml bootstrap.yml
 uv run --locked ansible-playbook -i /path/to/inventory.yml playbook.yml
 ```
-
-Bootstrap installs target-side dependencies and collections; it does not install
-the local uv environment on the router. The existing ansible-pull deployment path
-continues to use the distribution's Ansible installation.
 
 To intentionally update Python tooling, run `uv lock --upgrade`, review the
 lockfile changes, and rerun the checks. Collection upgrades are separate edits to

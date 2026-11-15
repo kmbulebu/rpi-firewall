@@ -7,6 +7,26 @@
     group: root
     mode: '0644'
   notify: restart systemd-journald
+- name: Determine whether remote syslog is enabled
+  ansible.builtin.set_fact:
+    rsyslog_remote_enabled: >-
+      {{ rsyslog_udp_server | default('', true) | trim | length > 0 or
+         rsyslog_tcp_server | default('', true) | trim | length > 0 }}
+- name: Install rsyslog for remote logging
+  ansible.builtin.apt:
+    name: rsyslog
+    state: present
+    install_recommends: false
+  when: rsyslog_remote_enabled | bool
+# service_facts can retain absent units with misleading status after a rerun.
+- name: Check the rsyslog unit load state
+  ansible.builtin.command:
+    argv: [systemctl, show, --property=LoadState, --value, rsyslog.service]
+  register: rsyslog_unit_load_state
+  changed_when: false
+  check_mode: false
+  failed_when: rsyslog_unit_load_state.rc != 0 and rsyslog_unit_load_state.stdout | trim != 'not-found'
+  when: not (rsyslog_remote_enabled | bool)
 - name: Remote Syslog configuration
   template:
     src: rsyslog/60-remote.conf
@@ -14,15 +34,13 @@
     owner: root
     group: root
     mode: '0644'
-  when: rsyslog_udp_server is defined or rsyslog_tcp_server is defined
+  when: rsyslog_remote_enabled | bool
   notify: restart rsyslog
 - name: Remove Syslog configuration
   file:
-    path: rsyslog/60-remote.conf
+    path: /etc/rsyslog.d/60-remote.conf
     state: absent
-  when: 
-    - rsyslog_udp_server is not defined
-    - rsyslog_tcp_server is not defined
+  when: not (rsyslog_remote_enabled | bool)
   notify: restart rsyslog
 - name: Remove 20-ufw.conf
   file:
@@ -39,13 +57,12 @@
     name: rsyslog
     state: started
     enabled: true
-  when: rsyslog_udp_server is defined or rsyslog_tcp_server is defined
+  when: rsyslog_remote_enabled | bool
 - name: disable rsyslog
   service:
     name: rsyslog
     state: stopped
     enabled: false
-  when: 
-    - rsyslog_udp_server is not defined
-    - rsyslog_tcp_server is not defined
-  ignore_errors: yes
+  when:
+    - not (rsyslog_remote_enabled | bool)
+    - rsyslog_unit_load_state.stdout | trim != 'not-found'

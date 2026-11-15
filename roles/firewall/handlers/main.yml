@@ -19,6 +19,7 @@
     name: systemd-timesyncd.service
     state: restarted
 - name: restart rsyslog
+  when: rsyslog_remote_enabled | default(false) | bool
   service:
     name: rsyslog
     state: restarted

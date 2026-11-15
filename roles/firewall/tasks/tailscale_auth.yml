@@ -1,0 +1,23 @@
+---
+# JSON mode returns success even when login is needed; CLI/daemon errors fail.
+# https://github.com/tailscale/tailscale/blob/main/cmd/tailscale/cli/status.go
+- name: Read Tailscale status
+  ansible.builtin.command:
+    argv: [tailscale, status, --peers=false, --json]
+  register: tailscale_status
+  changed_when: false
+  check_mode: false
+- name: Validate Tailscale backend state
+  ansible.builtin.assert:
+    that:
+      - (tailscale_status.stdout | from_json).BackendState in ['NeedsLogin', 'NeedsMachineAuth', 'Stopped', 'Starting', 'Running']
+    fail_msg: Tailscale returned an unexpected backend state; inspect tailscale status before retrying.
+- name: Log in to Tailscale when authentication is required
+  ansible.builtin.command:
+    argv:
+      - tailscale
+      - login
+      - --auth-key
+      - "{{ tailscale_auth_key }}"
+  when: (tailscale_status.stdout | from_json).BackendState == 'NeedsLogin'
+  no_log: true
