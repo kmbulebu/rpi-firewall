@@ -13,9 +13,6 @@
       - plymouth # Boot screen service
       - plymouth-theme-ubuntu-text
       - apport # Crash report tool
-      - lvm2 # Not using LVM
-      - udisks2 # Not using disk automount
-      - fwupd # Not needed on raspberry pi
       - lxd-agent-loader 
       - modemmanager
       - sosreport
@@ -24,3 +21,16 @@
     purge: yes
     autoclean: yes
     autoremove: yes
+# A generic host may depend on these for its disks and firmware updates.
+- name: Remove filesystem tools only for the managed Pi layout
+  ansible.builtin.apt:
+    name: [lvm2, udisks2]
+    state: absent
+    purge: true
+  when: manage_fstab | bool
+- name: Remove firmware updater on the managed Pi platform
+  ansible.builtin.apt:
+    name: fwupd
+    state: absent
+    purge: true
+  when: rpi_tuning_enabled | bool

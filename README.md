@@ -844,3 +844,24 @@ Omit `wan_dhcpv4_iaid` to keep networkd's generated IAID. Leave the custom DUID
 pair empty to use networkd's generated DUID with either DUID client-ID mode.
 An IPv4 identity change may change your public IPv4 lease or interrupt WAN
 connectivity when applied. See [ClientIdentifier in systemd.network](https://www.freedesktop.org/software/systemd/man/latest/systemd.network.html).
+
+## Platform configuration
+
+For a generic Ubuntu VM, retain its filesystem layout and skip Pi hardware tuning:
+
+```yaml
+rpi_tuning_enabled: false
+manage_fstab: false
+ansible_inventory: /etc/rpi-firewall/inventory.yml
+wan_iface_networkd_link_match: "MACAddress=02:00:00:00:00:01"
+lan_iface_networkd_link_match: "MACAddress=02:00:00:00:00:02"
+```
+
+Both switches default to `true`. `rpi_tuning_enabled: false` skips Pi module
+blacklists, boot firmware edits, fixed network receive CPU masks and the hardware
+watchdog; it also clears the optional node exporter's Pi CPU affinity and retains
+fwupd. `manage_fstab: false` leaves `/etc/fstab` and its mounts untouched, sends
+no mount notifications, and retains LVM and disk management packages. Skipping
+these tasks does not undo tuning from a previous run. Configure the interface
+matchers and an existing private inventory path for the target host. Unbound CPU
+affinity is configured separately; use an empty affinity on hosts without CPU 2.

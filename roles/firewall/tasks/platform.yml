@@ -1,0 +1,10 @@
+---
+- name: Configure managed filesystem mounts
+  ansible.builtin.include_tasks: mounts.yml
+  when: manage_fstab | bool
+- name: Configure Raspberry Pi hardware
+  ansible.builtin.include_tasks: rpi.yml
+  when: rpi_tuning_enabled | bool
+- name: Configure Raspberry Pi hardware watchdog
+  ansible.builtin.include_tasks: watchdog.yml
+  when: rpi_tuning_enabled | bool
