@@ -5,6 +5,31 @@
       - dns_serve_expired_ttl | int > 0
       - dns_serve_expired_client_timeout | int > 0
     fail_msg: Stale DNS responses require a positive age limit and upstream wait time.
+- name: Validate Unbound CPU affinity
+  ansible.builtin.assert:
+    that:
+      - unbound_cpu_affinity is string
+      - unbound_cpu_affinity == '' or unbound_cpu_affinity is match('^[0-9]+(-[0-9]+)?( [0-9]+(-[0-9]+)?)*$')
+    fail_msg: Use an empty string or space-separated CPU numbers/ranges for unbound_cpu_affinity.
+- name: Check encrypted DNS server certificate files
+  ansible.builtin.stat:
+    path: "{{ item }}"
+    follow: true
+  loop:
+    - /etc/unbound/unbound_server.key
+    - /etc/unbound/unbound_server.pem
+  register: dns_server_certificate_files
+  when: dns_encrypted_listeners_enabled | bool
+- name: Require certificates for encrypted DNS client listeners
+  ansible.builtin.assert:
+    that:
+      - item.stat.isreg | default(false)
+      - item.stat.size | default(0) > 0
+    fail_msg: >-
+      Provision a readable Unbound server key and certificate, or set
+      dns_encrypted_listeners_enabled to false. Upstream TLS remains enabled.
+  loop: "{{ dns_server_certificate_files.results }}"
+  when: dns_encrypted_listeners_enabled | bool
 - name: Install DNS services and packaged root trust anchors
   ansible.builtin.apt:
     name:
@@ -86,7 +111,7 @@
     state: directory
     mode: '0755'
 - name: Override systemd unbound settings
-  copy:
+  template:
     src: unbound/10-priority.conf
     dest: /etc/systemd/system/unbound.service.d/10-priority.conf
     owner: root

@@ -35,8 +35,10 @@
   <service name="llmnr"/>
   <service name="dhcp"/>
   <service name="dns"/>
+  {% if dns_encrypted_listeners_enabled | bool %}
   <service name="dns-over-tls"/>
   <service name="https"/>
+  {% endif %}
   {% if enable_prometheus_node_exporter_bool %}
   <service name="prometheus-node-exporter"/>
   {% endif %}
