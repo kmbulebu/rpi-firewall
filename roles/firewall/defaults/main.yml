@@ -70,6 +70,10 @@ name_servers:
 nf_conntrack_max: 524288
 nf_conntrack_buckets: 131072
 nf_conntrack_tcp_timeout_established: 5400
+# Space-separated systemd CPU numbers/ranges; empty removes CPU pinning.
+unbound_cpu_affinity: '2'
+# Client DoT/DoH listeners and server certificates; upstream TLS stays enabled.
+dns_encrypted_listeners_enabled: true
 dns_serve_expired: true
 dns_serve_expired_ttl: 86400
 dns_serve_expired_client_timeout: 1800

@@ -6,6 +6,9 @@ The image supplies packages/collections; the runtime test needs no WAN access.
 import os
 from pathlib import Path
 import re
+import socket
+import ssl
+import struct
 import subprocess
 import time
 
@@ -59,13 +62,12 @@ def main():
         raise SystemExit('Requires an explicitly disposable container running systemd')
     FIXTURE.mkdir(exist_ok=True)
     command('systemctl', 'stop', 'unbound', 'systemd-resolved')
-    # Rootless containers cannot request realtime I/O priority, and CI CPUs may
-    # not include the Pi's hardcoded CPU 2. Keep the real distro service/helper
-    # while overriding only those unrelated hardware tuning settings.
+    # Rootless containers cannot request realtime I/O priority. Keep the real
+    # distro service/helper; exercise affinity through the inventory setting.
     overrides = Path('/etc/systemd/system/unbound.service.d')
     overrides.mkdir(exist_ok=True)
     (overrides / '99-container.conf').write_text(
-        '[Service]\nNice=0\nCPUAffinity=\nIOSchedulingClass=best-effort\n')
+        '[Service]\nNice=0\nIOSchedulingClass=best-effort\n')
     command('systemctl', 'daemon-reload')
     # Container engines mount this file. Detach only the disposable container's
     # mount so Ansible can replace it, as it does on a real Ubuntu installation.
@@ -80,11 +82,20 @@ def main():
         command('ip', 'link', 'add', iface, 'type', 'dummy')
         command('ip', 'link', 'set', iface, 'up')
         command('ip', 'addr', 'add', address, 'dev', iface)
+        prefix = '1' if iface == 'dns-lan' else '2'
+        command('ip', '-6', 'addr', 'add', f'2001:db8:{prefix}::1/64', 'dev', iface, 'nodad')
+    command('ip', '-6', 'addr', 'add', '2001:db8:3::2/128', 'dev', 'lo', 'nodad')
     command('openssl', 'req', '-x509', '-newkey', 'rsa:2048', '-nodes',
             '-keyout', '/etc/unbound/unbound_server.key',
             '-out', '/etc/unbound/unbound_server.pem',
             '-days', '1', '-subj', '/CN=dns-startup-test')
     command('chown', 'unbound:unbound', '/etc/unbound/unbound_server.key')
+    # Certificate managers commonly provide symlinks; validate the targets.
+    for name in ('key', 'pem'):
+        source = Path(f'/etc/unbound/unbound_server.{name}')
+        target = source.with_suffix(source.suffix + '.issued')
+        source.rename(target)
+        source.symlink_to(target.name)
     ANCHOR.unlink(missing_ok=True)
     # An accidental invocation would fail this test, including on the first run.
     trap = Path('/usr/sbin/unbound-anchor')
@@ -94,13 +105,67 @@ def main():
              'vars': {'router_ip_address': '192.0.2.1/24',
                       'lan_guests_router_ip_address': '198.51.100.1/24',
                       'lan_iface': 'dns-lan', 'lan_guests_iface': 'dns-guest',
-                      'domain': 'example.test'},
+                      'domain': 'example.test', 'unbound_cpu_affinity': ''},
              'tasks': [{'name': 'Configure DNS', 'ansible.builtin.include_role':
                         {'name': 'firewall', 'tasks_from': 'dns'}}]}]
     (FIXTURE / 'play.yml').write_text(yaml.safe_dump(play))
     command('systemctl', 'reset-failed', 'unbound', 'systemd-resolved')
     apply()
     check_dns()
+    # Verify a real DoT query rather than only checking configuration text.
+    context = ssl._create_unverified_context()  # self-signed disposable fixture
+    def check_encrypted_dns():
+        with socket.create_connection(('192.0.2.1', 853), timeout=3) as plain:
+            with context.wrap_socket(plain, server_hostname='dns-startup-test') as connection:
+                wire = dns.message.make_query('example.test', 'SOA').to_wire()
+                connection.sendall(struct.pack('!H', len(wire)) + wire)
+                header = connection.recv(2)
+                size = struct.unpack('!H', header)[0]
+                response = b''
+                while len(response) < size:
+                    chunk = connection.recv(size - len(response))
+                    assert chunk
+                    response += chunk
+                assert dns.message.from_wire(response).rcode() == dns.rcode.NOERROR
+    check_encrypted_dns()
+    assert command('systemctl', 'show', '-p', 'CPUAffinity', '--value', 'unbound').strip() == ''
+    cpus = sorted(os.sched_getaffinity(0))[:2]
+    affinity = ' '.join(str(cpu) for cpu in cpus)
+    play[0]['vars']['unbound_cpu_affinity'] = affinity
+    (FIXTURE / 'play.yml').write_text(yaml.safe_dump(play))
+    apply()
+    pid = int(command('systemctl', 'show', '-p', 'MainPID', '--value', 'unbound'))
+    assert os.sched_getaffinity(pid) == set(cpus)
+    # Disable client encryption and remove both server files entirely. The actual
+    # DNS tasks must still configure/start plain IPv4 and delegated IPv6 DNS.
+    play[0]['vars']['dns_encrypted_listeners_enabled'] = False
+    (FIXTURE / 'play.yml').write_text(yaml.safe_dump(play))
+    for name in ('key', 'pem'):
+        source = Path(f'/etc/unbound/unbound_server.{name}')
+        source.rename(source.with_suffix(source.suffix + '.saved'))
+    apply()
+    check_dns()
+    for address in ('2001:db8:1::1', '2001:db8:2::1'):
+        for method in (dns.query.udp, dns.query.tcp):
+            response = method(dns.message.make_query('example.test', 'SOA'), address,
+                              source='2001:db8:3::2', timeout=3)
+            assert response.rcode() == dns.rcode.NOERROR and response.answer
+    listeners = command('ss', '-lnt')
+    assert ':853 ' not in listeners and ':443 ' not in listeners, listeners
+    config = Path('/etc/unbound/unbound.conf.d/server.conf').read_text()
+    assert 'forward-tls-upstream: yes' in config and 'tls-service-key:' not in config
+    assert re.search(r'changed=0\s', apply())
+    # Enabling encryption without certificates fails before changing the config.
+    play[0]['vars']['dns_encrypted_listeners_enabled'] = True
+    (FIXTURE / 'play.yml').write_text(yaml.safe_dump(play))
+    apply(expect_failure=True)
+    assert Path('/etc/unbound/unbound.conf.d/server.conf').read_text() == config
+    for name in ('key', 'pem'):
+        target = Path(f'/etc/unbound/unbound_server.{name}')
+        target.with_suffix(target.suffix + '.saved').rename(target)
+    apply()
+    check_dns()
+    check_encrypted_dns()
     assert ANCHOR.stat().st_size > 0
     # Model RFC 5011 tracking state that Ansible must not replace on later pulls.
     with ANCHOR.open('a') as anchor:
@@ -140,7 +205,7 @@ def main():
     command('systemctl', 'reset-failed', 'systemd-resolved')
     apply()
     check_dns()
-    print('PASS: offline anchor seed, idempotence, restart, dangling link repair, startup failure/recovery')
+    print('PASS: TLS query, listener toggle, IPv4/IPv6, CPU affinity, offline anchor, idempotence and recovery')
 
 
 if __name__ == '__main__':
