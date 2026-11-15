@@ -6,7 +6,7 @@
 - name: Install unattended-upgrades
   apt:
     name: unattended-upgrades
-    state: latest
+    state: present
     install_recommends: false
 - name: Configure upgrade reboots
   template:

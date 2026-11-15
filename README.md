@@ -852,3 +852,16 @@ explicitly. Existing chrony, ntp and ntpsec services are stopped and disabled
 before installation. Ubuntu's conflicting time-daemon packages may be removed
 by apt when timesyncd is installed. Inventory `ntp_servers` continues to select
 the servers written to `/etc/systemd/timesyncd.conf`.
+
+## Provisioning and logging behavior
+
+Distro package provisioning uses `state: present`; unattended-upgrades manages
+updates from the configured Ubuntu origins. Tailscale deliberately retains
+`state: latest` because its vendor repository is outside that update policy. Remote syslog is enabled by a nonempty
+`rsyslog_udp_server` or `rsyslog_tcp_server`. Clearing both removes the forwarding
+configuration and stops/disables rsyslog without restarting it.
+
+Tailscale authentication checks parse `tailscale status --json` directly. Only
+`NeedsLogin` triggers login with the private inventory auth key; daemon errors,
+invalid JSON and unexpected backend states fail provisioning. `NeedsMachineAuth`
+requires administrator approval in Tailscale and does not trigger repeated login.
