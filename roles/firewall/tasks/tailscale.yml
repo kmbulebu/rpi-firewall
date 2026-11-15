@@ -3,6 +3,7 @@
   ansible.builtin.command:
     cmd: lsb_release -cs
   register: ubuntu_release_name
+  changed_when: false
 - name: Add Tailscale GPG key
   ansible.builtin.get_url:
     url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ubuntu_release_name.stdout }}.noarmor.gpg"
@@ -13,7 +14,9 @@
     url: https://pkgs.tailscale.com/stable/ubuntu/{{ ubuntu_release_name.stdout }}.tailscale-keyring.list
     dest: /etc/apt/sources.list.d/tailscale.list
     mode: '0644'
-- name: Install tailscale
+# This vendor repository is outside our Ubuntu-only unattended-upgrade origins.
+# Retain intentional upgrades here so Tailscale continues receiving updates.
+- name: Install and update tailscale
   apt:
     update_cache: yes
     name: tailscale
@@ -33,19 +36,8 @@
     group: root
     mode: '0644'
   notify: restart tailscaled
-- name: Tailscale Status
-  ignore_errors: True
-  shell:
-    cmd: 'tailscale status --peers=false --json | jq -e .HaveNodeKey'
-  register: tailscale_status 
-- name: Tailscale Login
-  when: tailscale_status.rc != 0
-  command:
-    argv:
-      - tailscale
-      - login
-      - --auth-key
-      - "{{ tailscale_auth_key }}"
+- name: Check Tailscale authentication
+  ansible.builtin.include_tasks: tailscale_auth.yml
 - name: Tailscale Configure
   command:
     argv:

@@ -103,7 +103,7 @@
     - name: Install Wireguard
       apt:
         name: wireguard
-        state: latest
+        state: present
     ## Wireguard Network
     - name: Create wireguard client network
       template:

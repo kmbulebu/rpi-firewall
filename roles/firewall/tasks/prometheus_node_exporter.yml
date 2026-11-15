@@ -3,7 +3,7 @@
     - name: Install Prometheus Node Exporter
       apt:
         name: prometheus-node-exporter
-        state: latest
+        state: present
         install_recommends: false
     - name: Configure Prometheus Node Exporter
       copy:
