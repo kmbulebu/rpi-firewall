@@ -844,3 +844,16 @@ Omit `wan_dhcpv4_iaid` to keep networkd's generated IAID. Leave the custom DUID
 pair empty to use networkd's generated DUID with either DUID client-ID mode.
 An IPv4 identity change may change your public IPv4 lease or interrupt WAN
 connectivity when applied. See [ClientIdentifier in systemd.network](https://www.freedesktop.org/software/systemd/man/latest/systemd.network.html).
+
+## Provisioning and logging behavior
+
+Distro package provisioning uses `state: present`; unattended-upgrades manages
+updates from the configured Ubuntu origins. Tailscale deliberately retains
+`state: latest` because its vendor repository is outside that update policy. Remote syslog is enabled by a nonempty
+`rsyslog_udp_server` or `rsyslog_tcp_server`. Clearing both removes the forwarding
+configuration and stops/disables rsyslog without restarting it.
+
+Tailscale authentication checks parse `tailscale status --json` directly. Only
+`NeedsLogin` triggers login with the private inventory auth key; daemon errors,
+invalid JSON and unexpected backend states fail provisioning. `NeedsMachineAuth`
+requires administrator approval in Tailscale and does not trigger repeated login.

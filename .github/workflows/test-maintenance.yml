@@ -1,0 +1,34 @@
+name: Provisioning maintenance
+on: [pull_request]
+permissions:
+  contents: read
+jobs:
+  lifecycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build disposable test image
+        run: docker build -f tests/Dockerfile.maintenance -t rpi-maintenance-test .
+      - name: Validate configuration lifecycle
+        shell: bash
+        run: |
+          docker run -d --name test-container --privileged --cap-drop=SYS_TIME --network=none --cgroupns=private \
+            --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
+            -v "$GITHUB_WORKSPACE:/repo:ro" -w /repo rpi-maintenance-test
+          cleanup() {
+            test_exit_status=$?
+            if [ "$test_exit_status" -ne 0 ]; then
+              docker exec test-container journalctl --no-pager -n 100 || true
+            fi
+            docker rm -f test-container >/dev/null
+            exit "$test_exit_status"
+          }
+          trap cleanup EXIT
+          for attempt in {1..30}; do
+            if docker exec test-container systemctl show --property=Version --value >/dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec -e RPI_FIREWALL_DISPOSABLE_TEST=1 test-container python3 tests/integration_syslog.py
