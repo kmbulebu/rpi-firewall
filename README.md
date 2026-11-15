@@ -844,3 +844,11 @@ Omit `wan_dhcpv4_iaid` to keep networkd's generated IAID. Leave the custom DUID
 pair empty to use networkd's generated DUID with either DUID client-ID mode.
 An IPv4 identity change may change your public IPv4 lease or interrupt WAN
 connectivity when applied. See [ClientIdentifier in systemd.network](https://www.freedesktop.org/software/systemd/man/latest/systemd.network.html).
+
+## Time synchronization
+
+The role manages time synchronization with `systemd-timesyncd` and installs it
+explicitly. Existing chrony, ntp and ntpsec services are stopped and disabled
+before installation. Ubuntu's conflicting time-daemon packages may be removed
+by apt when timesyncd is installed. Inventory `ntp_servers` continues to select
+the servers written to `/etc/systemd/timesyncd.conf`.
