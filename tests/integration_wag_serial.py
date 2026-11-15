@@ -59,13 +59,28 @@ def main():
                 break
             time.sleep(.1)
         else:
-            raise AssertionError(command('journalctl', '-u', 'wag-d20-serial.service', '--no-pager'))
+            raise AssertionError(command('journalctl', '--namespace=wag-d20', '-u', 'wag-d20-serial.service', '--no-pager'))
+        assert json.loads(status.read_text())['poll_interval'] == 60
+        assert 'LogNamespace=wag-d20' in unit.read_text()
+        assert 'RuntimeMaxUse=32M' in Path('/etc/systemd/journald@wag-d20.conf').read_text()
         assert 'PON state: 5 (raw)' in command(str(motd))
+        command('journalctl', '--namespace=wag-d20', '--sync')
+        namespaced = command('journalctl', '--namespace=wag-d20', '-u', 'wag-d20-serial.service', '--no-pager')
+        assert 'Serial capture connected' in namespaced and 'WAG status: PON raw=5' in namespaced, namespaced
+        default = command('journalctl', '-u', 'wag-d20-serial.service', '--no-pager')
+        assert 'Serial capture connected' not in default and 'WAG status: PON raw=5' not in default, default
+        # Volatile storage must hold the actual journal, even if systemd creates
+        # an empty LogsDirectory under /var/log for the namespace service.
+        assert list(Path('/run/log/journal').glob('*.wag-d20/*.journal'))
+        assert not list(Path('/var/log/journal').glob('*.wag-d20/*.journal'))
+        print('PASS: capture isolated from default journal, volatile storage, 60-second polling', flush=True)
         assert 'enabled' == command('systemctl', 'is-enabled', 'wag-d20-serial.service').strip()
         print('PASS: enable installs service, polls ONT, exposes cached MOTD', flush=True)
+        journal_pid = command('systemctl', 'show', 'systemd-journald@wag-d20.service', '--property=MainPID', '--value')
         pid = command('systemctl', 'show', 'wag-d20-serial.service', '--property=MainPID', '--value')
         output = apply(True)
         assert 'changed=0' in output, output
+        assert journal_pid == command('systemctl', 'show', 'systemd-journald@wag-d20.service', '--property=MainPID', '--value')
         assert pid == command('systemctl', 'show', 'wag-d20-serial.service', '--property=MainPID', '--value')
         print('PASS: reapplying is idempotent without restarting receiver', flush=True)
         apply(False)
