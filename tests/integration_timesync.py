@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
+import time
 
 import yaml
 
@@ -14,7 +15,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def command(*args):
-    return subprocess.check_output(args, text=True, stderr=subprocess.STDOUT)
+    result = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if result.returncode:
+        print(result.stdout, flush=True)
+        result.check_returncode()
+    return result.stdout
 
 
 def main():
@@ -26,11 +31,25 @@ def main():
         dropin.mkdir(exist_ok=True)
         (dropin / '99-container.conf').write_text(
             '[Unit]\nConditionCapability=\nConditionVirtualization=\n[Service]\nCapabilityBoundingSet=~CAP_SYS_TIME\nAmbientCapabilities=\n')
+    # The hosted runner's chronyd AppArmor profile denies systemd's notify
+    # socket. Avoid notification readiness only in this disposable fixture;
+    # wait for chronyc below to verify the real daemon is serving requests.
+    with Path('/etc/systemd/system/chrony.service.d/99-container.conf').open('a') as dropin:
+        dropin.write('Type=exec\nUnsetEnvironment=NOTIFY_SOCKET\n')
     # chronyd's -x mode also works without permission to set the clock.
     Path('/etc/default/chrony').write_text('DAEMON_OPTS="-x"\n')
     command('systemctl', 'daemon-reload')
     command('systemctl', 'enable', '--now', 'chrony')
     command('systemctl', 'is-active', 'chrony')
+    for attempt in range(30):
+        ready = subprocess.run(['chronyc', 'tracking'], stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, text=True)
+        if ready.returncode == 0:
+            break
+        if attempt == 29:
+            print(ready.stdout, flush=True)
+            ready.check_returncode()
+        time.sleep(0.1)
     assert not Path('/usr/lib/systemd/system/systemd-timesyncd.service').exists()
     with tempfile.TemporaryDirectory() as tmp:
         play = Path(tmp) / 'play.yml'
