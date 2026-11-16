@@ -17,6 +17,20 @@
         name: python3
         state: present
 
+    - name: Configure the dedicated WAG-D20 journal
+      ansible.builtin.copy:
+        src: journald/wag-d20.conf
+        dest: /etc/systemd/journald@wag-d20.conf
+        owner: root
+        group: root
+        mode: '0644'
+      register: wag_d20_journal_config
+
+    - name: Start the WAG-D20 journal namespace
+      ansible.builtin.systemd_service:
+        name: systemd-journald@wag-d20.service
+        state: "{{ 'restarted' if wag_d20_journal_config.changed else 'started' }}"
+
     - name: Install serial logging and status program
       ansible.builtin.copy:
         src: serial/capture.py

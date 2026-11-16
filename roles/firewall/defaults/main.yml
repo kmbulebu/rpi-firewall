@@ -95,4 +95,4 @@ dhcp_reservations: []
 wag_d20_serial_enabled: false
 wag_d20_serial_device: /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
 
-wag_d20_status_interval: 30
+wag_d20_status_interval: 60

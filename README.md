@@ -316,16 +316,25 @@ Enable ONT console logging and read-only status polling in the router inventory:
 ```yaml
 wag_d20_serial_enabled: true
 wag_d20_serial_device: /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
-wag_d20_status_interval: 30
+wag_d20_status_interval: 60
 ```
 
 The feature defaults to disabled. When enabled, Ansible installs one systemd
 service that owns the serial port at 115200 baud, 8N1 without flow control. It
-captures console output to journald and polls the ONT every 30 seconds (minimum
+captures console output to journald and polls the ONT every 60 seconds (minimum
 configurable interval: 10 seconds). It waits for an absent adapter and retries
 connection failures without blocking router boot. With the adapter attached,
 confirm `Serial capture connected` before powering on the ONT. Bytes emitted
 before the receiver opens the port cannot be recovered.
+
+Console output and polling summaries use the `wag-d20` journal namespace with a
+separate 32 MB volatile journal budget, configured in
+`/etc/systemd/journald@wag-d20.conf`. They do not consume the default journal's
+100 MB budget and are lost on router reboot. Use `--namespace=wag-d20` to view
+new capture messages; older messages remain in the default journal until aged
+out. Systemd service startup errors may still appear in the default journal.
+If private inventory explicitly sets `wag_d20_status_interval: 30`, change it to
+`60` or remove the override to use the new once-per-minute default.
 
 Polling logs into the vendor console with the previously verified factory
 `test` / `default` account, enters `lsh`, and runs only these read-only getters:
@@ -367,7 +376,7 @@ poll, the MOTD reports unavailable status.
 
 ```bash
 sudo systemctl status wag-d20-serial.service
-sudo journalctl -u wag-d20-serial.service -f -o cat
+sudo journalctl --namespace=wag-d20 -u wag-d20-serial.service -f -o cat
 cat /run/wag-d20/status.json
 /etc/update-motd.d/62-wag-d20-status
 sudo systemctl stop wag-d20-serial.service  # Release port for interactive access

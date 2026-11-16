@@ -27,7 +27,10 @@ jobs:
           cleanup() {
             test_exit_status=$?
             if [ "$test_exit_status" -ne 0 ]; then
-              docker exec wag-serial-test journalctl --no-pager -n 100 -u wag-d20-serial.service || true
+              docker exec wag-serial-test journalctl --no-pager -n 100 \
+                -u wag-d20-serial.service -u systemd-journald@wag-d20.service || true
+              docker exec wag-serial-test journalctl --namespace=wag-d20 --no-pager -n 100 \
+                -u wag-d20-serial.service || true
             fi
             docker rm -f wag-serial-test >/dev/null
             exit "$test_exit_status"
