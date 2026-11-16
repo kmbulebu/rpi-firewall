@@ -166,6 +166,7 @@ def configure():
     (WORK / 'router.pub').write_text(command('wg', 'pubkey', input=private))
     values = dict(enable_lan_vpn=True, wan_backup_enabled=True, lan_guests_vlan_id=5,
                   router_ip_address='192.0.2.1/24', lan_address='192.0.2.1', lan_cidr='192.0.2.0/24',
+                  lan_broadcast='192.0.2.255', lan_guests_broadcast='198.51.100.255', lan_vpn_broadcast='192.0.3.255',
                   lan_guests_router_ip_address='198.51.100.1/24', lan_guests_address='198.51.100.1',
                   lan_guests_cidr='198.51.100.0/24', lan_vpn_router_ip_address='192.0.3.1/24',
                   lan_vpn_cidr='192.0.3.0/24', ip6_ula_cidr='fd12:3456::/48',

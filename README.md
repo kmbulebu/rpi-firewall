@@ -521,9 +521,11 @@ enable_prometheus_node_exporter: no
 
 #### DHCP Lease Length
 
-Configure lease durations separately for each network, in seconds. Both the
-default and maximum lease time use the configured value. Existing leases adopt
-the new duration when renewed. Networkd persists leases to disk on systemd 259.
+Configure default lease durations separately for each network, in integer seconds.
+Each maximum defaults to the same duration. Set a separate maximum to allow
+clients to request longer leases; shorter requested leases are also honored.
+Existing leases adopt changes when renewed. Networkd persists leases to disk
+on systemd 259.
 
 ```yaml
 lan_dhcp_lease_seconds: 86400         # 24 hours
@@ -531,7 +533,49 @@ lan_vpn_dhcp_lease_seconds: 86400     # 24 hours
 lan_guests_dhcp_lease_seconds: 3600   # 1 hour
 ```
 
+Optional maximums inherit the corresponding default when `null` (the default).
+For example, offer one hour by default while allowing requests up to one day:
+
+```yaml
+lan_dhcp_lease_seconds: 3600
+lan_dhcp_max_lease_seconds: 86400
+# Equivalent maximum settings for the other networks:
+# lan_guests_dhcp_max_lease_seconds: 7200
+# lan_vpn_dhcp_max_lease_seconds: 86400
+```
+
+Values must satisfy `0 < default <= maximum < 4294967295`. Networkd caps each
+requested lease at that network's maximum. We leave renewal (T1) and rebinding
+(T2) options unset: [RFC 2131 section 4.4.5](https://www.rfc-editor.org/rfc/rfc2131.html#section-4.4.5)
+defines client defaults of half and seven eighths of the **granted** lease,
+respectively. Fixed `SendOption=58/59` values derived from the configured default
+would be incorrect for clients requesting shorter or longer leases.
+
 A guest DHCP lease is independent of Wi-Fi portal authorization or session expiry.
+
+#### DHCP domain and broadcast options
+
+The trusted LAN advertises `domain` as option 15 using networkd 259's native
+`EmitDomain=yes` / `Domain=` settings. The same domain is sent as the single
+search-list entry in option 119, encoded as DNS labels per RFC 3397. For example,
+`my.home` becomes the bytes `02 6d 79 04 68 6f 6d 65 00`, rather than a plain
+text string. Use an ASCII DNS name without a trailing dot; each label is at most
+63 characters and the full name at most 253. Use IDNA A-labels for IDNs.
+
+| DHCP option | Trusted LAN | Guest LAN | VPN LAN (when enabled) |
+| --- | --- | --- | --- |
+| 15: domain name | `domain` | Omitted | Omitted |
+| 119: domain search | `domain`, DNS label encoding | Omitted | Omitted |
+| 28: broadcast address | Derived from LAN prefix | Derived from guest prefix | Derived from VPN prefix |
+| 51: granted lease | networkd, LAN limits | networkd, guest limits | networkd, VPN limits |
+| 58/59: T1/T2 | Client defaults | Client defaults | Client defaults |
+
+Guest and VPN clients do not receive the internal DNS suffix. Existing DNS,
+router, timezone and VPN MTU advertisements are preserved. Networkd generates
+subnet mask, router, lease duration and server identifier options; we do not add
+raw copies of those options. Broadcast addresses are derived from each CIDR,
+including subnets smaller than `/24`. These settings require systemd 259 or newer
+for native DHCP domain advertisement ([systemd.network](https://www.freedesktop.org/software/systemd/man/259/systemd.network.html#EmitDomain=)).
 
 #### DHCP Address Allocation Range
 
@@ -750,12 +794,14 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `enable_prometheus_node_exporter` | `no` | Enable Prometheus node exporter and listen on LAN interface. |
 | `lan_dhcp_pool_offset` | `10` | Offset from router IP to start DHCP pool. |
 | `lan_dhcp_pool_size` | `200` | Number of DHCP addresses in the LAN pool. |
-| `lan_dhcp_lease_seconds` | `86400` | Default and maximum trusted LAN lease duration in seconds. |
+| `lan_dhcp_lease_seconds` | `86400` | Default trusted LAN lease duration in seconds. |
+| `lan_dhcp_max_lease_seconds` | `null` | Maximum trusted LAN lease duration; null inherits its default. |
 | `lan_iface` | `lan0` | Desired LAN interface name. |
 | `lan_iface_networkd_link_match` | `"Driver=bcmgenet"` | `systemd-networkd` match string for LAN link. |
 | `lan_guests_dhcp_pool_offset` | `10` | DHCP pool offset for guests network. |
 | `lan_guests_dhcp_pool_size` | `200` | DHCP pool size for guests network. |
-| `lan_guests_dhcp_lease_seconds` | `3600` | Default and maximum guest lease duration in seconds. |
+| `lan_guests_dhcp_lease_seconds` | `3600` | Default guest lease duration in seconds. |
+| `lan_guests_dhcp_max_lease_seconds` | `null` | Maximum guest lease duration; null inherits its default. |
 | `lan_guests_iface` | `lan_guests` | Interface name for LAN guests network. |
 | `lan_guests_router_ip_address` | `192.168.200.254/24` | Router IP/prefix for the guests network. |
 | `lan_guests_vlan_id` | `6` | VLAN id for the guests network. |
@@ -763,7 +809,8 @@ The table below lists role variables defined in `roles/firewall/defaults/main.ym
 | `lan_vpn_mtu` | `1292` | Shared VPN tunnel/VLAN/VRF MTU and DHCP MTU advertisement, in bytes. |
 | `lan_vpn_iface` | `lan_vpn` | Desired interface name for the LAN VPN VLAN. |
 | `lan_vpn_router_ip_address` | `192.168.254.1/24` | Router IP/prefix for the LAN VPN network. |
-| `lan_vpn_dhcp_lease_seconds` | `86400` | Default and maximum VPN LAN lease duration in seconds. |
+| `lan_vpn_dhcp_lease_seconds` | `86400` | Default VPN LAN lease duration in seconds. |
+| `lan_vpn_dhcp_max_lease_seconds` | `null` | Maximum VPN LAN lease duration; null inherits its default. |
 | `lan_vpn_vlan_id` | `2` | VLAN id for the LAN VPN network. |
 | `lan_vpn_wg_listen_port` | `51820` | WireGuard listen port for the VPN interface. |
 | `lan_vpn_wg_peer_allowed_ips` | `0.0.0.0/0` | Allowed IPs for the WireGuard peer (routes through VPN). |
