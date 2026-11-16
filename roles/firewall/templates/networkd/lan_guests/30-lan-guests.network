@@ -28,6 +28,8 @@ Token=::1
 SubnetId=5
 
 [DHCPServer]
+SendOption=28:ipv4address:{{ lan_guests_broadcast }}
+EmitDomain=no
 EmitDNS=yes
 PoolOffset={{ lan_guests_dhcp_pool_offset }}
 PoolSize={{ lan_guests_dhcp_pool_size }}
@@ -41,7 +43,7 @@ EmitRouter=yes
 EmitTimezone=yes
 Timezone=America/New_York
 DefaultLeaseTimeSec={{ lan_guests_dhcp_lease_seconds }}
-MaxLeaseTimeSec={{ lan_guests_dhcp_lease_seconds }}
+MaxLeaseTimeSec={{ lan_guests_dhcp_lease_seconds if lan_guests_dhcp_max_lease_seconds is none else lan_guests_dhcp_max_lease_seconds }}
 
 [IPv6SendRA]
 RouterPreference=high

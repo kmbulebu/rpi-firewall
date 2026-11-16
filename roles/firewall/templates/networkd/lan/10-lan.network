@@ -78,6 +78,11 @@ Destination={{ lan_vpn_cidr }}
 #Destination={{ lan_guests_cidr }}
 
 [DHCPServer]
+SendOption=28:ipv4address:{{ lan_broadcast }}
+# networkd owns option 15; option 119 uses RFC 3397 DNS label encoding.
+EmitDomain=yes
+Domain={{ domain }}
+SendOption=119:string:{% for label in domain.split('.') %}\x{{ '%02x' | format(label | length) }}{{ label }}{% endfor %}\x00
 PoolOffset={{ lan_dhcp_pool_offset }}
 PoolSize={{ lan_dhcp_pool_size }}
 EmitDNS=yes
@@ -90,7 +95,7 @@ EmitRouter=yes
 EmitTimezone=yes
 Timezone=America/New_York
 DefaultLeaseTimeSec={{ lan_dhcp_lease_seconds }}
-MaxLeaseTimeSec={{ lan_dhcp_lease_seconds }}
+MaxLeaseTimeSec={{ lan_dhcp_lease_seconds if lan_dhcp_max_lease_seconds is none else lan_dhcp_max_lease_seconds }}
 
 {% for dhcp_reservation in (dhcp_reservations | default([], true))%}
 # {{ dhcp_reservation.hostname }}

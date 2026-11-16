@@ -70,5 +70,6 @@ lockfile changes, and rerun the checks. Collection upgrades are separate edits t
 
 The `tests/integration_*.py` scripts require their documented disposable containers
 and capabilities. They must not be run directly on a production router. See
-[the forwarding lab](tests/README.forwarding.md) and the GitHub Actions workflow
+[the forwarding lab](tests/README.forwarding.md), [DHCP packet tests](tests/README.dhcp.md),
+and the GitHub Actions workflow
 for the current integration commands.

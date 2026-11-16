@@ -21,6 +21,8 @@ class VpnConfigurationTests(unittest.TestCase):
     def setUp(self):
         self.values = yaml.safe_load((ROLE / 'defaults/main.yml').read_text())
         self.values.update(lan_address='192.168.1.1', lan_cidr='192.168.1.0/24',
+                           lan_broadcast='192.168.1.255', lan_guests_broadcast='192.168.200.255',
+                           lan_vpn_broadcast='192.168.254.255',
                            lan_guests_cidr='192.168.200.0/24',
                            lan_vpn_cidr='192.168.254.0/24',
                            ip6_ula_cidr='fd12:3456::/48', lan_ip6_ula_cidr='fd12:3456::/64')

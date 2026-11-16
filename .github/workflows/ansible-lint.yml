@@ -100,6 +100,41 @@ jobs:
           docker exec -e RPI_FIREWALL_DISPOSABLE_TEST=1 rpi-forwarding-test \
             python3 tests/integration_forwarding.py
 
+  dhcp-options:
+    name: DHCP options and lease negotiation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build disposable networkd test image
+        run: docker build -f tests/Dockerfile.forwarding -t rpi-dhcp-test .
+
+      - name: Inspect DHCP OFFER and ACK packets
+        shell: bash
+        run: |
+          docker run -d --name rpi-dhcp-test --privileged --network=none --cgroupns=private \
+            --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
+            -v "$GITHUB_WORKSPACE:/repo:ro" -w /repo rpi-dhcp-test
+          cleanup() {
+            test_exit_status=$?
+            if [ "$test_exit_status" -ne 0 ]; then
+              docker exec rpi-dhcp-test journalctl --no-pager -n 100 -u systemd-networkd || true
+            fi
+            docker rm -f rpi-dhcp-test >/dev/null
+            exit "$test_exit_status"
+          }
+          trap cleanup EXIT
+          for attempt in {1..30}; do
+            if docker exec rpi-dhcp-test systemctl show --property=Version --value >/dev/null 2>&1; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec -e RPI_FIREWALL_DISPOSABLE_TEST=1 rpi-dhcp-test \
+            python3 tests/integration_dhcp_options.py
+
   blocklist-orchestration:
     name: Blocklist failure isolation
     runs-on: ubuntu-24.04
