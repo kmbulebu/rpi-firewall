@@ -107,6 +107,48 @@ class SerialCaptureTests(unittest.TestCase):
             console.pump()
             self.assertFalse(console.booting)
 
+    def test_silent_start_waits_without_writing(self):
+        console = receiver.Console(123)
+        now = [console.last_rx]
+
+        def advance(_timeout):
+            now[0] += 1
+
+        with patch.object(receiver.time, 'monotonic', side_effect=lambda: now[0]), \
+                patch.object(console, 'pump', side_effect=advance), \
+                patch.object(console, 'send') as send:
+            with self.assertRaises(TimeoutError):
+                console.shell()
+            send.assert_not_called()
+
+    def test_bootloader_prompt_without_banner_revokes_shell_access(self):
+        console = receiver.Console(123)
+        chunks = [b'root@ont:/usr/bin# ', b'\r\nPRX', b'300 #']
+        with patch('select.select', side_effect=[([123], [], [])] * 3 + [([], [], [])]), \
+                patch('os.read', side_effect=chunks), \
+                patch('os.write') as write, contextlib.redirect_stdout(io.StringIO()):
+            console.pump()
+            self.assertTrue(console.management_ready)
+            console.shell_ready = True
+            console.pump()
+            console.pump()
+            self.assertTrue(console.booting)
+            self.assertFalse(console.shell_ready)
+            with self.assertRaisesRegex(ValueError, 'refusing console writes'):
+                console.send('\r')
+            write.assert_not_called()
+
+    def test_old_ready_marker_cannot_override_later_boot_in_same_read(self):
+        console = receiver.Console(123)
+        data = b'OMCI daemon initialized\r\nroot@ont:/usr/bin# \r\nSystem reset (12)\r\n'
+        with patch('select.select', return_value=([123], [], [])), \
+                patch('os.read', return_value=data), contextlib.redirect_stdout(io.StringIO()):
+            console.pump()
+        self.assertTrue(console.booting)
+        self.assertFalse(console.wake_pending)
+        self.assertFalse(console.management_ready)
+        self.assertIsNone(receiver.PROMPT.search(console.tail))
+
     def test_getter_parser_preserves_quotes_and_rejects_failures(self):
         self.assertEqual(receiver.pairs('errorcode=0 pon_id="0 1 2" current=11'),
                          {'errorcode': 0, 'pon_id': '0 1 2', 'current': 11})
