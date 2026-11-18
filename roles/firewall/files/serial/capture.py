@@ -18,6 +18,7 @@ ANSI = re.compile(r'\x1b(?:\[[0-?]*[ -/]*[@-~]|[78])')
 PROMPT = re.compile(r'(?:^|[\r\n])(User:|Password:|\(WAGD20\)[^\r\n]*>|root@[^\r\n]*#)[ \t\r\n]*$')
 BOOT = re.compile(r'ROM VER:|U-Boot |Hit any key|Press.*failsafe|Linux version |'
                   r'reboot ONT now|System reset \(|(?:^|[\r\n])PRX300[ \t]+#')
+QUIET_SECONDS = 10
 READY = re.compile(r'OMCI daemon initialized')
 PAIRS = re.compile(r'([A-Za-z_][A-Za-z0-9_]*)=("[^"]*"|\S+)')
 
@@ -68,6 +69,7 @@ class Console:
         self.boot_generation = 0
         self.management_ready = False
         self.wake_pending = False
+        self.wake_requested = False
         self.scan_tail = ''
         self.shell_ready = False
 
@@ -116,11 +118,13 @@ class Console:
             self.pending = ''
         return text
 
-    def send(self, text):
+    def send(self, text, *, operator_wake=False):
         generation = self.boot_generation
         while select.select([self.fd], [], [], 0)[0]:
             self.pump(0)
-        if not self.management_ready or self.boot_generation != generation:
+        if operator_wake and (self.booting or time.monotonic() - self.last_rx < QUIET_SECONDS):
+            raise ValueError('console is active or booting; operator wake refused')
+        if self.boot_generation != generation or (not operator_wake and not self.management_ready):
             raise ValueError('management console not confirmed; refusing console writes')
         data = text.encode()
         while data:
@@ -149,8 +153,19 @@ class Console:
         end = time.monotonic() + 120
         while time.monotonic() < end:
             if PROMPT.search(self.tail):
+                self.wake_requested = False
                 break
-            if self.wake_pending and time.monotonic() - self.last_rx >= 10:
+            if self.wake_requested:
+                self.wake_requested = False
+                try:
+                    self.send('\r', operator_wake=True)
+                except ValueError as error:
+                    print(str(error), file=sys.stderr, flush=True)
+                else:
+                    self.wake_pending = False
+                    print('Operator requested a management prompt', file=sys.stderr, flush=True)
+                    break
+            if self.wake_pending and time.monotonic() - self.last_rx >= QUIET_SECONDS:
                 self.wake_pending = False
                 self.send('\r')
                 break
@@ -220,6 +235,13 @@ def main():
     snapshot(path, state)
     previous = None
     last_error = None
+    console = None
+
+    def request_wake(_signum, _frame):
+        if console is not None and not console.management_ready:
+            console.wake_requested = True
+
+    signal.signal(signal.SIGUSR1, request_wake)
     while True:
         fd = None
         try:
@@ -271,6 +293,7 @@ def main():
                 print('WAG status unavailable: ' + str(error), file=sys.stderr, flush=True)
                 last_error = str(error)
         finally:
+            console = None
             if fd is not None:
                 try:
                     fcntl.ioctl(fd, termios.TIOCNXCL)

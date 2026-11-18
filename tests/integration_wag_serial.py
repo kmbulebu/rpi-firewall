@@ -52,7 +52,11 @@ def main():
     emulator.start()
     try:
         apply(True)
-        emulator.ready.set()
+        # The ONT is already running at a quiet login prompt and emits nothing.
+        # A service restart must stay passive until the operator requests a wake.
+        time.sleep(11)
+        assert emulator.commands == [], emulator.commands
+        command('systemctl', 'kill', '--kill-whom=main', '--signal=SIGUSR1', unit.name)
         deadline = time.monotonic() + 30
         while time.monotonic() < deadline:
             if status.exists() and json.loads(status.read_text())['health'] == 'ok':
@@ -60,6 +64,7 @@ def main():
             time.sleep(.1)
         else:
             raise AssertionError(command('journalctl', '--namespace=wag-d20', '-u', 'wag-d20-serial.service', '--no-pager'))
+        assert emulator.commands[:2] == ['', 'test'], emulator.commands
         assert json.loads(status.read_text())['poll_interval'] == 60
         assert 'LogNamespace=wag-d20' in unit.read_text()
         assert 'RuntimeMaxUse=32M' in Path('/etc/systemd/journald@wag-d20.conf').read_text()

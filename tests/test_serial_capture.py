@@ -124,7 +124,7 @@ class SerialCaptureTests(unittest.TestCase):
     def test_bootloader_prompt_without_banner_revokes_shell_access(self):
         console = receiver.Console(123)
         chunks = [b'root@ont:/usr/bin# ', b'\r\nPRX', b'300 #']
-        with patch('select.select', side_effect=[([123], [], [])] * 3 + [([], [], [])]), \
+        with patch('select.select', side_effect=[([123], [], [])] * 3 + [([], [], [])] * 2), \
                 patch('os.read', side_effect=chunks), \
                 patch('os.write') as write, contextlib.redirect_stdout(io.StringIO()):
             console.pump()
@@ -136,6 +136,8 @@ class SerialCaptureTests(unittest.TestCase):
             self.assertFalse(console.shell_ready)
             with self.assertRaisesRegex(ValueError, 'refusing console writes'):
                 console.send('\r')
+            with self.assertRaisesRegex(ValueError, 'operator wake refused'):
+                console.send('\r', operator_wake=True)
             write.assert_not_called()
 
     def test_old_ready_marker_cannot_override_later_boot_in_same_read(self):

@@ -349,9 +349,16 @@ The receiver listens passively until it sees a management prompt or the
 firmware's OMCI initialization message. The OMCI message permits one prompt
 request after the console goes quiet. Boot messages and the `PRX300 #` prompt
 return the receiver to passive capture. If the receiver starts after the ONT
-has gone quiet, status may be unavailable until the next recognized prompt or
-ONT boot. Poll responses, changed PON state/LOS, and polling failures appear
-in the console journal.
+has gone quiet, confirm the ONT is fully booted and passing WAN traffic, then
+request a single management prompt without cycling power:
+
+```sh
+sudo systemctl kill --kill-whom=main --signal=SIGUSR1 wag-d20-serial.service
+```
+
+The request is refused during detected boot or if serial output was received
+in the last ten seconds. Check the console journal for the result. Poll
+responses, changed PON state/LOS, and polling failures appear there too.
 
 A successful poll atomically updates `/run/wag-d20/status.json` with raw PLOAM,
 PON and optics records, device uptime, and observation timestamps. A failed poll
