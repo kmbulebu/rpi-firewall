@@ -15,8 +15,10 @@ import time
 import uuid
 
 ANSI = re.compile(r'\x1b(?:\[[0-?]*[ -/]*[@-~]|[78])')
-PROMPT = re.compile(r'(User:\s*|Password:\s*|\(WAGD20\)[^\r\n]*>\s*|root@[^\r\n]*#\s*)$')
-BOOT = re.compile(r'ROM VER:|U-Boot |Hit any key|Press.*failsafe|Linux version |reboot ONT now|System reset \(')
+PROMPT = re.compile(r'(?:^|[\r\n])(User:|Password:|\(WAGD20\)[^\r\n]*>|root@[^\r\n]*#)[ \t\r\n]*$')
+BOOT = re.compile(r'ROM VER:|U-Boot |Hit any key|Press.*failsafe|Linux version |'
+                  r'reboot ONT now|System reset \(|(?:^|[\r\n])PRX300[ \t]+#')
+READY = re.compile(r'OMCI daemon initialized')
 PAIRS = re.compile(r'([A-Za-z_][A-Za-z0-9_]*)=("[^"]*"|\S+)')
 
 
@@ -63,6 +65,9 @@ class Console:
         self.tail = ''
         self.last_rx = time.monotonic()
         self.booting = False
+        self.boot_generation = 0
+        self.management_ready = False
+        self.wake_pending = False
         self.scan_tail = ''
         self.shell_ready = False
 
@@ -77,14 +82,27 @@ class Console:
             raise OSError('serial disconnected')
         text = self.decoder.decode(data)
         self.last_rx = time.monotonic()
-        self.tail = (self.tail + ANSI.sub('', text))[-65536:]
-        scan = self.scan_tail + text
+        clean = ANSI.sub('', text)
+        self.tail = (self.tail + clean)[-65536:]
+        scan = self.scan_tail + clean
         offset = len(self.scan_tail)
-        if any(match.end() > offset for match in BOOT.finditer(scan)):
+        boot = list(match for match in BOOT.finditer(scan) if match.end() > offset)
+        if boot:
+            # Discard prompts preceding the latest boot marker, including in this read.
+            offset = boot[-1].end()
+            self.tail = scan[offset:]
             self.booting = True
+            self.boot_generation += 1
+            self.management_ready = False
+            self.wake_pending = False
             self.shell_ready = False
-        ready = any(match.end() > offset for match in re.finditer('OMCI daemon initialized', scan))
-        if ready or PROMPT.search(self.tail):
+        if any(match.end() > offset for match in READY.finditer(scan)):
+            self.wake_pending = True
+            self.management_ready = True
+        if PROMPT.search(self.tail):
+            self.wake_pending = False
+            self.management_ready = True
+        if self.management_ready:
             self.booting = False
         self.scan_tail = scan[-256:]
         self.pending += text.replace('\r', '\n')
@@ -99,8 +117,11 @@ class Console:
         return text
 
     def send(self, text):
-        if self.booting:
-            raise ValueError('boot detected; refusing console writes')
+        generation = self.boot_generation
+        while select.select([self.fd], [], [], 0)[0]:
+            self.pump(0)
+        if not self.management_ready or self.boot_generation != generation:
+            raise ValueError('management console not confirmed; refusing console writes')
         data = text.encode()
         while data:
             _, writable, _ = select.select([], [self.fd], [], 2)
@@ -123,15 +144,17 @@ class Console:
         raise TimeoutError('console prompt timeout')
 
     def shell(self):
-        # Observe first; never send input into a detected boot/autoboot window.
+        # A silent port could be between boot stages. Only wake a console after
+        # this boot's OMCI startup message, or respond to a management prompt.
         end = time.monotonic() + 120
         while time.monotonic() < end:
-            self.pump(1)
             if PROMPT.search(self.tail):
                 break
-            if not self.booting and time.monotonic() - self.last_rx >= 10:
+            if self.wake_pending and time.monotonic() - self.last_rx >= 10:
+                self.wake_pending = False
                 self.send('\r')
                 break
+            self.pump(1)
         else:
             raise TimeoutError('no safe console readiness observed')
         for _ in range(6):
@@ -197,17 +220,16 @@ def main():
     snapshot(path, state)
     previous = None
     last_error = None
-    boot_guard = False
     while True:
         fd = None
         try:
             fd = open_serial(args.device)
             console = Console(fd)
-            console.booting = boot_guard
             print('Serial capture connected', file=sys.stderr, flush=True)
-            console.shell()
             while True:
                 try:
+                    if not console.shell_ready:
+                        console.shell()
                     ploam = pairs(console.query('/opt/intel/bin/pon ploam_state_get'))
                     pon = pairs(console.query('/opt/intel/bin/pon gpon_status_get'))
                     optics = pairs(console.query('/opt/intel/bin/pon optic_status_get '
@@ -236,12 +258,13 @@ def main():
                     if str(error) != last_error:
                         print('WAG status unavailable: ' + str(error), file=sys.stderr, flush=True)
                         last_error = str(error)
-                    # Keep receiving through reboot; do not reopen and lose boot context.
-                    console.shell()
-                    until = time.monotonic() + 5
-                    while time.monotonic() < until:
-                        console.pump(min(1, until - time.monotonic()))
-        except (OSError, termios.error, ValueError, TimeoutError) as error:
+                    # Keep receiving through reboot or a silent console.
+                    console.shell_ready = False
+                    if not console.booting:
+                        until = time.monotonic() + 5
+                        while not console.booting and time.monotonic() < until:
+                            console.pump(min(1, max(0, until - time.monotonic())))
+        except (OSError, termios.error) as error:
             state.update(health='stale', last_attempt=time.time(), error=str(error))
             snapshot(path, state)
             if str(error) != last_error:
@@ -249,7 +272,6 @@ def main():
                 last_error = str(error)
         finally:
             if fd is not None:
-                boot_guard = console.booting
                 try:
                     fcntl.ioctl(fd, termios.TIOCNXCL)
                 except OSError:

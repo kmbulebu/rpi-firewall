@@ -345,11 +345,13 @@ Polling logs into the vendor console with the previously verified factory
 - `cat /proc/uptime`
 
 These commands and credentials are specific to the explored WAG-D20 firmware.
-The receiver requires recognized prompts before sending queries and suppresses
-input during a detected boot/autoboot sequence. It does not change ONT
-configuration or restart its PON services. Poll responses are also visible in
-the console journal. Changed PON state/LOS and polling failures get concise
-status messages.
+The receiver listens passively until it sees a management prompt or the
+firmware's OMCI initialization message. The OMCI message permits one prompt
+request after the console goes quiet. Boot messages and the `PRX300 #` prompt
+return the receiver to passive capture. If the receiver starts after the ONT
+has gone quiet, status may be unavailable until the next recognized prompt or
+ONT boot. Poll responses, changed PON state/LOS, and polling failures appear
+in the console journal.
 
 A successful poll atomically updates `/run/wag-d20/status.json` with raw PLOAM,
 PON and optics records, device uptime, and observation timestamps. A failed poll
