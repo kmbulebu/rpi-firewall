@@ -20,6 +20,8 @@ IPv4Forwarding=yes
 IPv6Forwarding=yes
 
 [DHCPServer]
+SendOption=28:ipv4address:{{ lan_vpn_broadcast }}
+EmitDomain=no
 EmitDNS=yes
 # TODO: Make these configurable
 DNS=1.1.1.1
@@ -27,4 +29,4 @@ DNS=1.0.0.1
 EmitRouter=yes
 SendOption=26:uint16:{{ lan_vpn_mtu }}
 DefaultLeaseTimeSec={{ lan_vpn_dhcp_lease_seconds }}
-MaxLeaseTimeSec={{ lan_vpn_dhcp_lease_seconds }}
+MaxLeaseTimeSec={{ lan_vpn_dhcp_lease_seconds if lan_vpn_dhcp_max_lease_seconds is none else lan_vpn_dhcp_max_lease_seconds }}

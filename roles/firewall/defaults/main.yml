@@ -44,6 +44,8 @@ lan_iface: lan0
 lan_dhcp_pool_offset: 10
 lan_dhcp_pool_size: 200
 lan_dhcp_lease_seconds: 86400
+# Null keeps the maximum equal to the default lease duration.
+lan_dhcp_max_lease_seconds: null
 wan_device_set_mac_address: 
 lan_guests_iface: lan_guests
 lan_guests_router_ip_address: 192.168.200.254/24
@@ -51,6 +53,8 @@ lan_guests_vlan_id: 6
 lan_guests_dhcp_pool_offset: 10
 lan_guests_dhcp_pool_size: 200
 lan_guests_dhcp_lease_seconds: 3600
+# Null keeps the maximum equal to the default lease duration.
+lan_guests_dhcp_max_lease_seconds: null
 enable_lan_vpn: false
 # Keep the existing tunnel, VLAN and DHCP MTU until a measured change is needed.
 lan_vpn_mtu: 1292
@@ -59,6 +63,8 @@ vpn_vrf_iface: vpn_vrf0
 lan_vpn_iface: lan_vpn
 lan_vpn_router_ip_address: 192.168.254.1/24
 lan_vpn_dhcp_lease_seconds: 86400
+# Null keeps the maximum equal to the default lease duration.
+lan_vpn_dhcp_max_lease_seconds: null
 lan_vpn_vlan_id: 2
 lan_vpn_wg_listen_port: 51820
 lan_vpn_wg_peer_allowed_ips: 0.0.0.0/0

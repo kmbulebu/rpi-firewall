@@ -42,13 +42,8 @@
     fail_msg: >-
       wan_dhcpv4_iaid must be empty or a decimal integer from 0 to 4294967295
       with wan_dhcpv4_client_identifier set to duid.
-- name: Validate DHCP lease durations
-  assert:
-    that:
-      - lan_dhcp_lease_seconds | int > 0
-      - lan_guests_dhcp_lease_seconds | int > 0
-      - lan_vpn_dhcp_lease_seconds | int > 0
-    fail_msg: DHCP lease durations must be positive numbers of seconds.
+- name: Validate downstream DHCP configuration
+  ansible.builtin.import_tasks: validate_dhcp.yml
 # Reject ambiguous matches before writing any network configuration.
 - name: Validate backup WAN configuration
   assert:

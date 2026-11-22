@@ -1,0 +1,34 @@
+---
+- name: Validate DHCP lease limits
+  ansible.builtin.assert:
+    that:
+      - item.default is not boolean
+      - (item.default | string) is match('^[0-9]+\Z')
+      - item.default | int > 0
+      - item.maximum is not boolean
+      - (item.maximum | string) is match('^[0-9]+\Z')
+      - item.maximum | int >= item.default | int
+      - item.maximum | int < 4294967295
+    fail_msg: >-
+      {{ item.network }} DHCP lease durations must be integer seconds with
+      0 < default <= maximum < 4294967295. A null maximum inherits the default.
+  loop:
+    - network: LAN
+      default: "{{ lan_dhcp_lease_seconds }}"
+      maximum: "{{ lan_dhcp_lease_seconds if lan_dhcp_max_lease_seconds is none else lan_dhcp_max_lease_seconds }}"
+    - network: guests
+      default: "{{ lan_guests_dhcp_lease_seconds }}"
+      maximum: "{{ lan_guests_dhcp_lease_seconds if lan_guests_dhcp_max_lease_seconds is none else lan_guests_dhcp_max_lease_seconds }}"
+    - network: VPN
+      default: "{{ lan_vpn_dhcp_lease_seconds }}"
+      maximum: "{{ lan_vpn_dhcp_lease_seconds if lan_vpn_dhcp_max_lease_seconds is none else lan_vpn_dhcp_max_lease_seconds }}"
+
+- name: Validate the trusted LAN DHCP domain
+  ansible.builtin.assert:
+    that:
+      - domain is string
+      - domain | length <= 253
+      - domain is match('^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*\Z')
+    fail_msg: >-
+      domain must be an ASCII DNS name without a trailing dot, at most 253
+      characters long with labels of 1 to 63 characters. Use IDNA A-labels for IDNs.

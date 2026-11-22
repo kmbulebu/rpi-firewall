@@ -59,7 +59,9 @@ def main():
                  ]}]
         (root / 'play.yml').write_text(yaml.safe_dump(play))
         values = dict(lan_iface='lan-test', router_ip_address='192.0.2.1/24', lan_address='192.0.2.1',
-                      lan_cidr='192.0.2.0/24', lan_guests_iface='guest-test', lan_guests_cidr='198.51.100.0/24',
+                      lan_cidr='192.0.2.0/24', lan_broadcast='192.0.2.255',
+                      lan_guests_broadcast='198.51.100.255', lan_vpn_broadcast='192.168.254.255',
+                      lan_guests_iface='guest-test', lan_guests_cidr='198.51.100.0/24',
                       lan_guests_address='198.51.100.1',
                       lan_vpn_cidr='192.168.254.0/24', ip6_ula_cidr='fd12:3456::/48',
                       lan_ip6_ula_cidr='fd12:3456::/64')
