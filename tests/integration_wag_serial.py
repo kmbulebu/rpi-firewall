@@ -34,9 +34,9 @@ def main():
         name: {ROOT}/roles/firewall
         tasks_from: wag_d20_serial
 ''')
-    def apply(enabled):
-        return command('ansible-playbook', '-i', 'localhost,', str(play), '-e',
-                       json.dumps({'wag_d20_serial_enabled': enabled}))
+    def apply(enabled, **overrides):
+        variables = {'wag_d20_serial_enabled': enabled, **overrides}
+        return command('ansible-playbook', '-i', 'localhost,', str(play), '-e', json.dumps(variables))
     unit = Path('/etc/systemd/system/wag-d20-serial.service')
     motd = Path('/etc/update-motd.d/62-wag-d20-status')
     status = Path('/run/wag-d20/status.json')
@@ -49,17 +49,40 @@ def main():
     device.parent.mkdir(parents=True, exist_ok=True)
     device.unlink(missing_ok=True)
     device.symlink_to(emulator.path)
+    emulator.mode = 'autoboot'
     emulator.start()
     try:
         apply(True)
+        assert '--no-auto-recovery' not in unit.read_text()
+
+        def wait_for(predicate):
+            deadline = time.monotonic() + 25
+            while time.monotonic() < deadline:
+                if predicate():
+                    return
+                time.sleep(.1)
+            raise AssertionError(command('journalctl', '--namespace=wag-d20',
+                                         '-u', unit.name, '--no-pager'))
+
+        def poll_healthy():
+            return status.exists() and json.loads(status.read_text())['health'] == 'ok'
+
+        wait_for(lambda: 'bootloader prompt returned' in command(
+            'journalctl', '--namespace=wag-d20', '-u', unit.name, '--no-pager'))
+        assert emulator.commands == ['', 'run bootcmd'], emulator.commands
         emulator.ready.set()
-        deadline = time.monotonic() + 30
-        while time.monotonic() < deadline:
-            if status.exists() and json.loads(status.read_text())['health'] == 'ok':
-                break
-            time.sleep(.1)
-        else:
-            raise AssertionError(command('journalctl', '--namespace=wag-d20', '-u', 'wag-d20-serial.service', '--no-pager'))
+        wait_for(poll_healthy)
+        print('PASS: silent autoboot stops on Enter, receives one boot command, and polling resumes after Linux readiness',
+              flush=True)
+
+        # Restart while Linux is up but the console is silent at login.
+        emulator.mode = 'user'
+        emulator.commands.clear()
+        command('systemctl', 'restart', unit.name)
+        wait_for(lambda: 'ploam_state_get' in ' '.join(emulator.commands) and poll_healthy())
+        assert emulator.commands[:2] == ['', 'test'], emulator.commands
+        assert 'run bootcmd' not in emulator.commands, emulator.commands
+        print('PASS: monitor restart resumes polling on a quiet, running ONT', flush=True)
         assert json.loads(status.read_text())['poll_interval'] == 60
         assert 'LogNamespace=wag-d20' in unit.read_text()
         assert 'RuntimeMaxUse=32M' in Path('/etc/systemd/journald@wag-d20.conf').read_text()
@@ -83,6 +106,20 @@ def main():
         assert journal_pid == command('systemctl', 'show', 'systemd-journald@wag-d20.service', '--property=MainPID', '--value')
         assert pid == command('systemctl', 'show', 'wag-d20-serial.service', '--property=MainPID', '--value')
         print('PASS: reapplying is idempotent without restarting receiver', flush=True)
+        apply(True, wag_d20_auto_recovery=False)
+        assert '--no-auto-recovery' in unit.read_text()
+        emulator.commands.clear()
+        emulator.mode = 'bootloader'
+        # Re-emit the prompt until the restarted monitor has acquired the adapter.
+        def see_passive_prompt():
+            emulator.write(b'\r\nPassive recovery test\r\nPRX300 # ')
+            return 'Passive recovery test' in command('journalctl', '--namespace=wag-d20',
+                                                      '-u', unit.name, '--no-pager')
+
+        wait_for(see_passive_prompt)
+        time.sleep(2)
+        assert emulator.commands == [], emulator.commands
+        print('PASS: explicit opt-out leaves the bootloader prompt alone', flush=True)
         apply(False)
         assert not motd.exists() and not status.exists()
         assert unit.exists()

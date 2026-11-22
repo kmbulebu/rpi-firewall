@@ -51,7 +51,12 @@ class OntEmulator:
                 command, pending = pending.split(b'\r', 1)
                 command = command.decode().replace('\x15', '')
                 self.commands.append(command)
-                if self.mode == 'user' and command == '':
+                if self.mode == 'autoboot' and command == '':
+                    self.mode = 'bootloader'
+                    reply = '\r\nPRX300 # '
+                elif self.mode == 'bootloader' and command == 'run bootcmd':
+                    reply = '\r\nPRX300 # '
+                elif self.mode == 'user' and command == '':
                     reply = 'User: '
                 elif self.mode == 'user' and command == 'test':
                     self.mode = 'password'; reply = 'Password: '

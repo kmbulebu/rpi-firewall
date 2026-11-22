@@ -3,11 +3,12 @@
   ansible.builtin.assert:
     that:
       - wag_d20_serial_enabled is boolean
+      - wag_d20_auto_recovery is boolean
       - wag_d20_serial_device is string
       - wag_d20_status_interval is integer
       - wag_d20_status_interval >= 10
       - wag_d20_serial_device is match('^/dev/serial/by-id/[A-Za-z0-9_.:-]+$')
-    fail_msg: Serial monitoring requires a boolean enable flag, a stable /dev/serial/by-id/ path and an integer poll interval of at least ten seconds.
+    fail_msg: Serial monitoring requires boolean enable and recovery flags, a stable /dev/serial/by-id/ path and an integer poll interval of at least ten seconds.
 
 - name: Configure enabled WAG-D20 serial capture
   when: wag_d20_serial_enabled

@@ -18,6 +18,7 @@ ANSI = re.compile(r'\x1b(?:\[[0-?]*[ -/]*[@-~]|[78])')
 PROMPT = re.compile(r'(?:^|[\r\n])(User:|Password:|\(WAGD20\)[^\r\n]*>|root@[^\r\n]*#)[ \t\r\n]*$')
 BOOT = re.compile(r'ROM VER:|U-Boot |Hit any key|Press.*failsafe|Linux version |'
                   r'reboot ONT now|System reset \(|(?:^|[\r\n])PRX300[ \t]+#')
+BOOTLOADER_PROMPT = re.compile(r'(?:^|[\r\n])PRX300 #(?:[ \t\r\n]*)\Z')
 READY = re.compile(r'OMCI daemon initialized')
 PAIRS = re.compile(r'([A-Za-z_][A-Za-z0-9_]*)=("[^"]*"|\S+)')
 
@@ -58,12 +59,16 @@ def pairs(text):
 
 
 class Console:
-    def __init__(self, fd):
+    def __init__(self, fd, auto_recovery=False, boot_attempted=False):
         self.fd = fd
+        self.auto_recovery = auto_recovery
+        self.boot_attempted = boot_attempted
+        self.reported_boot_failure = False
         self.decoder = codecs.getincrementaldecoder('utf-8')(errors='replace')
         self.pending = ''
         self.tail = ''
         self.last_rx = time.monotonic()
+        self.last_tx = self.last_rx
         self.booting = False
         self.boot_generation = 0
         self.management_ready = False
@@ -90,7 +95,7 @@ class Console:
         if boot:
             # Discard prompts preceding the latest boot marker, including in this read.
             offset = boot[-1].end()
-            self.tail = scan[offset:]
+            self.tail = scan[boot[-1].start():] if BOOTLOADER_PROMPT.search(scan) else scan[offset:]
             self.booting = True
             self.boot_generation += 1
             self.management_ready = False
@@ -116,12 +121,29 @@ class Console:
             self.pending = ''
         return text
 
-    def send(self, text):
+    def probe_allowed(self):
+        return (self.auto_recovery and not self.booting and not self.boot_attempted
+                and time.monotonic() - max(self.last_rx, self.last_tx) >= 10)
+
+    def send(self, text, *, purpose='management'):
         generation = self.boot_generation
         while select.select([self.fd], [], [], 0)[0]:
             self.pump(0)
-        if not self.management_ready or self.boot_generation != generation:
+        if self.boot_generation != generation:
+            raise ValueError('console state changed; refusing console writes')
+        if purpose == 'boot':
+            if (not self.auto_recovery or not self.booting or self.boot_attempted
+                    or not BOOTLOADER_PROMPT.search(self.tail)
+                    or time.monotonic() - self.last_rx < 1):
+                raise ValueError('bootloader recovery conditions changed')
+            self.boot_attempted = True
+            print('WAG recovery: sending run bootcmd at PRX300 prompt', file=sys.stderr, flush=True)
+        elif purpose == 'probe':
+            if not self.probe_allowed():
+                raise ValueError('console no longer quiet or boot detected')
+        elif not self.management_ready:
             raise ValueError('management console not confirmed; refusing console writes')
+        self.last_tx = time.monotonic()
         data = text.encode()
         while data:
             _, writable, _ = select.select([], [self.fd], [], 2)
@@ -144,15 +166,26 @@ class Console:
         raise TimeoutError('console prompt timeout')
 
     def shell(self):
-        # A silent port could be between boot stages. Only wake a console after
-        # this boot's OMCI startup message, or respond to a management prompt.
+        # Automatic recovery may probe an unknown console. A detected boot
+        # suppresses probes, with one explicit exception for the U-Boot prompt.
         end = time.monotonic() + 120
         while time.monotonic() < end:
             if PROMPT.search(self.tail):
                 break
+            if (self.auto_recovery and BOOTLOADER_PROMPT.search(self.tail)
+                    and time.monotonic() - self.last_rx >= 1):
+                if not self.boot_attempted:
+                    self.send('run bootcmd\r', purpose='boot')
+                elif not self.reported_boot_failure:
+                    print('WAG recovery: bootloader prompt returned; stopping recovery writes',
+                          file=sys.stderr, flush=True)
+                    self.reported_boot_failure = True
             if self.wake_pending and time.monotonic() - self.last_rx >= 10:
                 self.wake_pending = False
                 self.send('\r')
+                break
+            if self.probe_allowed():
+                self.send('\r', purpose='probe')
                 break
             self.pump(1)
         else:
@@ -208,6 +241,7 @@ def main():
     parser.add_argument('--device', required=True)
     parser.add_argument('--status', default='/run/wag-d20/status.json')
     parser.add_argument('--interval', type=int, default=60)
+    parser.add_argument('--no-auto-recovery', dest='auto_recovery', action='store_false')
     args = parser.parse_args()
     if args.interval < 10:
         parser.error('poll interval must be at least ten seconds')
@@ -220,11 +254,12 @@ def main():
     snapshot(path, state)
     previous = None
     last_error = None
+    boot_attempted = False
     while True:
-        fd = None
+        fd = console = None
         try:
             fd = open_serial(args.device)
-            console = Console(fd)
+            console = Console(fd, args.auto_recovery, boot_attempted)
             print('Serial capture connected', file=sys.stderr, flush=True)
             while True:
                 try:
@@ -247,6 +282,8 @@ def main():
                         print('WAG status: PON raw=%s; optical LOS=%s; polling healthy' % transition,
                               file=sys.stderr, flush=True)
                     previous, last_error = transition, None
+                    console.boot_attempted = False
+                    console.reported_boot_failure = False
                     end = time.monotonic() + args.interval
                     while time.monotonic() < end:
                         console.pump(min(1, end - time.monotonic()))
@@ -271,6 +308,8 @@ def main():
                 print('WAG status unavailable: ' + str(error), file=sys.stderr, flush=True)
                 last_error = str(error)
         finally:
+            if console is not None:
+                boot_attempted = console.boot_attempted
             if fd is not None:
                 try:
                     fcntl.ioctl(fd, termios.TIOCNXCL)

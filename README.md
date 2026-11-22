@@ -345,13 +345,20 @@ Polling logs into the vendor console with the previously verified factory
 - `cat /proc/uptime`
 
 These commands and credentials are specific to the explored WAG-D20 firmware.
-The receiver listens passively until it sees a management prompt or the
-firmware's OMCI initialization message. The OMCI message permits one prompt
-request after the console goes quiet. Boot messages and the `PRX300 #` prompt
-return the receiver to passive capture. If the receiver starts after the ONT
-has gone quiet, status may be unavailable until the next recognized prompt or
-ONT boot. Poll responses, changed PON state/LOS, and polling failures appear
-in the console journal.
+Poll responses, changed PON state/LOS, and polling failures appear in the console
+journal.
+
+Automatic recovery is enabled whenever WAG-D20 serial monitoring is enabled.
+The monitor can send Enter after ten seconds on a quiet, unrecognized console.
+If Enter interrupts autoboot, or the monitor otherwise sees the exact
+`PRX300 #` prompt, it sends `run bootcmd` once and waits for Linux. A returned
+bootloader prompt is logged and left alone. A successful status poll re-arms
+recovery for a future outage.
+
+Set `wag_d20_auto_recovery: false` in inventory to keep the console passive
+during unknown startup and at the bootloader prompt. In this mode, polling
+starts after a recognized management prompt or OMCI initialization message.
+For one-off bootloader maintenance, stop the monitor before opening the port.
 
 A successful poll atomically updates `/run/wag-d20/status.json` with raw PLOAM,
 PON and optics records, device uptime, and observation timestamps. A failed poll
