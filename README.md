@@ -353,6 +353,15 @@ has gone quiet, status may be unavailable until the next recognized prompt or
 ONT boot. Poll responses, changed PON state/LOS, and polling failures appear
 in the console journal.
 
+To enable unattended recovery, add `wag_d20_auto_recovery: true` alongside
+`wag_d20_serial_enabled: true` in inventory. The default is passive. In recovery
+mode, the monitor can send Enter after ten seconds without serial input or output.
+If Enter interrupts autoboot, or the monitor otherwise sees the exact
+`PRX300 #` prompt, it sends `run bootcmd` once and waits for Linux. A returned
+bootloader prompt is logged and left alone. A successful status poll re-arms
+recovery for a future outage. Stop the monitor before intentionally entering
+U-Boot for maintenance when automatic recovery is enabled.
+
 A successful poll atomically updates `/run/wag-d20/status.json` with raw PLOAM,
 PON and optics records, device uptime, and observation timestamps. A failed poll
 marks the previous values stale. Firmware-specific state numbers, authentication
