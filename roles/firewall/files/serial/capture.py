@@ -241,7 +241,7 @@ def main():
     parser.add_argument('--device', required=True)
     parser.add_argument('--status', default='/run/wag-d20/status.json')
     parser.add_argument('--interval', type=int, default=60)
-    parser.add_argument('--auto-recovery', action='store_true')
+    parser.add_argument('--no-auto-recovery', dest='auto_recovery', action='store_false')
     args = parser.parse_args()
     if args.interval < 10:
         parser.error('poll interval must be at least ten seconds')

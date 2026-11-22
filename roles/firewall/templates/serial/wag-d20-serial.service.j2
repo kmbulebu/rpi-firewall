@@ -5,7 +5,7 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /usr/local/sbin/wag-d20-serial-capture --device {{ wag_d20_serial_device | quote }} --interval {{ wag_d20_status_interval }}{{ ' --auto-recovery' if wag_d20_auto_recovery else '' }}
+ExecStart=/usr/bin/python3 /usr/local/sbin/wag-d20-serial-capture --device {{ wag_d20_serial_device | quote }} --interval {{ wag_d20_status_interval }}{{ '' if wag_d20_auto_recovery else ' --no-auto-recovery' }}
 Restart=on-failure
 RestartSec=5
 RuntimeDirectory=wag-d20

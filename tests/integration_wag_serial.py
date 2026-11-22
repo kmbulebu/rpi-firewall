@@ -34,10 +34,9 @@ def main():
         name: {ROOT}/roles/firewall
         tasks_from: wag_d20_serial
 ''')
-    def apply(enabled, auto_recovery=False):
-        return command('ansible-playbook', '-i', 'localhost,', str(play), '-e',
-                       json.dumps({'wag_d20_serial_enabled': enabled,
-                                   'wag_d20_auto_recovery': auto_recovery}))
+    def apply(enabled, **overrides):
+        variables = {'wag_d20_serial_enabled': enabled, **overrides}
+        return command('ansible-playbook', '-i', 'localhost,', str(play), '-e', json.dumps(variables))
     unit = Path('/etc/systemd/system/wag-d20-serial.service')
     motd = Path('/etc/update-motd.d/62-wag-d20-status')
     status = Path('/run/wag-d20/status.json')
@@ -53,8 +52,8 @@ def main():
     emulator.mode = 'autoboot'
     emulator.start()
     try:
-        apply(True, auto_recovery=True)
-        assert '--auto-recovery' in unit.read_text()
+        apply(True)
+        assert '--no-auto-recovery' not in unit.read_text()
 
         def wait_for(predicate):
             deadline = time.monotonic() + 25
@@ -102,11 +101,25 @@ def main():
         print('PASS: enable installs service, polls ONT, exposes cached MOTD', flush=True)
         journal_pid = command('systemctl', 'show', 'systemd-journald@wag-d20.service', '--property=MainPID', '--value')
         pid = command('systemctl', 'show', 'wag-d20-serial.service', '--property=MainPID', '--value')
-        output = apply(True, auto_recovery=True)
+        output = apply(True)
         assert 'changed=0' in output, output
         assert journal_pid == command('systemctl', 'show', 'systemd-journald@wag-d20.service', '--property=MainPID', '--value')
         assert pid == command('systemctl', 'show', 'wag-d20-serial.service', '--property=MainPID', '--value')
         print('PASS: reapplying is idempotent without restarting receiver', flush=True)
+        apply(True, wag_d20_auto_recovery=False)
+        assert '--no-auto-recovery' in unit.read_text()
+        emulator.commands.clear()
+        emulator.mode = 'bootloader'
+        # Re-emit the prompt until the restarted monitor has acquired the adapter.
+        def see_passive_prompt():
+            emulator.write(b'\r\nPassive recovery test\r\nPRX300 # ')
+            return 'Passive recovery test' in command('journalctl', '--namespace=wag-d20',
+                                                      '-u', unit.name, '--no-pager')
+
+        wait_for(see_passive_prompt)
+        time.sleep(2)
+        assert emulator.commands == [], emulator.commands
+        print('PASS: explicit opt-out leaves the bootloader prompt alone', flush=True)
         apply(False)
         assert not motd.exists() and not status.exists()
         assert unit.exists()
