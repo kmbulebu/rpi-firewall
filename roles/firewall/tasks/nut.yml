@@ -122,6 +122,10 @@
       diff: false
       register: nut_configuration
 
+    - name: Prepare permissions for an already-connected USB UPS
+      ansible.builtin.include_tasks: nut_usb_permissions.yml
+      when: nut_ups_driver == 'usbhid-ups'
+
     - name: Enable and start the packaged NUT stack
       ansible.builtin.systemd_service:
         name: nut.target
