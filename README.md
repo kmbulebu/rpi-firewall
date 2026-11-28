@@ -410,6 +410,53 @@ service, release the adapter, and remove its MOTD entry and runtime cache.
 Installed receiver/unit files and existing logs are retained. A fresh disabled
 installation installs no receiver, service or MOTD file.
 
+### Optional APC UPS monitoring
+
+Enable the packaged apcupsd service in your inventory for UPS status and
+automatic router shutdown during a sustained power failure. The defaults are
+for one directly attached USB UPS supported by apcupsd, with automatic device
+detection. Check the USB ID against the packaged driver's supported-device
+table before enabling it for another vendor's UPS.
+
+```yaml
+apcupsd_enabled: true
+apcupsd_lan_access: false
+apcupsd_ups_type: usb
+apcupsd_ups_cable: usb
+apcupsd_device: ''
+```
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `apcupsd_enabled` | `false` | Install, configure and enable apcupsd. |
+| `apcupsd_lan_access` | `false` | Serve status and recent events over TCP 3551 on the trusted LAN. |
+| `apcupsd_ups_type` | `usb` | Driver such as `usb`, `apcsmart`, `dumb`, `modbus`, `net`, `snmp` or `pcnet`. |
+| `apcupsd_ups_cable` | `usb` | Connection type or APC cable identifier expected by the driver. |
+| `apcupsd_device` | Empty | Leave empty for USB autodetection. Use a stable `/dev/serial/by-id/…` path for serial, or the driver's endpoint format for network UPSes. |
+| `apcupsd_battery_level` | `5` | Remaining battery charge threshold in percent. |
+| `apcupsd_runtime_minutes` | `3` | Estimated remaining battery runtime threshold in minutes. |
+| `apcupsd_timeout_seconds` | `0` | Additional shutdown threshold based on seconds on battery. Zero disables this timer. |
+
+For example, a router polling another apcupsd server uses `apcupsd_ups_type:
+net`, `apcupsd_ups_cable: ether` and `apcupsd_device: ups.home:3551`.
+Keep any device credentials in private inventory. On battery, apcupsd applies
+whichever shutdown threshold is reached first. Check the UPS's reported charge
+and runtime before relying on those thresholds.
+
+```bash
+apcaccess status
+journalctl -u apcupsd.service -b
+```
+
+The daemon listens on loopback. Opting into LAN access starts a separate socket
+bound to the router's LAN IPv4 address and trusted LAN interface. LAN clients can
+use `apcaccess status <router-lan-ip>:3551`. The listener accepts traffic only
+through that interface. Keep TCP 3551 out of WAN port forwards.
+
+Reapply with `apcupsd_lan_access: false` to remove the LAN listener while
+keeping local status. Set `apcupsd_enabled: false` to also stop and disable the
+managed daemon. The package, configuration and logs are retained.
+
 ### Remote Syslog
 
 To send router and firewall logs to a remote syslog server, provide

@@ -1,0 +1,24 @@
+## apcupsd.conf v1.1 ##
+# Managed by rpi-firewall
+UPSCABLE {{ apcupsd_ups_cable }}
+UPSTYPE {{ apcupsd_ups_type }}
+DEVICE{{ (' ' ~ apcupsd_device) if apcupsd_device else '' }}
+LOCKFILE /var/lock
+SCRIPTDIR /etc/apcupsd
+PWRFAILDIR /etc/apcupsd
+NOLOGINDIR /etc
+ONBATTERYDELAY 6
+BATTERYLEVEL {{ apcupsd_battery_level }}
+MINUTES {{ apcupsd_runtime_minutes }}
+TIMEOUT {{ apcupsd_timeout_seconds }}
+NOLOGON disable
+KILLDELAY 0
+NETSERVER on
+NISIP 127.0.0.1
+NISPORT 3551
+EVENTSFILE /var/log/apcupsd.events
+EVENTSFILEMAX 10
+UPSCLASS standalone
+UPSMODE disable
+STATTIME 0
+LOGSTATS off

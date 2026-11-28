@@ -29,4 +29,6 @@
   ansible.builtin.include_tasks: ad_blocking.yml
 - name: Configure optional WAG-D20 serial capture
   ansible.builtin.include_tasks: wag_d20_serial.yml
+- name: Configure optional UPS monitoring
+  ansible.builtin.include_tasks: apcupsd.yml
 - meta: clear_facts

@@ -1,0 +1,10 @@
+[Unit]
+Description=Proxy LAN UPS status requests to apcupsd
+PartOf=apcupsd-lan.socket
+Requires=apcupsd.service
+After=apcupsd.service
+
+[Service]
+ExecStart=/usr/lib/systemd/systemd-socket-proxyd --exit-idle-time=30s 127.0.0.1:3551
+DynamicUser=yes
+NoNewPrivileges=yes
