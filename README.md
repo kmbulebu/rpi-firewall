@@ -468,6 +468,38 @@ zone is in Coordinated Universal Time (UTC).
 upgrade_reboot_time: '07:00'
 ```
 
+### Optional Network UPS Tools (NUT)
+
+Enable NUT to monitor one UPS attached to the router and shut the router down
+cleanly when the UPS reports low battery while running on battery power.
+Both `nut_enabled` and `nut_lan_access` default to `false`. The default driver
+is `usbhid-ups` with port `auto`. Use the driver and port appropriate for the
+UPS. Additional driver options go in `nut_ups_options` as a mapping of strings.
+
+For a CyberPower USB UPS with USB ID `0764:0501`, use this inventory:
+
+```yaml
+nut_enabled: true
+nut_lan_access: true
+nut_ups_driver: usbhid-ups
+nut_ups_port: auto
+nut_ups_options:
+  vendorid: '0764'
+  productid: '0501'
+```
+
+Ansible generates the credentials for the router's local NUT shutdown monitor.
+Use `upsc router-ups@127.0.0.1` on the router to see UPS status.
+Set `nut_lan_access: true` for read-only monitoring from the trusted LAN.
+The listener uses the existing LAN IPv4 address and interface on TCP 3493.
+In Home Assistant, add **Network UPS Tools (NUT)** with the router's LAN IPv4
+address and port `3493`. Leave credentials blank for status monitoring.
+
+Set `nut_lan_access: false` to close the LAN listener while keeping local
+monitoring and shutdown. Set `nut_enabled: false` to stop and disable the
+managed NUT services while retaining their configuration. Use one daemon to
+manage the UPS at a time.
+
 ### Ubuntu Pro
 
 Ubuntu Pro management is enabled by a non-empty token and disabled by default. Obtain your subscription token

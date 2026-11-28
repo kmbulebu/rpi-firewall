@@ -103,3 +103,10 @@ wag_d20_auto_recovery: true
 wag_d20_serial_device: /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
 
 wag_d20_status_interval: 60
+
+# Optional Network UPS Tools for one UPS attached to the router.
+nut_enabled: false
+nut_lan_access: false
+nut_ups_driver: usbhid-ups
+nut_ups_port: auto
+nut_ups_options: {}

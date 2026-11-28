@@ -1,0 +1,6 @@
+[router-ups]
+    driver = {{ nut_ups_driver }}
+    port = "{{ nut_ups_port }}"
+{% for key, value in nut_ups_options.items() | sort %}
+    {{ key }} = "{{ value }}"
+{% endfor %}

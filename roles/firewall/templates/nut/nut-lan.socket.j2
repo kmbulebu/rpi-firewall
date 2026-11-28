@@ -1,0 +1,15 @@
+[Unit]
+Description=NUT UPS status on the trusted LAN
+# Waiting for the LAN device must not hold up sockets.target.
+DefaultDependencies=no
+After=sysinit.target
+Before=shutdown.target
+Conflicts=shutdown.target
+
+[Socket]
+ListenStream={{ lan_address }}:3493
+BindToDevice={{ lan_iface }}
+FreeBind=yes
+
+[Install]
+WantedBy=multi-user.target

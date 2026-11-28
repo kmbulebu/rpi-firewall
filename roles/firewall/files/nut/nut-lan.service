@@ -1,0 +1,10 @@
+[Unit]
+Description=Proxy LAN UPS status requests to NUT
+PartOf=nut-lan.socket
+Requires=nut-server.service
+After=nut-server.service
+
+[Service]
+ExecStart=/usr/lib/systemd/systemd-socket-proxyd --exit-idle-time=30s 127.0.0.1:3493
+DynamicUser=yes
+NoNewPrivileges=yes
