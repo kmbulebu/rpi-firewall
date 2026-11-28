@@ -97,6 +97,16 @@ tailscale_iface: tailscale0
 port_forwards: []
 dhcp_reservations: []
 
+# Optional UPS monitoring and graceful shutdown.
+apcupsd_enabled: false
+apcupsd_lan_access: false
+apcupsd_ups_type: usb
+apcupsd_ups_cable: usb
+apcupsd_device: ''
+apcupsd_battery_level: 5
+apcupsd_runtime_minutes: 3
+apcupsd_timeout_seconds: 0
+
 # Optional ONT console logging and read-only status polling.
 wag_d20_serial_enabled: false
 wag_d20_auto_recovery: true

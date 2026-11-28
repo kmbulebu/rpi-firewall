@@ -1,0 +1,141 @@
+---
+- name: Validate UPS feature switches
+  ansible.builtin.assert:
+    that:
+      - apcupsd_enabled is boolean
+      - apcupsd_lan_access is boolean
+    fail_msg: Set apcupsd_enabled and apcupsd_lan_access to YAML booleans.
+
+- name: Validate UPS driver, cable and shutdown thresholds
+  ansible.builtin.assert:
+    that:
+      - apcupsd_ups_type in ['usb', 'apcsmart', 'dumb', 'modbus', 'net', 'snmp', 'pcnet']
+      - apcupsd_ups_cable is string and apcupsd_ups_cable is match('^[A-Za-z0-9_-]+\Z')
+      - apcupsd_battery_level is integer and 0 <= apcupsd_battery_level <= 100
+      - apcupsd_runtime_minutes is integer and apcupsd_runtime_minutes >= 0
+      - apcupsd_timeout_seconds is integer and apcupsd_timeout_seconds >= 0
+    fail_msg: Use a supported apcupsd driver and cable, a battery percentage from 0 to 100 and nonnegative integer timers.
+  when: apcupsd_enabled
+
+- name: Validate the UPS device without exposing its value
+  ansible.builtin.assert:
+    that:
+      - apcupsd_device is string and apcupsd_device is match('^[^\s#]*\Z')
+      - apcupsd_ups_type != 'usb' or apcupsd_device == ''
+      - apcupsd_ups_type not in ['dumb', 'apcsmart'] or apcupsd_device is match('^/dev/.')
+      - apcupsd_ups_type not in ['net', 'snmp', 'pcnet'] or apcupsd_device | length > 0
+    fail_msg: Use an empty USB device, a serial device path or the endpoint format for the selected network driver.
+  no_log: true
+  when: apcupsd_enabled
+
+- name: Validate the trusted LAN listener
+  ansible.builtin.assert:
+    that:
+      - (lan_address | ansible.utils.ipv4) is string
+      - not (lan_address | ansible.utils.ipaddr('127.0.0.0/8'))
+      - lan_address != '0.0.0.0'
+      - lan_iface is match('^[A-Za-z0-9_.-]{1,15}\Z')
+      - lan_iface not in ['lo', wan_iface, wan_backup_iface, lan_guests_iface, lan_vpn_iface, vpn_client_iface, tailscale_iface]
+    fail_msg: UPS LAN access requires a specific LAN IPv4 address and a distinct trusted LAN interface.
+  when: apcupsd_enabled and apcupsd_lan_access
+
+- name: Disable the optional UPS LAN listener
+  when: not (apcupsd_enabled and apcupsd_lan_access)
+  block:
+    - name: Check for the role-managed UPS LAN socket
+      ansible.builtin.stat:
+        path: /etc/systemd/system/apcupsd-lan.socket
+      register: apcupsd_lan_unit
+
+    - name: Stop and disable the UPS LAN socket
+      ansible.builtin.systemd_service:
+        name: apcupsd-lan.socket
+        enabled: false
+        state: stopped
+      when: apcupsd_lan_unit.stat.exists
+
+    - name: Remove the UPS LAN units
+      ansible.builtin.file:
+        path: "/etc/systemd/system/{{ item }}"
+        state: absent
+      loop:
+        - apcupsd-lan.socket
+        - apcupsd-lan.service
+      notify: systemctl daemon-reload
+
+- name: Configure the UPS daemon
+  when: apcupsd_enabled
+  block:
+    - name: Install apcupsd without starting it before configuration
+      ansible.builtin.apt:
+        name: apcupsd
+        install_recommends: false
+        policy_rc_d: 101
+        state: present
+
+    - name: Configure apcupsd with a loopback status listener
+      ansible.builtin.template:
+        src: apcupsd/apcupsd.conf.j2
+        dest: /etc/apcupsd/apcupsd.conf
+        owner: root
+        group: root
+        mode: '0600'
+      diff: false
+      register: apcupsd_config
+
+    - name: Enable and start the UPS daemon
+      ansible.builtin.systemd_service:
+        name: apcupsd.service
+        enabled: true
+        state: "{{ 'restarted' if apcupsd_config.changed else 'started' }}"
+
+- name: Stop and disable the UPS daemon configured by this role
+  when: not apcupsd_enabled
+  block:
+    - name: Check for the packaged UPS daemon
+      ansible.builtin.stat:
+        path: /usr/lib/systemd/system/apcupsd.service
+      register: apcupsd_packaged_unit
+
+    - name: Check for role-managed apcupsd configuration
+      ansible.builtin.find:
+        paths: /etc/apcupsd
+        patterns: apcupsd.conf
+        contains: '^# Managed by rpi-firewall$'
+      register: apcupsd_managed_config
+      when: apcupsd_packaged_unit.stat.exists
+
+    - name: Stop and disable the managed UPS daemon
+      ansible.builtin.systemd_service:
+        name: apcupsd.service
+        enabled: false
+        state: stopped
+      when: apcupsd_packaged_unit.stat.exists and apcupsd_managed_config.matched > 0
+
+- name: Enable UPS status access on the trusted LAN
+  when: apcupsd_enabled and apcupsd_lan_access
+  block:
+    - name: Install the UPS LAN proxy service
+      ansible.builtin.copy:
+        src: apcupsd/apcupsd-lan.service
+        dest: /etc/systemd/system/apcupsd-lan.service
+        owner: root
+        group: root
+        mode: '0644'
+      register: apcupsd_lan_proxy
+
+    - name: Install the UPS LAN socket
+      ansible.builtin.template:
+        src: apcupsd/apcupsd-lan.socket.j2
+        dest: /etc/systemd/system/apcupsd-lan.socket
+        owner: root
+        group: root
+        mode: '0644'
+      register: apcupsd_lan_socket
+
+    - name: Enable and start the interface-bound UPS LAN socket
+      ansible.builtin.systemd_service:
+        name: apcupsd-lan.socket
+        daemon_reload: "{{ apcupsd_lan_proxy.changed or apcupsd_lan_socket.changed }}"
+        enabled: true
+        state: "{{ 'restarted' if apcupsd_lan_proxy.changed or apcupsd_lan_socket.changed else 'started' }}"
