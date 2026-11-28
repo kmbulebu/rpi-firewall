@@ -1,0 +1,187 @@
+---
+- name: Validate NUT feature switches
+  ansible.builtin.assert:
+    that:
+      - nut_enabled is boolean
+      - nut_lan_access is boolean
+      - not (nut_enabled and (apcupsd_enabled | default(false) | bool))
+    fail_msg: Use YAML booleans and enable only one UPS management daemon.
+
+- name: Validate NUT driver and port
+  ansible.builtin.assert:
+    that:
+      - nut_ups_driver is string and nut_ups_driver is match('^[a-z][a-z0-9_-]*\Z')
+      - nut_ups_port is string and nut_ups_port is match('^[!-~]+\Z')
+      - nut_ups_port is not search('["#\\\\]')
+      - nut_ups_options is mapping
+    fail_msg: Specify a NUT driver, a port without spaces and a mapping of driver options.
+  when: nut_enabled
+
+- name: Validate NUT driver options
+  ansible.builtin.assert:
+    that:
+      - item.key is string and item.key is match('^[a-zA-Z0-9_][a-zA-Z0-9_.-]*\Z')
+      - item.key | lower not in ['driver', 'port']
+      - item.value is string and item.value is match('^[ -~]*\Z')
+      - item.value is not search('["#\\\\]')
+    fail_msg: Use string values with no quotes, hash or backslash in nut_ups_options.
+  loop: "{{ nut_ups_options | dict2items }}"
+  no_log: true
+  when: nut_enabled
+
+- name: Validate the trusted NUT LAN listener
+  ansible.builtin.assert:
+    that:
+      - (lan_address | ansible.utils.ipv4) is string
+      - not (lan_address | ansible.utils.ipaddr('127.0.0.0/8'))
+      - lan_address != '0.0.0.0'
+      - lan_iface is match('^[A-Za-z0-9_.-]{1,15}\Z')
+      - lan_iface not in ['lo', wan_iface, wan_backup_iface, lan_guests_iface, lan_vpn_iface, vpn_client_iface, tailscale_iface]
+    fail_msg: NUT LAN access requires a specific LAN IPv4 address and a distinct trusted LAN interface.
+  when: nut_enabled and nut_lan_access
+
+- name: Disable the NUT LAN listener
+  when: not (nut_enabled and nut_lan_access)
+  block:
+    - name: Check for the managed NUT LAN socket
+      ansible.builtin.stat:
+        path: /etc/systemd/system/nut-lan.socket
+      register: nut_installed_socket
+
+    - name: Stop and disable the NUT LAN socket
+      ansible.builtin.systemd_service:
+        name: nut-lan.socket
+        enabled: false
+        state: stopped
+      when: nut_installed_socket.stat.exists
+
+    - name: Remove the NUT LAN units
+      ansible.builtin.file:
+        path: "/etc/systemd/system/{{ item }}"
+        state: absent
+      loop:
+        - nut-lan.socket
+        - nut-lan.service
+      notify: systemctl daemon-reload
+
+- name: Configure NUT services
+  when: nut_enabled
+  block:
+    - name: Install the packaged NUT server and monitor
+      ansible.builtin.apt:
+        name: nut-server
+        install_recommends: false
+        policy_rc_d: 101
+        state: present
+
+    - name: Verify the selected NUT driver is installed
+      ansible.builtin.stat:
+        path: "/usr/libexec/nut/{{ nut_ups_driver }}"
+      register: nut_driver_binary
+
+    - name: Require a packaged NUT driver
+      ansible.builtin.assert:
+        that: nut_driver_binary.stat.exists and nut_driver_binary.stat.executable
+        fail_msg: Install the NUT package that provides the selected driver, or select another driver.
+
+    - name: Check for an existing local monitor secret
+      ansible.builtin.stat:
+        path: /etc/nut/router-monitor.secret
+      register: nut_monitor_secret_file
+
+    - name: Generate a persistent local monitor secret
+      ansible.builtin.copy:
+        content: "{{ lookup('ansible.builtin.password', '/dev/null', length=40, chars=['ascii_letters', 'digits']) }}"
+        dest: /etc/nut/router-monitor.secret
+        owner: root
+        group: root
+        mode: '0600'
+        force: false
+      no_log: true
+      when: not nut_monitor_secret_file.stat.exists
+
+    - name: Read the local monitor secret
+      ansible.builtin.slurp:
+        src: /etc/nut/router-monitor.secret
+      register: nut_monitor_secret
+      no_log: true
+
+    - name: Configure the driver, loopback server and local shutdown monitor
+      ansible.builtin.template:
+        src: "nut/{{ item }}.j2"
+        dest: "/etc/nut/{{ item }}"
+        owner: root
+        group: nut
+        mode: '0640'
+      loop:
+        - ups.conf
+        - upsd.conf
+        - upsd.users
+        - upsmon.conf
+        - nut.conf
+      diff: false
+      register: nut_configuration
+
+    - name: Enable and start the packaged NUT stack
+      ansible.builtin.systemd_service:
+        name: nut.target
+        enabled: true
+        state: "{{ 'restarted' if nut_configuration.changed else 'started' }}"
+
+- name: Disable previously managed NUT services
+  when: not nut_enabled
+  block:
+    - name: Check for the packaged NUT target
+      ansible.builtin.stat:
+        path: /usr/lib/systemd/system/nut.target
+      register: nut_packaged_target
+
+    - name: Check for a role-managed NUT configuration
+      ansible.builtin.find:
+        paths: /etc/nut
+        patterns: nut.conf
+        contains: '^# Managed by rpi-firewall$'
+      register: nut_managed_configuration
+      when: nut_packaged_target.stat.exists
+
+    - name: Disable the NUT startup mode
+      ansible.builtin.lineinfile:
+        path: /etc/nut/nut.conf
+        regexp: '^MODE='
+        line: MODE=none
+      when: nut_packaged_target.stat.exists and nut_managed_configuration.matched > 0
+
+    - name: Stop and disable the managed NUT stack
+      ansible.builtin.systemd_service:
+        name: nut.target
+        enabled: false
+        state: stopped
+      when: nut_packaged_target.stat.exists and nut_managed_configuration.matched > 0
+
+- name: Enable NUT status on the trusted LAN
+  when: nut_enabled and nut_lan_access
+  block:
+    - name: Install the NUT LAN proxy service
+      ansible.builtin.copy:
+        src: nut/nut-lan.service
+        dest: /etc/systemd/system/nut-lan.service
+        owner: root
+        group: root
+        mode: '0644'
+      register: nut_lan_proxy
+
+    - name: Install the interface-bound NUT LAN socket
+      ansible.builtin.template:
+        src: nut/nut-lan.socket.j2
+        dest: /etc/systemd/system/nut-lan.socket
+        owner: root
+        group: root
+        mode: '0644'
+      register: nut_lan_socket
+
+    - name: Enable and start the NUT LAN socket
+      ansible.builtin.systemd_service:
+        name: nut-lan.socket
+        daemon_reload: "{{ nut_lan_proxy.changed or nut_lan_socket.changed }}"
+        enabled: true
+        state: "{{ 'restarted' if nut_lan_proxy.changed or nut_lan_socket.changed else 'started' }}"

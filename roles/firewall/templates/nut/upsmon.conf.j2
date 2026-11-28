@@ -1,0 +1,4 @@
+MONITOR router-ups@127.0.0.1 1 router-monitor {{ nut_monitor_secret.content | b64decode }} primary
+MINSUPPLIES 1
+SHUTDOWNCMD "/sbin/shutdown -h +0"
+POWERDOWNFLAG /run/nut-router-killpower
