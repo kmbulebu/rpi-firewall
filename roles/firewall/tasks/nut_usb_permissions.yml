@@ -1,0 +1,32 @@
+---
+- name: Check the current NUT USB driver state
+  ansible.builtin.command:
+    argv: [systemctl, is-active, --quiet, nut-driver@router-ups.service]
+  register: nut_usb_driver_state
+  changed_when: false
+  failed_when: nut_usb_driver_state.rc not in [0, 3, 4]
+  check_mode: false
+
+# The package's rule may have been installed after the UPS was enumerated.
+- name: Reapply packaged udev permissions to the USB UPS
+  when: nut_configuration.changed or nut_usb_driver_state.rc != 0
+  vars:
+    nut_usb_vendor: "{{ nut_ups_options.vendorid | default('') | lower }}"
+    nut_usb_product: "{{ nut_ups_options.productid | default('') | lower }}"
+    nut_usb_exact_vendor: "{{ nut_usb_vendor is match('^[0-9a-f]{4}$') }}"
+    nut_usb_exact_product: "{{ nut_usb_product is match('^[0-9a-f]{4}$') }}"
+  block:
+    - name: Reload udev rules before replaying USB device events
+      ansible.builtin.command:
+        argv: [udevadm, control, --reload-rules]
+      changed_when: false
+
+    - name: Wait for the selected HID USB device events
+      ansible.builtin.command:
+        argv: >-
+          {{ ['udevadm', 'trigger', '--settle', '--verbose', '--action=change', '--subsystem-match=usb']
+             + (['--attr-match=idVendor=' ~ nut_usb_vendor] if nut_usb_exact_vendor else [])
+             + (['--attr-match=idProduct=' ~ nut_usb_product] if nut_usb_exact_product else [])
+             + ([] if nut_usb_exact_vendor and nut_usb_exact_product else ['--property-match=ID_USB_INTERFACES=*:03????:*']) }}
+      register: nut_usb_events
+      changed_when: nut_usb_events.stdout_lines | length > 0
