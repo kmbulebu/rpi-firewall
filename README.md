@@ -414,7 +414,9 @@ installation installs no receiver, service or MOTD file.
 
 Enable the packaged apcupsd service in your inventory for UPS status and
 automatic router shutdown during a sustained power failure. The defaults are
-for one directly attached USB UPS with automatic device detection.
+for one directly attached USB UPS supported by apcupsd, with automatic device
+detection. Check the USB ID against the packaged driver's supported-device
+table before enabling it for another vendor's UPS.
 
 ```yaml
 apcupsd_enabled: true
